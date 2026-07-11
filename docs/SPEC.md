@@ -50,30 +50,34 @@ Not “one golden sentence.” Not a new universal testing paradigm.
 The *shape* (Scenario → Script → runner → verifier over projected state) can host more,
 but we do not market “test the whole agent” until domain ground truth is first-class.
 
-### Product naming split (locked): Scenario vs Script
+### Product naming: trajectory, Scenario, Script (locked)
 
-Two product nouns — do not collapse them:
+**Trajectory is first-class.** We almost lost it by over-focusing on the control-plane
+play-back driver. Put it back:
 
-| Product name | What it is | Code today |
-|---|---|---|
-| **Conjecture Scenario** | Load-bearing **trajectory description**: twists & turns, actors, scope/ODD, nondeterminism, **allowed_outcomes**, **required_invariants**, waits, evidence, profiles | `experimental.Scenario` (+ `schema.json`) |
-| **Conjecture Script** | **Runnable play-back form** for a chosen runner (pins, effects, expected kinds) — what CI often checks in | `ConjectureScript` in `script.py` (**stable**) |
-| **Observed trajectory** | Evidence of **one** run under one profile | `Trajectory` / `RunResult` |
-| **Runner** | **Who executes** the script/scenario | CP: `run_script`; later UI / other runners |
-| **Verifier** | Judges envelopes vs observation | `invariants.py`, `temporal.py` |
+| Product name | What it is | Code today | Maturity |
+|---|---|---|---|
+| **Authored trajectory** | The load-bearing **twists & turns** story (what could break law) | Carried inside Scenario / Script | Concept **stable**; authoring depth varies |
+| **Conjecture Scenario** | Flexible **description language** for that trajectory + envelopes | `experimental.Scenario` (+ `schema.json`) | **Early** — models exist; not full multi-runner platform |
+| **Conjecture Script** | **Runnable play-back** of a trajectory for a chosen runner | `ConjectureScript` (**stable** for CP runner) | **Most mature** path we ship |
+| **Observed trajectory** | Evidence of **one** execution under one profile | `Trajectory` / `RunResult` | Partial (RunResult solid; rich Trajectory experimental) |
+| **Runner** | **Who executes** the Script | Control-plane: `run_script`; others roadmap | One runner mature; multi-runner **not** |
+| **Verifier** | Expected envelopes vs **observed trajectory** | `invariants.py`, `temporal.py` | Solid for CP kinds; domain plugins open |
 
 ```text
-  seeds (specs · sim · agent · human)
+  seeds (specs · Collinear/other multi-turn tools · agent · human)
+              │  curate + attach expected envelopes
+              ▼
+  authored TRAJECTORY of twists  (load-bearing path story)
               │
-              ▼
-  Conjecture Scenario   (description: twists → envelopes)
-              │  author Script, or compile Scenario → Script
-              ▼
-  Conjecture Script     (play-back form for a runner)
-              │  who runs it? (explicit)
+              ▼  described as
+  Conjecture Scenario  and/or  Conjecture Script
+              │
+              ▼  who runs it? (explicit — file does not run itself)
      ┌────────┴────────┐
      ▼                 ▼
-  CP runner      other runners (roadmap)
+  control-plane    other runners
+  runner           (roadmap)
   (run_script)
      └────────┬────────┘
               │ Driver plugin (HTTP · Playwright · LangGraph ·
@@ -81,7 +85,7 @@ Two product nouns — do not collapse them:
               ▼
        Real application
               │
-     observed trajectory → VERIFIER → pass/fail
+     OBSERVED TRAJECTORY  →  VERIFIER  →  pass/fail
               │
        pytest / CI only *hosts* the run
 ```
@@ -90,13 +94,42 @@ Two product nouns — do not collapse them:
 |---|---|---|
 | Job | Flexible language for *which twists* and *what must hold* | Form a **specific runner** can execute today |
 | Contains | steps, actors, scope, nondeterminism envelopes, waits, evidence | turns, pins, effects, `InvariantSpec`s |
-| Tied to one driver? | **No** | Bound to a runner (today: CP `run_script`) |
+| Tied to one driver? | **No** | Bound to a runner (today: control-plane `run_script`) |
 | Agent authors | Can write either; Script is the usual CI golden | Yes — and that file *is* the test case |
 
-**Mnemonic:** Scenario *describes* the load-bearing trajectory; Script *runs* (one play-back of) it.
+**Mnemonic:** Scenario *describes* the trajectory of twists; Script *plays* it; observed trajectory *is what happened*; Verifier *judges*.
+
+### Maturity (honest)
+
+We are **not** as mature as a full multi-surface behaviour-runner platform.
+
+| Mature enough to use now | Early / incomplete |
+|---|---|
+| Control-plane **Script** + `run_script` + verifier kinds | Full **Scenario** multi-runner play-back |
+| Path-faithful mini-app E2E + planted bugs | Rich observed-trajectory store / N-run distribution |
+| Freeze/record cognition for CI | First-party LangGraph/Crew/Temporal packages |
+| Compile Scenario → Script bridge (partial) | Domain ground-truth plugins |
+
+Do not market “complete trajectory platform.” Market: **control-plane contracts on multi-turn trajectories under freeze**, with a path to broader Scenario language.
+
+### Seeds (including Collinear and peers)
+
+**We can and should use output from Collinear-class sims and other multi-turn tools** as
+**seeds** — path material to curate into authored trajectories (Scenario/Script) **with
+expected envelopes**. That is composition, not competition:
+
+| External tool | How we use it |
+|---|---|
+| Collinear / multi-turn sim labs | Export or note multi-turn paths → attach **expected state** → Script/Scenario → our runner/verifier |
+| Session traffic / explorers | Same: path seed, not automatic green bar |
+| Coding agents | Author Script/Scenario (artifact *is* the golden) |
+| Specs / incidents | Primary source of *which* laws to encode |
+
+Their green bar (quality scores, sim success) is **not** our green bar. Our gate remains:
+**observed trajectory satisfies declared envelopes.**
 
 **Without a runner + verifier**, Scenarios/Scripts are inert files.  
-**Without Scenario language**, you only have an ad-hoc driver API.
+**Without trajectory-of-twists thinking**, you only have an ad-hoc driver API.
 
 ### Orchestration engines (LangGraph, Crew, Temporal, …)
 
@@ -391,38 +424,36 @@ Without a **generalized description language**, you only have a one-off driver A
 | **Observed trajectory** | Evidence of one run | `RunResult`; `experimental/trajectory.py` |
 
 ```text
-  seeds (specs · sim · agent · human)
+  seeds (specs · Collinear/other multi-turn tools · agent · human)
+              │  curate + attach expected envelopes
+              ▼
+  authored TRAJECTORY of twists
               │
-              ▼
-  Conjecture Scenario   (description: twists → envelopes)
-              │  author Script, or compile Scenario → Script
-              ▼
-  Conjecture Script     (play-back form for a runner)
+  Conjecture Scenario  and/or  Conjecture Script
               │  who runs it? (explicit)
      ┌────────┴────────┐
      ▼                 ▼
-  CP runner      other runners (roadmap)
-  (run_script)
+  control-plane    other runners
+  runner           (roadmap)
      └────────┬────────┘
-              │ Driver plugin (HTTP · Playwright · LangGraph ·
-              │               Temporal · Crew · in-process · …)
+              │ Driver plugin …
               ▼
        Real application
               │
-     observed trajectory → VERIFIER → pass/fail
+     OBSERVED TRAJECTORY → VERIFIER → pass/fail
               │
        pytest / CI only *hosts* the run
 ```
 
-**Who runs the trajectory?** Explicit choice of runner + Driver — not implied by Scenario/Script alone.
+**Who runs the trajectory?** Explicit choice of runner + Driver — not implied by the file alone.
 
 | Piece | Role |
 |---|---|
-| Specs, agents, humans, path seeds | Author **Conjecture Scenario** and/or **Script** (+ expected envelopes) |
-| CP runner / future UI runners | **Who runs** the Script |
+| Specs, Collinear/other tools, agents, humans | **Seeds** for authored trajectories (+ expected envelopes) |
+| Control-plane runner / future runners | **Who runs** the Script |
 | Playwright / HTTP / LangGraph / Temporal | **Driver** under a runner |
 | pytest / CI | Process host only |
-| Verifier | Shared judge — independent of which runner drove Act |
+| Verifier | Shared judge on **observed trajectory** |
 
 ### Four extension points (product boundary)
 

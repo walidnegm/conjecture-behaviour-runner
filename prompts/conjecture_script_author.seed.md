@@ -42,25 +42,26 @@ a plan for someone else to turn into a test later — **you are writing the gold
 ## Product shape
 
 ```text
-  seeds (specs · sim · agent · human)
+  seeds (specs · Collinear/other multi-turn tools · agent · human)
+              │  curate twists + attach expected envelopes
+              ▼
+  authored TRAJECTORY of twists
+              │
+  Conjecture Scenario (optional)  and/or  Conjecture Script  ← you usually emit Script
+              │
+              ▼  who runs it: control-plane run_script today
+        runner + CognitionProvider + Driver
               │
               ▼
-  Conjecture Scenario   (optional rich description)
-              │
-              ▼  you usually emit this ↓
-  Conjecture Script     (your JSON — play-back form)
-              │
-              ▼  who runs it: CP runner today
-        run_script + CognitionProvider
-              │ Driver plugin
-              ▼
-       host adapter observe → VERIFIER → pass/fail
-              │
-       pytest / CI only *hosts* the run
+     OBSERVED TRAJECTORY → VERIFIER → pass/fail
 ```
 
-You author the **Conjecture Script** (or Scenario). The host supplies Act/Observe.
-The verifier judges kinds you declare. The runner is **who executes** — not the file alone.
+You author the **trajectory of twists as a Conjecture Script** (or Scenario). Host Act/Observe
+produces the **observed trajectory**. Verifier judges. Runner is **who executes** — not the file.
+
+If the human pastes output from Collinear or another multi-turn tool, treat it as a **path seed**:
+compress to load-bearing twists and attach **expected** owner/pin/outcomes — do not copy their
+quality scores as pass/fail.
 
 ## Output contract
 

@@ -37,29 +37,37 @@ We differentiate by **what we assert** (the green bar), not by vendor bake-offs.
 
 | | |
 |--|--|
-| **Conjecture Scenario** | Load-bearing **trajectory description**: twists & turns + envelopes (not tied to one driver) |
-| **Conjecture Script** | **Runnable play-back** for a runner (`ConjectureScript` today — what goldens/CI usually are) |
-| **Who runs it** | A **runner** + **Driver** (CP `run_script` today; other runners later) |
-| **Verifier** | Judges expected vs **observed** trajectory |
+| **Trajectory (authored)** | Load-bearing **twists & turns** that can stress state law — the story of the path |
+| **Conjecture Scenario** | Flexible **description language** for that trajectory + envelopes (not tied to one driver) |
+| **Conjecture Script** | **Runnable play-back** of a trajectory for a chosen runner (usual CI golden today) |
+| **Who runs it** | A **runner** + **Driver** (control-plane `run_script` today; others later) |
+| **Observed trajectory** | Evidence of **one** execution under one profile — input to the verifier |
+| **Verifier** | Expected envelopes vs **observed trajectory** |
 | **Green bar** | State law under pin/freeze — not reply wording |
 | **Commercial** | Optional **Verdict** — separate from OSS **Verifier** |
 
-**Mnemonic:** Scenario *describes* the twists; Script *runs* (one play-back of) them.
+**Mnemonic:** Scenario *describes* the trajectory of twists; Script *plays* it; observed trajectory *is what happened*; Verifier *judges*.
+
+**Maturity (honest):** the **control-plane Script + `run_script` + verifier** path is what we can run today (E2E mini-app, CCP goldens). Full **Scenario** language, multi-runner play-back, and rich observed-trajectory tooling are **earlier** — useful shapes, not a finished platform. We are not as mature as a full behaviour-runner stack would imply.
+
+**Seeds welcome:** specs, humans, coding agents, **and** multi-turn tools (e.g. Collinear-class sims, session exports, explorers). Their output is **path material** we curate into Scenario/Script + **expected** state — not something we replace.
 
 Normative: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
 
 ```text
-  seeds (specs · sim · agent · human)
+  seeds (specs · Collinear/other multi-turn tools · agent · human)
+              │  curate + attach expected envelopes
+              ▼
+  authored TRAJECTORY of twists  (what could break law)
               │
-              ▼
-  Conjecture Scenario   (description: twists → envelopes)
-              │  author Script, or compile Scenario → Script
-              ▼
-  Conjecture Script     (play-back form for a runner)
-              │  who runs it? (explicit)
+              ▼  described as
+  Conjecture Scenario  (flexible language)  and/or  Conjecture Script  (play-back form)
+              │
+              ▼  who runs it? (explicit — file does not run itself)
      ┌────────┴────────┐
      ▼                 ▼
-  CP runner      other runners (roadmap)
+  control-plane    other runners
+  runner           (roadmap)
   (run_script)
      └────────┬────────┘
               │ Driver plugin (HTTP · Playwright · LangGraph ·
@@ -67,13 +75,13 @@ Normative: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
               ▼
        Real application
               │
-     observed trajectory → VERIFIER → pass/fail
+     OBSERVED TRAJECTORY  →  VERIFIER  →  pass/fail
               │
        pytest / CI only *hosts* the run
 ```
 
-**Always core:** Scenario + Script envelopes + at least one runner + verifier.  
-**Never core:** user-sim worlds, quality scoreboards, “the file runs itself.”
+**Always core:** trajectory envelopes (expected) + at least one runner + verifier.  
+**Never core:** “we are the only multi-turn tool,” quality scoreboards, “the file runs itself.”
 
 ---
 

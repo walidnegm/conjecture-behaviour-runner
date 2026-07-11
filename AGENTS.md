@@ -24,31 +24,38 @@
 **Green bar:** owner, pins, legal landings, mid-flight law under pin/freeze — **not** reply wording.
 
 ```text
-  seeds (specs · sim · agent · human)
+  seeds (specs · Collinear/other multi-turn tools · agent · human)
+              │  curate + attach expected envelopes
+              ▼
+  authored TRAJECTORY of twists
               │
-              ▼
-  Conjecture Scenario   (description: twists → envelopes)
-              │  author Script, or compile Scenario → Script
-              ▼
-  Conjecture Script     (play-back form for a runner)
+  Conjecture Scenario  and/or  Conjecture Script
               │  who runs it? (explicit)
      ┌────────┴────────┐
      ▼                 ▼
-  CP runner      other runners (roadmap)
-  (run_script)
+  control-plane    other runners
+  runner           (roadmap)
      └────────┬────────┘
-              │ Driver plugin (HTTP · Playwright · LangGraph ·
-              │               Temporal · Crew · in-process · …)
+              │ Driver plugin …
               ▼
        Real application
               │
-     observed trajectory → VERIFIER → pass/fail
+     OBSERVED TRAJECTORY → VERIFIER → pass/fail
               │
        pytest / CI only *hosts* the run
 ```
 
-Without a **runner + verifier**, Scenario/Script files are inert.  
-Without **Conjecture Scenario** language, you only have an ad-hoc driver test.
+**Trajectory is not optional vocabulary.** Scenario/Script *carry* an authored trajectory of
+twists; the runner produces an **observed** trajectory; the verifier compares them to
+expected envelopes.
+
+**Maturity:** control-plane Script + `run_script` is what works end-to-end today. Full
+Scenario multi-runner stack is earlier. Prefer honest scope over platform theater.
+
+**Seeds:** Collinear-class and other multi-turn tools are **welcome path inputs** — attach
+expected state, then run our verifier. Do not reimplement their sim inside this package.
+
+Without a **runner + verifier**, Scenario/Script files are inert.
 
 ---
 

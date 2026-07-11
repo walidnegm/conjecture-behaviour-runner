@@ -110,9 +110,33 @@ It is **metadata on the claim**, not a single test case.
 - **ODD / scope** = specification of the boundary  
 - **Adversarial generation** = technique that *uses* the boundary (in-scope stress + out-of-scope refusal)  
 
-Four **corpus modalities** still belong to the product: code-based · user-watching ·
-agent-plays-the-game · adversarial. Slice 0 is mostly code-based control-plane contracts;
-the rest is **build-out**, not cancelled vision.
+### Where scenarios and use-cases come from (important distinctions)
+
+Scenarios are not only “someone wrote a Playwright test.” They are **seeded from
+different ground truths**. Mixing them without labels confuses trust and triage.
+
+| Source | What you read / write | What you get | Build status |
+|--------|----------------------|--------------|--------------|
+| **Specs** | Epics, ODD/scope, product contracts, acceptance intent | *Intended* use-cases — what the design claims | **Partial** (authored by hand today) |
+| **Codebase scan** | Routers, ledgers, state machines, tools, prompts, existing regs | *Structural* use-cases — transitions the code actually admits | **Partial** (Slice 0 goldens are hand-curated from contracts; **automated scan → draft scripts not built out**) |
+| **Raw scripts / ideas / edge lists** | Free-form scenario seeds, “what if…”, sticky notes, incident notes | *Hypothesis* and **edge conditions** before they are formal ODD probes | **Partial** (humans write `ConjectureScript`s; **idea → scenario pipeline not built out**) |
+| **User traffic** | Sessions, transcripts, telemetry | *Empirical* routes people actually drive | **Not built out** |
+| **Explorer** (“agent plays the game”) | Deployed app exploration | *Operational* reachability | **Not built out** |
+| **Adversarial from ODD** | Stress generation on/inside/outside scope | *Refusal* and stress contracts | **Seed only** (threat regs); formal generator **not built out** |
+
+These are **different extractors into the same corpus**, not synonyms:
+
+```text
+  specs ──┐
+  codebase scan ──┼──► curate / promote ──► scenario + invariants ──► play back
+  raw ideas / edges ──┘
+  (later: traffic · explorer · adversarial gen)
+```
+
+**Honest status:** Slice 0 proves we can **play back** pinned scripts with real
+invariant checks. We have **not** fully built automated “scan the codebase →
+draft use-cases,” “specs → scenario pack,” or “raw edge list → formal probes.”
+That generation and curation stack is still the product roadmap.
 
 Full write-up: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) §1.1.
 

@@ -105,16 +105,32 @@ Portable scenario models use the same idea in plain language:
 
 Adversarial is never the sole CI green without human promote.
 
-### Four corpus modalities (build-out)
+### Where use-cases / scenarios are seeded (distinct sources)
 
-| Modality | Gives |
-|---|---|
-| **Code-based** | Intended contracts (routers, prompts, regs) |
-| **User-watching** | Empirical traffic |
-| **Agent-plays-the-game** | Operational reachability on a deployed app |
-| **Adversarial** | Stress / refusal envelope from ODD |
+Do **not** collapse “generation” into one blob. Seed sources differ in trust and job:
 
-Slice 0 is mostly **code-based** control-plane contracts. Later slices re-absorb the rest.
+| Source | Input | Output kind | Trust | Status |
+|---|---|---|---|---|
+| **Specs** | Epics, ODD/scope, design contracts | *Intended* use-cases | High for “claimed” behaviour | **Partial** — humans author; **spec→scenario tooling not built out** |
+| **Codebase scan** | Routers, state machines, tools, prompts, existing tests | *Structural* use-cases the code admits | High for “reachable in code” | **Partial** — Slice 0 goldens hand-derived; **auto scan→draft scripts not built out** |
+| **Raw scripts / ideas / edge lists** | Free-form seeds, “what if…”, incident notes, sticky edges | *Hypothesis* scenarios and **edge conditions** | Variable — needs curation | **Partial** — hand-written `ConjectureScript`; **idea→formal probe pipeline not built out** |
+| **User-watching** | Sessions, transcripts, telemetry | *Empirical* routes | High for “what people do” | **Not built out** |
+| **Explorer** | Deployed app drive | *Operational* reachability | High for runtime quirks | **Not built out** |
+| **Adversarial from ODD** | Scope + threat generation | *Stress / refusal* probes | Separate triage (refusal ≠ success) | **Seed only**; formal generator **not built out** |
+
+```text
+  specs ──────────────┐
+  codebase scan ──────┼──► curate / promote ──► scenario + invariants
+  raw ideas / edges ──┘         │
+                                ▼
+                          play back → capture → diagnose
+                                │
+              later: traffic · explorer · adversarial gen
+```
+
+**Slice 0** proves the **play back** column: pinned scripts + real invariant checks.
+Automated extractors from specs, code, and raw edge lists are **roadmap**, not
+pretend-done.
 
 ### Pipeline (still the objective)
 
@@ -124,8 +140,9 @@ extract → curate/learn → play back → capture → diagnose → live debug
    +------------------------- feedback ----------------------+
 ```
 
-Slice 0 = thin vertical (script → pin-driven playback → pass/fail). Capture stores,
-curator, explorer, and formal adversarial generation remain **to build**.
+Slice 0 = thin vertical on **play back** (script → pin-driven run → pass/fail).
+Extract (specs / code / ideas), curator, capture store, explorer, and formal
+adversarial generation remain **to build**.
 
 ---
 

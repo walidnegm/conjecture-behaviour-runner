@@ -1,10 +1,17 @@
 # Conjecture Behaviour Runner
 
-**Prove multi-turn agent behaviour** — who owns the turn, what stays pinned, what outcomes are allowed — **without** scoring chat by string match.
+**Prove multi-turn behaviour under messy, auto-generated software** —  
+not “did the assistant say this exact sentence?”
 
-Built by [Bot0.ai](https://bot0.ai) as the **test kit** that pairs with the  
+Vibe-coded and auto-coded programs don’t fail like classical apps. They accrete
+**unknown pathways**: probabilistic specs, half-scoped features, dynamic scope,
+shifting requirements, and code nobody deliberately designed. Chat and agents
+make that worse across turns. **Conjecture** is a harness for pinning what
+*must* stay true when you cannot inventory every path in advance.
+
+Built by [Bot0.ai](https://bot0.ai). First cut ships with a deep pairing to the  
 [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)  
-(*who owns the thread* → *prove it still holds across turns*).
+(turn ownership / pins) — but the *idea* is broader than one product surface.
 
 | | |
 |---|---|
@@ -17,20 +24,51 @@ Built by [Bot0.ai](https://bot0.ai) as the **test kit** that pairs with the
 
 ## Why we created this
 
-We kept shipping multi-turn agents that *looked* fine in demos and still failed in production:
+### The world Conjecture assumes
 
-| What users hit | What string-match evals miss |
+Modern agentic products are rarely a closed, fully-specified state machine:
+
+| Reality of vibe / auto coding | What that does to testing |
+|-------------------------------|---------------------------|
+| Specs are **probabilistic** (“make it handle handoff”) | Paths appear that no ticket named |
+| **New requirements** land mid-build | Old happy-path tests still green |
+| **Weak or dynamic scoping** | Features reach states authors never mapped |
+| **Changing requirements** week to week | String goldens rot or get rewritten to pass |
+| Code **generated faster than reviewed** | Unknown branches, silent fallthroughs, dual writers |
+| Multi-turn chat on top | Failures show up as *wrong owner*, *lost pin*, *wrong outcome* — not typos |
+
+You cannot unit-test “everything” when you do not know the full path set. You
+*can* script **behaviour envelopes**: after these turns, with this cognition
+pinned, **these invariants must hold** and **these outcomes are allowed**.
+
+### What string-match and snapshot evals miss
+
+| What users hit | What “exact reply” tests miss |
 |----------------|------------------------------|
-| A glossary answer steals an in-flight cost-out | Reply text still “sounds helpful” |
-| Entity identity flips mid-dialogue (`last_read_*` hijacks the pin) | No golden sentence fails |
-| “Continue” re-starts assessment instead of staying on VERIFY | Snapshot tests of one reply pass |
-| Detour vs continue vs new task confused | Regex/keyword ladders accrete per incident |
+| A detour steals an in-flight multi-turn task | Reply still “sounds helpful” |
+| Identity flips mid-dialogue (ambient pin hijack) | No golden sentence fails |
+| Continue restarts a flow instead of staying mid-flight | One-turn snapshot still passes |
+| Unknown branch after a generated refactor | No test ever named that branch |
+| Scope drift (“it also does X now”) | Prose tests update; contracts don’t |
 
-Those bugs live in **behaviour and ownership**, not prose. Pinning exact assistant text makes evals brittle and **does not** catch them.
+Those failures live in **behaviour, ownership, and allowed outcomes** — not
+prose. Pinning assistant text is brittle and **does not** catch them.
 
-So we built **Conjecture**: a small runner that scripts **turns + cognition pins**, runs them against a **control-plane adapter**, and checks **invariants** (exclusive owner, pin present/equals, allowed outcomes, …). Cognition can be **stubbed or frozen** so CI stays deterministic — the control plane still has to behave correctly.
+### What we built
 
-> **One-line reason:** *If the control plane is the authority for “who owns the turn,” Conjecture is how you prove that authority holds when the conversation gets messy.*
+**Conjecture** scripts **turns + structured cognition pins**, runs them through
+a **host adapter** (your control plane / ledger / system under test), and checks
+**invariants** (owner, pin present/equals, extras, allowed outcomes, …).
+Cognition can be **stubbed or frozen** so CI stays deterministic while the
+system under test still has to behave correctly.
+
+The first deep binding is the **Conversation Control Plane** (sole-continue,
+detour supersede, pin-over-ambient). That is a *reference domain*, not the
+whole thesis.
+
+> **One-line reason:** *When code and scope are generated and incomplete, you
+> cannot prove “all paths.” You prove the behaviour that must not break when
+> paths appear anyway — across turns, without string-matching chat.*
 
 ---
 
@@ -38,17 +76,19 @@ So we built **Conjecture**: a small runner that scripts **turns + cognition pins
 
 ### It is
 
-- A **portable multi-turn behaviour harness** (scripts, pins, modes, `run_script`)
+- A **portable multi-turn behaviour harness** for agentic / auto-coded systems
+- A way to pin **invariants and allowed outcomes** when path inventories are incomplete
 - A **standard invariant library** so adapters prove real checks, not only `always_true`
 - An optional binding to the **Conversation Control Plane** with three **portable goldens**
-- A **host adapter protocol** so *your* ledger can plug in the same way
+- A **host adapter protocol** so *your* ledger or app control layer can plug in
 
 ### It is not
 
-- A full product test suite or Bot0 monorepo goldens (those stay private)
+- A claim that every product must use Bot0’s control plane (that pairing is the first cut)
+- A full product suite or private monorepo goldens
 - A free live-LLM soak on every PR (default is stub/freeze)
-- A Playwright/UI-first runner (optional later; Slice 0 is control-plane behaviour)
-- A second agent runtime — it **evaluates** ownership/pins; it does not replace your agents
+- A complete path-coverage tool (it does not discover unknown code; it **guards contracts** when unknowns appear)
+- A second agent runtime — it **evaluates** behaviour; it does not replace your agents
 
 ---
 
@@ -145,25 +185,30 @@ For real checks, subclass `BaseControlPlaneAdapter` or use
 
 ---
 
-## Pairing: ownership + proof
+## First deep pairing: ownership + proof
+
+Slice 0’s deepest example is conversational **turn ownership** — because that is
+where vibe-coded multi-agent products fail most loudly. The same harness shape
+applies anywhere you can **observe** structured state after a turn.
 
 | Package | Question it answers |
 |---------|---------------------|
 | [conversation-control-plane](https://github.com/walidnegm/conversation-control-plane) | **Who owns this turn?** (ledger, sole-continue, pins, gates) |
-| **conjecture-behaviour-runner** (this repo) | **Did ownership still hold after N turns?** (scripts + invariants) |
+| **conjecture-behaviour-runner** (this repo) | **Did the behaviour contract still hold after N turns?** (scripts + invariants) |
 
 ```text
         Conjecture Behaviour Runner
      scripts · pins · invariants
+     (broader: any multi-turn behaviour contract)
                  │
                  ▼
-        ControlPlaneAdapter
+        ControlPlaneAdapter  (or your host adapter)
                  │
                  ▼
-     conversation-control-plane  (or your host ledger)
+     conversation-control-plane  ·  your ledger  ·  your app state
 ```
 
-Install both:
+Install both for the reference goldens:
 
 ```bash
 pip install conjecture-behaviour-runner[control-plane]
@@ -201,11 +246,12 @@ pip install conjecture-behaviour-runner[scenarios]   # PyYAML
 
 ## Who this is for
 
-- Teams building **multi-turn agents** with explicit **task ownership** (continue vs detour vs new task)
-- Anyone who has watched **evals pass** while **routing/ownership fails** in chat
-- Hosts that already use (or want) a **turn-ownership ledger** and need a **CI-safe proof layer**
+- Teams shipping **agentic or LLM-shaped products** that grow by generation and iteration
+- Anyone watching **evals pass** while **routing, ownership, or mid-flow state** fails in real chat
+- Codebases where **scope is incomplete** and new paths keep appearing — and you need **contracts**, not full path inventories
+- Hosts that use (or want) a **turn-ownership ledger** and a **CI-safe proof layer** (CCP goldens are the reference)
 
-If your only test is “the assistant said something nice,” this package is the next step up.
+If your only test is “the assistant said something nice,” or your only defense is “we’ll write a unit test once we know the paths,” this package is the next step up.
 
 ---
 
@@ -213,14 +259,19 @@ If your only test is “the assistant said something nice,” this package is th
 
 **Alpha.** MIT. Surface is intentionally small.
 
+The **thesis** (behaviour contracts under incomplete, auto-grown systems) is broader
+than Slice 0. The **shipping surface** starts where we hurt most: multi-turn
+control-plane invariants with stubbed cognition.
+
 | Included | Meaning |
 |----------|---------|
 | Invariant library + base adapter | Real checks, fail-closed on unknown kinds |
-| CCP stream adapter + 3 goldens | Two-repo pairing demonstrated in code |
+| CCP stream adapter + 3 goldens | Reference pairing demonstrated in code |
 | Generic cognition pin | Product flags stay in `extras` |
 | Experimental scenario models | Quarantined; not the main 0.1 path |
 
-**Not yet:** full path-faithful chat/SSE driver, distribution-over-N-runs monitoring, Playwright-first corpus (later slices).
+**Not yet:** full path-faithful chat/SSE driver, distribution-over-N-runs monitoring,
+Playwright-first corpus, non-conversation adapters as first-class examples (later slices).
 
 ---
 

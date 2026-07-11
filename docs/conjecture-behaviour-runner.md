@@ -256,6 +256,44 @@ where applicable, raw + parsed output, validation evidence. **Mode labels alone 
 | `path_faithful.py` | Mini-app Act path + planted-bug proof |
 | `discover.py` / `report.py` / `cli.py` | Discovery, JSON/JUnit, `conjecture run` |
 
+---
+
+## 2.1 Pipeline, ecosystem, and Collinear
+
+Public face of this section: [README — pipeline · ecosystem · Collinear](../README.md#end-to-end-pipeline-spec--agent--runner--verify).
+
+### Pipeline (normative)
+
+```text
+Spec / epic / story / ODD / incident
+        → Agent interface (draft against Conjecture schema; validate; repair)
+        → ConjectureScript IR (deterministic golden)
+        → Runner (CognitionProvider + Driver + Observer)
+        → Oracle (step + outcome-specific + trajectory)
+        → Report (RunResult / Trajectory / JUnit) → CI gate
+```
+
+Agent interface **authors**; runner **executes**; oracle **verdicts**. The schema is the
+shared “score surface” for agents — not free-form pass criteria.
+
+### Ecosystem
+
+Compose with Collinear-class sim (upstream seeds / optional downstream re-probe),
+Playwright/HTTP (drivers), pytest/CI (host), coding agents (author IR), eval platforms
+(parallel trajectory scores — not a substitute for contract gates).
+
+### Collinear: differentiate and integrate
+
+| | Collinear-class | Conjecture |
+|---|---|---|
+| Job | Sim users/worlds, multi-turn **data**, rubrics | **Control-plane contracts** under pin/freeze |
+| Green bar | Quality / task / preference scores | Owner · pin · terminal · refusal envelope |
+| Integration | → seed scripts; ← failed contracts as sim regression seeds | CI gate on authoritative state |
+
+**Tempting features that would erase the wedge** (happy/sad quality scores, built-in sim
+world, creative execution engine, logger-as-product) stay **out of core** — see README
+scope table.
+
 Not the mission: replace general runners or become a sim-data platform.
 
 ### What would make the repo materially credible

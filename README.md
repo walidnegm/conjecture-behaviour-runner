@@ -60,6 +60,151 @@ with frozen/sampled cognition** is the defensible framing.
 - *Stateful conformance testing for probabilistic workflows.*  
 - *Contract testing for the conversational control plane.*
 
+---
+
+## End-to-end pipeline (spec → agent → runner → verify)
+
+This is the intended product flow — same shape as “agentic coding takes a spec and produces
+something the framework executes,” but the artifact is a **contract script**, not free prose.
+
+```text
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  INPUTS (human / system)                                         │
+  │  Epic · user story · ODD/scope · incident note · transcript      │
+  │  optional: traffic seed · Collinear sim trajectory · bug report  │
+  └────────────────────────────┬────────────────────────────────────┘
+                               │
+                               ▼
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  AGENT INTERFACE (authoring — organic NL in)                     │
+  │  LLM / coding agent drafts a ConjectureScript against our schema │
+  │  (script_id, turns, pins, invariants, scope, allowed_outcomes) │
+  │  → schema validate · fail-closed kinds · one-shot repair loop    │
+  │  Output: deterministic IR (JSON/YAML golden)                     │
+  └────────────────────────────┬────────────────────────────────────┘
+                               │  ConjectureScript (portable IR)
+                               ▼
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  RUNNER (thin execution — not a sim world)                       │
+  │  CognitionProvider: stub | freeze | record | host local/cloud    │
+  │  Driver: in-process adapter | HTTP/SSE | Playwright | …          │
+  │  Observer: TurnObservation (owner, pins, extras, outcome)        │
+  └────────────────────────────┬────────────────────────────────────┘
+                               │
+                               ▼
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  ORACLE / VERIFY                                                 │
+  │  Step invariants · outcome-specific sets · trajectory (temporal) │
+  │  allowed_outcomes membership (non-vacuous)                       │
+  │  → RunResult · Trajectory · JSON/JUnit report · CI exit code     │
+  └─────────────────────────────────────────────────────────────────┘
+```
+
+| Stage | Owns | Must stay true |
+|-------|------|----------------|
+| **Spec / epic / story** | Intent and claimed scope (`ScriptScope` mini-ODD) | Humans (or tickets) own the claim |
+| **Agent interface** | Drafting goldens from specs | Emits **only** validated IR — not live product mutations |
+| **IR (`ConjectureScript`)** | Portable contract language | Schema + enum kinds; no free-form “pass if nice” |
+| **Runner** | Act + observe under pinned cognition | Thin; reuses Playwright/HTTP as drivers |
+| **Oracle** | Pass/fail on authoritative state | Ownership, pins, terminals, trajectory rules |
+
+**Status:** IR + runner + oracle + path-faithful mini-app ship today. **Agent script synthesizer**
+(spec→JSON with repair) is the next authoring surface — the schema is ready; the agent loop is open.
+
+---
+
+## Ecosystem integration (compose — do not replace)
+
+Conjecture is a **contract layer**. It sits beside simulators, eval platforms, and drivers.
+
+```text
+                    ┌──────────────────┐
+                    │  Specs / ODD /   │
+                    │  epics / bugs    │
+                    └────────┬─────────┘
+                             │
+           ┌─────────────────┼─────────────────┐
+           ▼                 ▼                 ▼
+   ┌───────────────┐  ┌─────────────┐  ┌────────────────┐
+   │ Collinear /   │  │ Coding agent│  │ Human / CI     │
+   │ sim labs      │  │ (Cursor etc)│  │ hand goldens   │
+   │ multi-turn    │  │ drafts IR   │  │                │
+   │ trajectories  │  └──────┬──────┘  └────────┬───────┘
+   └───────┬───────┘         │                  │
+           │ seed / filter   │ schema           │
+           └────────┬────────┴──────────┬───────┘
+                    ▼                   ▼
+            ┌────────────────────────────────┐
+            │  ConjectureScript IR + scope   │
+            │  (our schema / score surface)  │
+            └────────────────┬───────────────┘
+                             ▼
+            ┌────────────────────────────────┐
+            │  Conjecture runner + oracle    │
+            └────────┬───────────┬───────────┘
+                     │           │
+         ┌───────────┘           └───────────┐
+         ▼                                   ▼
+  Playwright / HTTP / SSE              pytest / CI / JUnit
+  (Driver)                             (exit + reports)
+         │
+         ▼
+  Real application (ledger / control plane)
+```
+
+| Ecosystem piece | Integration pattern |
+|-----------------|---------------------|
+| **Collinear (or similar sim)** | **Upstream seed:** export multi-turn trajectories / edge cases → curate → compile to `ConjectureScript` (or agent rewrites into our schema). Optional: run Conjecture oracle as a **deterministic verifier** on paths discovered in sim. **Not:** replace Collinear’s sim world. |
+| **LangSmith / Braintrust / …** | **Parallel:** they score trajectories and tool paths; we **gate contracts** (owner/pin/terminal). Share conversation ids / traces as Observer inputs later. |
+| **Playwright / Cypress** | **Driver** under the oracle — browser Act when UI is the surface. |
+| **pytest / CI** | **Harness host** — `conjecture run` + JUnit/JSON; freeze dir for deterministic PR gates. |
+| **Coding agents** | **Author** goldens from epics against our schema (agent interface). |
+| **Conversation Control Plane** | **Reference domain** — portable goldens prove mid-flow ownership contracts. |
+
+---
+
+## Collinear comparison (specific) and where we integrate
+
+We are **not** “unrelated to Collinear.” Buyers will compare. Honest split:
+
+| Dimension | **Collinear-class** (sim / eval data) | **Conjecture** (this project) |
+|-----------|--------------------------------------|-------------------------------|
+| **Primary job** | Simulate users & environments; produce multi-turn behavior data; rubrics / training signal | Verify **authoritative control-plane contracts** under pinned/replayed cognition |
+| **Pass criterion** | Often quality / task success / preference / rubric | **Envelope:** allowed outcomes + invariants on owner, pin, terminal, ledger |
+| **Cognition** | Live or simulated user/agent models in the loop | **Pinned / frozen / recorded** for CI-safe conformance; live optional later |
+| **World / sim** | Stateful environments, tools, APIs, simulated users | **No world engine** — Driver hits *your* app or a thin path-faithful harness |
+| **Artifact** | Datasets, scores, sim runs | `ConjectureScript` IR + `RunResult` / Trajectory + contract fail reasons |
+| **Strength today** | Scale of multi-turn **exploration** and data | Precision of **mid-flow ownership / identity** checks |
+| **Weak without the other** | Can score a path that **violates** ledger law if rubric ignores it | Can only check paths **you already have** (hand/agent/sim-seeded) |
+
+### Integrate (preferred), don’t clone
+
+| Direction | How |
+|-----------|-----|
+| **Collinear → Conjecture** | Sim finds weird multi-turn paths → filter to control-plane-relevant → agent or compiler emits `ConjectureScript` with pins + invariants → CI freezes cognition and fails on dual owner / lost pin / illegal restart. |
+| **Conjecture → Collinear** | Export failed contracts as **regression seeds** for sim (“always re-probe dual-owner mid cost-out”). Contract hold-rates over N sim runs = distribution later — still **contract** rates, not reply-quality rubrics. |
+| **Shared CI** | Collinear job explores; Conjecture job **gates merge** on authoritative-state goldens. |
+
+**Smell test:** if the default green bar is “sim user scored 0.87,” that’s Collinear’s lane.  
+If it is “no dual owner, pin held, illegal restart refused,” that’s Conjecture.
+
+---
+
+## Scope pin: tempting features (do / defer / never-core)
+
+| Tempting feature | Risk | Decision |
+|------------------|------|----------|
+| Happy/sad path **comparative quality scores** | Eval-lab / Collinear center | **Defer** — use `scope` + `expected_refusal` scripts instead |
+| Rich **simulated users / worlds** | You become a sim platform | **Never core** — integrate upstream (Collinear etc.) for seeds |
+| “Creative” proprietary **execution engine** | Rebuild Playwright + agent sandbox | **Never core** — thin Driver; reuse ecosystem |
+| **Logger-as-product** | Observability company | **Support only** — trajectory is evidence for the oracle |
+| **Agent script synthesizer** (spec→IR) | Authoring UX | **In scope** — next open item; schema is the score surface |
+| Freeze / record / replay cognition | Needed for CI | **In scope** — shipped foundation |
+| Path-faithful Driver (HTTP/SSE/Playwright) | Credibility | **In scope** — mini-app done; host drivers next |
+| Generation + shrink (Hypothesis-class) | Differentiation depth | **Later** — after path-faithful hosts |
+| N-run **contract hold-rate** distributions | Overlaps sim analytics | **Later** — contracts only, not preference data |
+| Dual-license / model leaderboards | Wrong market | **Out of scope** |
+
 ### Scripts are multi-actor (not “user only”)
 
 A script is a **sequence of turns that move system state**. Initiation is not limited to a human:
@@ -99,12 +244,12 @@ authoritative-state contracts** (with cognition pinned, frozen, or later sampled
 
 ### Target architecture (four extension points)
 
-| Point | Role | Slice 0 |
-|-------|------|---------|
-| **Driver** | Act on the real system (HTTP, SSE, Playwright, in-process, …) | In-process **adapter** only |
+| Point | Role | 0.1.1 |
+|-------|------|-------|
+| **Driver** | Act on the real system (HTTP, SSE, Playwright, in-process, …) | Mini-app path-faithful + CCP unit adapter; HTTP/Playwright open |
 | **Observer** | Collect authoritative evidence (ledger, tools, events, ownership) | `TurnObservation` from adapter |
-| **Cognition provider** | stub / freeze-replay / record / local / cloud | **Pins on the turn** (modes mostly labels until providers land) |
-| **Oracle** | Allowed outcomes + invariants (+ later temporal / distributional) | Standard invariant kinds + outcome membership |
+| **Cognition provider** | stub / freeze-replay / record / local / cloud | **Stub + FreezeStore record/replay shipped**; local/cloud host-supplied |
+| **Oracle** | Allowed outcomes + invariants (+ temporal) | Step + outcome-specific + trajectory kinds |
 
 ### Slice 0 honesty
 

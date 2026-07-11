@@ -5,8 +5,14 @@
 **Face demo:** [examples/e2e_multi_turn.py](examples/e2e_multi_turn.py) — path-faithful `handle()` + planted bugs.  
 **Prompt seed:** [prompts/conjecture_script_author.seed.md](prompts/conjecture_script_author.seed.md).
 
-**Claim (face):** freeze-safe **state-law** regression (owner · pin · terminal/mid-flight) under
-pinned cognition — red bar even when the reply looks fine. **Not** a prose/quality grader.
+**Claim hierarchy** (do not invert — CBR-SPEC §0):
+
+1. **Face:** freeze-safe **state-law** regression (owner · pin · terminal/mid-flight) under
+   pinned cognition — red bar even when the reply looks fine. **Not** a prose/quality grader.
+2. **Technical (sticky):** contract testing for the conversational control plane —
+   behavioral envelopes over authoritative state under pin/freeze. Not one golden sentence.
+3. **Architecture (scoped):** control-plane conformance under probabilistic cognition —
+   **only** for CCP-shaped hosts with real Act under a Driver (not free discovery for every agent).
 
 **Inspiration / apt hosts:** [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
 and apps **isomorphic** to that format (single-writer ownership, entity pins, sole-continue /

@@ -45,12 +45,34 @@ That demo is the value prop. Ontology and vision live in the [spec](docs/SPEC.md
 
 ---
 
-## What this is (honest claim)
+## What this is (claim hierarchy)
+
+### 1. Face — sell this
 
 > **Freeze-safe regression gates for control-plane state law**  
 > (turn ownership · entity pins · mid-flight / terminal boundaries).  
 > Goldens go red when state breaks — even when the reply looks fine.  
 > Cognition is **pinned or frozen** so CI is cheap and repeatable (no live LLM on every PR).
+
+### 2. Technical definition — sticky mechanism (under the face)
+
+> **Contract testing for the conversational control plane** —  
+> **behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**,  
+> under **pinned or replayed cognition**.  
+>  
+> Not “one golden sentence.” Not a new universal testing paradigm.
+
+This is how green is defined. It does **not** replace the face claim or imply a full
+multi-surface behaviour platform.
+
+### 3. Architecture gloss — scoped, not the pitch
+
+> Authoritative control-plane conformance under probabilistic cognition —  
+> **when** the host is [CCP](https://github.com/walidnegm/conversation-control-plane)-shaped
+> (or isomorphic) and Act is under a real Driver.  
+> Not “every LangGraph app / free live discovery today.”
+
+Normative hierarchy: [CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative).
 
 | Today (backed by code) | Not today (vision / roadmap) |
 |------------------------|------------------------------|

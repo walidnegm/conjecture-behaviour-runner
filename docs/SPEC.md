@@ -13,7 +13,7 @@
 | **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
 | **Prompt seed** | [prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) — trajectory + ODD → Script |
 | **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.3** |
-| **One-liner (locked)** | Freeze-safe regression gates for control-plane state law — owner · pin · mid-flight/terminal envelopes under pinned cognition; red bar even when the reply looks fine |
+| **Claim hierarchy (locked)** | **Face:** freeze-safe state-law gates · **Technical:** contract testing / envelopes / pin-freeze · **Gloss:** conformance under probabilistic cognition (CCP-shaped + Act only) — see §0 |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Inspiration / primary pattern** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) — hosts isomorphic to that format are the apt application |
 
@@ -28,18 +28,40 @@ It is **not** a marketing brief, ADR log, or epic backlog (those live elsewhere)
 This section freezes the market/architecture decisions from design review. Later
 slices implement; they do not redefine the wedge without a SPEC version bump.
 
-### One-liner (locked)
+### Claim hierarchy (locked — do not invert)
+
+Three layers. **Face wins** on the homepage and pitch. Sticky mechanism language **supports**
+the face claim; it does **not** expand it back into platform theater.
+
+| Layer | Text | Role |
+|---|---|---|
+| **1. Face (sell / one-liner)** | Freeze-safe regression gates for control-plane **state law** (owner · pin · mid-flight/terminal) under pinned cognition — red bar even when the reply looks fine | Hero demo + buyer pitch |
+| **2. Technical definition (sticky)** | Contract testing for the conversational control plane — behavioral envelopes (allowed outcomes + invariants) over authoritative state, under pinned or replayed cognition. Not “one golden sentence.” Not a new universal testing paradigm. | How green is defined; mechanism |
+| **3. Architecture gloss (scoped)** | Authoritative control-plane conformance under probabilistic cognition — **when** the host is CCP-shaped (or isomorphic) and Act is under a real Driver | Research combination; **not** “every live multi-step agent today” |
+
+#### Face (layer 1 — locked one-liner)
 
 > **Freeze-safe regression gates for control-plane state law** —  
-> **behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**  
-> (owner · pin · mid-flight / terminal), under **pinned or replayed cognition**.  
+> owner · pin · mid-flight / terminal envelopes under **pinned or replayed cognition**.  
 > The bar goes red when state breaks **even if the reply still looks fine**.
 
-Not a general chat quality product. Not a new universal testing paradigm.  
-**Wedge:** deterministic **state enforcement** for multi-turn agents that have law to protect.
+#### Technical definition (layer 2 — sticky; keep under face)
 
-**Pitch that wins:** we do not care if the agent uses a different adjective today; we care
-that it did not violate core legal state, drop session pins, or rewrite identity mid-flight.
+> **Contract testing for the conversational control plane** —  
+> **behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**,  
+> under **pinned or replayed cognition**.  
+>  
+> Not “one golden sentence.” Not a new universal testing paradigm.
+
+#### Architecture gloss (layer 3 — scope required)
+
+> Authoritative control-plane **conformance under probabilistic cognition** —  
+> for CCP-shaped hosts, as **state-law regression** under pin/freeze, proved on a real Act
+> path where available. Full live classify→route→mutate discovery is **next Driver**, not the face sell.
+
+**Align rule:** layer 2 ⊂ layer 1. Layer 3 must not be sold without the CCP-shaped + Act scope.  
+**Pitch that wins:** we do not care about adjectives; we care that legal state, pins, and
+mid-flight law held.
 
 ### Inspiration and who it is for
 
@@ -259,11 +281,13 @@ sentence or one ideal trajectory.
 | **Invariants** | Must remain true regardless of wording or path |
 | **Authoritative focus** | Ownership, active work identity, routing, terminals, ledger integrity |
 
-None of those ingredients is novel alone. The defensible combination is:
+None of those ingredients is novel alone. The defensible combination (claim hierarchy
+**layer 3**, always scoped — see §0) is:
 
-> **Authoritative control-plane conformance under probabilistic cognition.**
+> Authoritative control-plane conformance under probabilistic cognition —  
+> **as freeze-safe state-law regression for CCP-shaped hosts**, not as a universal agent-test platform.
 
-Not “a completely new testing paradigm.”
+Not “a completely new testing paradigm.” Face claim remains **layer 1** (§0).
 
 ### Failure modes that string / pure quality scores miss
 

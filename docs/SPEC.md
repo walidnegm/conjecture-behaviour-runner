@@ -363,7 +363,7 @@ Short face: [README — Pipeline](../README.md#pipeline-face). **This section is
 | Runner | Act + observe under pin/freeze | Thin; reuse ecosystem drivers |
 | Verifier | Pass/fail on authoritative state | Owner, pin, terminal, trajectory |
 
-Agent **authors**; runner **executes**; verifier **verdicts**. Schema = agent “score surface.”
+Agent **authors**; runner **executes**; verifier **judges**. Schema = agent “score surface.”
 
 ### Ecosystem (compose — seeds and plugins, not the product)
 

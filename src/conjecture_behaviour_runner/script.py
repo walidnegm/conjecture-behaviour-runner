@@ -102,6 +102,10 @@ class DialogueTurn:
     invariants: Sequence[InvariantSpec] = ()
     # Optional envelope of legal outcomes when cognition is live.
     allowed_outcomes: Sequence[str] = ()
+    # Outcome → extra invariants that apply only when that outcome is observed.
+    outcome_invariants: Mapping[str, Sequence[InvariantSpec]] = field(
+        default_factory=dict
+    )
     freeze_key: str = ""
     # user | agent | system — Slice 0 authors leave default; multi-actor is later.
     actor: str = "user"
@@ -124,6 +128,10 @@ class DialogueTurn:
             "effects": [e.to_dict() for e in self.effects],
             "invariants": [i.to_dict() for i in self.invariants],
             "allowed_outcomes": list(self.allowed_outcomes),
+            "outcome_invariants": {
+                k: [inv.to_dict() for inv in v]
+                for k, v in dict(self.outcome_invariants or {}).items()
+            },
         }
         if pin_out is not None:
             d["pin"] = pin_out
@@ -149,12 +157,20 @@ class DialogueTurn:
         invariants = tuple(
             InvariantSpec.from_dict(i) for i in (data.get("invariants") or ())
         )
+        oi_raw = data.get("outcome_invariants") or {}
+        outcome_invariants: dict[str, tuple[InvariantSpec, ...]] = {}
+        if isinstance(oi_raw, Mapping):
+            for ok, specs in oi_raw.items():
+                outcome_invariants[str(ok)] = tuple(
+                    InvariantSpec.from_dict(s) for s in (specs or ())
+                )
         return cls(
             user_text=str(data.get("user_text") or ""),
             pin=pin,
             effects=effects,
             invariants=invariants,
             allowed_outcomes=tuple(data.get("allowed_outcomes") or ()),
+            outcome_invariants=outcome_invariants,
             freeze_key=str(data.get("freeze_key") or ""),
             actor=str(data.get("actor") or "user"),
         )
@@ -177,6 +193,8 @@ class ConjectureScript:
     initial_context: dict[str, Any] = field(default_factory=dict)
     tags: Sequence[str] = ()
     scope: Optional[ScriptScope] = None
+    # Cross-turn oracle (evaluated after all turns) — see temporal.py.
+    trajectory_invariants: Sequence[InvariantSpec] = ()
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -186,6 +204,7 @@ class ConjectureScript:
             "turns": [t.to_dict() for t in self.turns],
             "initial_context": dict(self.initial_context),
             "tags": list(self.tags),
+            "trajectory_invariants": [i.to_dict() for i in self.trajectory_invariants],
         }
         if self.scope is not None:
             d["scope"] = self.scope.to_dict()
@@ -196,6 +215,10 @@ class ConjectureScript:
         turns = tuple(DialogueTurn.from_dict(t) for t in (data.get("turns") or ()))
         if not turns:
             raise ValueError("ConjectureScript requires at least one turn")
+        traj = tuple(
+            InvariantSpec.from_dict(i)
+            for i in (data.get("trajectory_invariants") or ())
+        )
         return cls(
             script_id=str(data["script_id"]),
             description=str(data.get("description") or ""),
@@ -204,6 +227,7 @@ class ConjectureScript:
             initial_context=dict(data.get("initial_context") or {}),
             tags=tuple(data.get("tags") or ()),
             scope=ScriptScope.from_dict(data.get("scope")),
+            trajectory_invariants=traj,
         )
 
 

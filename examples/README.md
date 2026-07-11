@@ -12,6 +12,13 @@ Host-private goldens stay in your application repository; these examples are con
 | `sole_continue_golden.json` | Full multi-turn sole-continue golden (load with `load_script_json`) |
 | `sole_continue_golden.yaml` | Same shape in YAML (`load_script_yaml`, needs PyYAML / `[scenarios]`) |
 
+Path-faithful vertical (Act through mini-app `handle`, not pure contract injection):
+
+```bash
+conjecture path-faithful --prove-bugs
+conjecture run examples/sole_continue_golden.json --adapter null   # structure only
+```
+
 ```bash
 # Structure load (no host adapter required for parse)
 python -c "from conjecture_behaviour_runner import load_script_json; print(load_script_json('examples/sole_continue_golden.json').script_id)"

@@ -1,14 +1,21 @@
 """Conjecture Behaviour Runner — public package surface.
 
-Portable multi-turn behaviour eval: script model, cognition pins (generic),
-invariant library, adapter protocol. Hosts bind a ``ControlPlaneAdapter`` to
-their control plane or ledger.
-
-Scenario YAML / trajectory models live under
-``conjecture_behaviour_runner.experimental`` (not part of the stable 0.1 API).
+Portable multi-turn behaviour eval: script model, cognition providers,
+invariant + trajectory oracles, adapter protocol. Hosts bind a
+``ControlPlaneAdapter`` (or path-faithful driver) to their system.
 """
 from __future__ import annotations
 
+from conjecture_behaviour_runner.cognition import (
+    CognitionDecision,
+    CognitionProvider,
+    FreezeArtifact,
+    FreezeCognitionProvider,
+    FreezeStore,
+    RecordCognitionProvider,
+    StubCognitionProvider,
+    provider_for_mode,
+)
 from conjecture_behaviour_runner.harness import run_script
 from conjecture_behaviour_runner.invariants import (
     STANDARD_INVARIANT_KINDS,
@@ -33,26 +40,40 @@ from conjecture_behaviour_runner.script import (
     load_script_yaml,
     script_from_dict,
 )
+from conjecture_behaviour_runner.temporal import (
+    TRAJECTORY_INVARIANT_KINDS,
+    check_trajectory_invariant,
+)
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "STANDARD_INVARIANT_KINDS",
+    "TRAJECTORY_INVARIANT_KINDS",
     "BaseControlPlaneAdapter",
+    "CognitionDecision",
     "CognitionPin",
+    "CognitionProvider",
     "ConjectureScript",
     "ControlPlaneAdapter",
     "DialogueTurn",
+    "FreezeArtifact",
+    "FreezeCognitionProvider",
+    "FreezeStore",
     "InvariantSpec",
     "LedgerEffect",
     "LlmMode",
     "NullControlPlaneAdapter",
+    "RecordCognitionProvider",
     "RunResult",
     "ScriptScope",
+    "StubCognitionProvider",
     "TurnObservation",
     "check_standard_invariant",
+    "check_trajectory_invariant",
     "load_script_json",
     "load_script_yaml",
+    "provider_for_mode",
     "run_script",
     "script_from_dict",
     "__version__",

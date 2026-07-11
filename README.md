@@ -457,9 +457,20 @@ More: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md)
 | Horizon | Intent |
 |---------|--------|
 | **Defensible wedge** | Control-plane conformance under pinned/replayed cognition |
-| **Slice 0** | Script API · standard invariants · CCP reference goldens (contract unit path) |
-| **Next milestone** | Path-faithful vertical: real app · freeze cognition · real ledger · catch planted bugs · CI replay |
-| **Later** | Cognition providers · Driver/Observer split · temporal oracles · generation/shrink · richer runner CLI |
+| **0.1.1 foundations** | CognitionProvider + freeze/record store · temporal + outcome-specific oracles · Scenario→script→Trajectory bridge · CLI `run` / JSON+JUnit · **path-faithful mini-app** + planted-bug proof |
+| **Still open** | Host HTTP/SSE/Playwright drivers · full CognitionProvider for local/cloud models · richer temporal ops · generation/shrink · agent script-synthesizer · production-scale CLI (shards/retries) |
+
+### Quick: path-faithful credibility demo
+
+```bash
+pip install -e ".[dev]"
+conjecture path-faithful --prove-bugs
+# clean app passes; dual_owner / drop_pin / illegal_restart each fail the same golden
+```
+
+```bash
+conjecture run examples/ --adapter path-faithful --json-report /tmp/out.json --junit /tmp/out.xml
+```
 
 Contributions welcome — scripts, invariants, adapters, drivers, and docs that stay portable
 (host-private goldens stay in *your* app repo).

@@ -238,14 +238,23 @@ where applicable, raw + parsed output, validation evidence. **Mode labels alone 
 
 ### Delivery slices (revised priorities)
 
-| Slice | What | Priority note |
+| Slice | What | Status |
 |---|---|---|
-| **0 (now)** | Script model, pin-driven harness, standard invariants, optional CCP goldens | Contract **unit** path |
-| **1 (credibility)** | Path-faithful vertical: real app interface → freeze cognition → real ledger → trajectory report → planted bugs red → CI replay | **Do this before** more schema expansion |
-| **2** | Driver/Observer split; Playwright/HTTP as drivers; CognitionProvider interface | Composability |
-| **3** | Join experimental Scenario IR → ExecutionPlan → Runner → Trajectory | End architecture drift |
-| **4** | Temporal oracles; outcome-specific invariant sets; generation + shrink (Hypothesis-class) | Differentiation depth |
-| **5** | ODD-driven corpus / explorer / N-run distributions | Only after 1–3 are real |
+| **0** | Script model, pin-driven harness, standard invariants, optional CCP goldens | ✅ |
+| **0.1.1 foundations** | `CognitionProvider` + freeze/record disk store; trajectory + outcome-specific oracles; `compile_scenario_to_script` + `run_result_to_trajectory`; CLI `run` / `path-faithful` / JSON+JUnit; **MiniChatApp** path-faithful Act + three planted bugs | ✅ landed (thin but real) |
+| **1 next** | Host HTTP/SSE/Playwright drivers; live freeze from real classifiers; agent **script synthesizer** (spec→JSON golden) | open |
+| **2** | Richer temporal ops; generation + shrink; production runner (shards, retries, timeouts) | open |
+| **3** | ODD-driven corpus / explorer / N-run **contract hold-rate** distributions | open |
+
+### 0.1.1 module map
+
+| Module | Role |
+|---|---|
+| `cognition.py` | `CognitionProvider`, `FreezeStore`, stub/freeze/record |
+| `temporal.py` | Cross-turn oracle kinds |
+| `compile_scenario.py` | Scenario IR → `ConjectureScript`; `RunResult` → `Trajectory` |
+| `path_faithful.py` | Mini-app Act path + planted-bug proof |
+| `discover.py` / `report.py` / `cli.py` | Discovery, JSON/JUnit, `conjecture run` |
 
 Not the mission: replace general runners or become a sim-data platform.
 

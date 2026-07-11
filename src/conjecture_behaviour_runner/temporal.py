@@ -1,4 +1,4 @@
-"""Trajectory-level (cross-turn) oracle checks.
+"""Trajectory-level (cross-turn) verifier checks.
 
 These run after all turns complete, over the list of per-turn observations.
 Temporal kinds are evaluated by the harness, not by host adapters.

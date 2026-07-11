@@ -1,7 +1,7 @@
 """Conjecture Behaviour Runner — public package surface.
 
 Portable multi-turn behaviour eval: script model, cognition providers,
-invariant + trajectory oracles, adapter protocol. Hosts bind a
+invariant + trajectory verifiers, adapter protocol. Hosts bind a
 ``ControlPlaneAdapter`` (or path-faithful driver) to their system.
 """
 from __future__ import annotations

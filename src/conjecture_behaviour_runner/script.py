@@ -193,7 +193,7 @@ class ConjectureScript:
     initial_context: dict[str, Any] = field(default_factory=dict)
     tags: Sequence[str] = ()
     scope: Optional[ScriptScope] = None
-    # Cross-turn oracle (evaluated after all turns) — see temporal.py.
+    # Cross-turn verifier (evaluated after all turns) — see temporal.py.
     trajectory_invariants: Sequence[InvariantSpec] = ()
 
     def to_dict(self) -> dict[str, Any]:

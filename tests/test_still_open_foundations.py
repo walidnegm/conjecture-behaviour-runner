@@ -86,7 +86,7 @@ class CognitionFreezeTests(unittest.TestCase):
             self.assertEqual(cog["pin"]["task_intent"], "continue")
 
 
-class TemporalOracleTests(unittest.TestCase):
+class TemporalVerifierTests(unittest.TestCase):
     def test_eventually_and_never(self) -> None:
         obs = [
             {"exclusive_owner": "front_door", "pins": {}, "observed_outcome": "a"},

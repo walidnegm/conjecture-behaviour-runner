@@ -1,4 +1,4 @@
-"""Cognition providers — resolve / record / replay pins independently of the oracle.
+"""Cognition providers — resolve / record / replay pins independently of the verifier.
 
 Slice 0 goldens still put pins on turns. This module makes the *mode system* real:
 stub, freeze (disk), and record (disk) with a portable freeze artifact format.

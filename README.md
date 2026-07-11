@@ -48,7 +48,7 @@ with frozen/sampled cognition** is the defensible framing.
 ### Positioning (compose with existing tools — do not replace them)
 
 ```text
-  Conjecture scenario + oracle (behavioral envelope)
+  Conjecture scenario + verifier (behavioral envelope)
              ↓
   Driver: Playwright / HTTP / SSE / WebSocket / in-process / …
              ↓
@@ -71,16 +71,16 @@ with frozen/sampled cognition** is the defensible framing.
 
 ---
 
-## What the product is (IR + runner + oracle)
+## What the product is (IR + runner + verifier)
 
-**Not** “an open-source scenario script format.” Without **our runner** and **our oracle**,
+**Not** “an open-source scenario script format.” Without **our runner** and **our verifier**,
 the YAML would be only a schema. Conjecture is three cores:
 
 | Core | Job | In-tree today |
 |------|-----|----------------|
 | **IR** | Portable contract language (`ConjectureScript`) | script model, load JSON/YAML, scope |
 | **Runner** | Execute under pin/freeze; call Driver; collect observation | `run_script`, CognitionProvider, freeze store, CLI |
-| **Oracle** | Pass/fail on **authoritative state** | standard + temporal invariants, outcome sets, fail-closed |
+| **Verifier** | Pass/fail on **authoritative state** | standard + temporal invariants, outcome sets, fail-closed |
 
 ```text
   seeds (specs · sim · agent · human)
@@ -88,15 +88,15 @@ the YAML would be only a schema. Conjecture is three cores:
               ▼
      ┌────────────────────────────┐
      │  CONJECTURE                │
-     │  IR → RUNNER → ORACLE      │
+     │  IR → RUNNER → VERIFIER      │
      └──────────┬─────────────────┘
                 │ Driver plugin (HTTP / Playwright / in-process)
                 ▼
          Real application          pytest/CI only *hosts* the run
 ```
 
-**Pipeline:** author IR → our runner executes → our oracle verdicts → report/CI.  
-Playwright is a **driver**, not the product. Collinear **seeds** paths; it does not replace the oracle.
+**Pipeline:** author IR → our runner executes → our verifier judges → report/CI.  
+Playwright is a **driver**, not the product. Collinear **seeds** paths; it does not replace the verifier.
 
 Full ecosystem + Collinear: **[Specification §2](docs/SPEC.md#2-project-architecture)** · **[§2.1](docs/SPEC.md#21-pipeline-ecosystem-and-collinear)**.
 
@@ -104,12 +104,12 @@ Full ecosystem + Collinear: **[Specification §2](docs/SPEC.md#2-project-archite
 |--|-----------------|------------|
 | **Job** | Sim users/worlds, multi-turn **data**, rubrics | **Control-plane contracts** under pin/freeze |
 | **Green bar** | Quality / task / preference scores | Owner · pin · terminal · refusal envelope |
-| **Integrate** | Sim **seeds** scripts; failed contracts re-probe in sim | CI **gates** merge on *our* oracle |
+| **Integrate** | Sim **seeds** scripts; failed contracts re-probe in sim | CI **gates** merge on *our* verifier |
 
 **Smell test:** “sim scored 0.87” → their lane. “No dual owner, pin held” → ours.
 
 **Never core:** built-in sim worlds, quality scoreboards, creative execution engines.  
-**Always core:** IR + runner + oracle (if any one is missing, the claim collapses).
+**Always core:** IR + runner + verifier (if any one is missing, the claim collapses).
 
 ### Multi-actor scripts
 
@@ -129,7 +129,7 @@ We verify **authoritative-state contracts** under pinned/frozen cognition.
 | **Driver** | Act on the system (mini-app + CCP adapter; HTTP/Playwright open) |
 | **Observer** | `TurnObservation` (owner, pins, extras, outcome) |
 | **Cognition** | Stub + FreezeStore record/replay; local/cloud host-supplied |
-| **Oracle** | Step + outcome-specific + trajectory kinds |
+| **Verifier** | Step + outcome-specific + trajectory kinds |
 
 **Honesty:** many goldens still **inject** pin + effects (contract unit path). Path-faithful mini-app proves Act-through-`handle` + planted bugs. Full host drivers next — [Specification](docs/SPEC.md).
 
@@ -139,7 +139,7 @@ ODD/scope, scenario seed sources, delivery slices: **[Specification §1–2](doc
 
 ## What ships today (0.1.1)
 
-- **Script IR** + `run_script` · scope · outcome-specific + trajectory oracles  
+- **Script IR** + `run_script` · scope · outcome-specific + trajectory verifiers  
 - **CognitionProvider** + freeze/record store · standard + temporal invariants  
 - **CLI** `run` / `path-faithful` · JSON + JUnit · path-faithful mini-app + planted bugs  
 - Optional **CCP** goldens · experimental Scenario → script → Trajectory bridge  
@@ -372,7 +372,7 @@ More: [docs/SPEC.md](docs/SPEC.md) ·
 | Horizon | Intent |
 |---------|--------|
 | **Defensible wedge** | Control-plane conformance under pinned/replayed cognition |
-| **0.1.1 foundations** | CognitionProvider + freeze/record store · temporal + outcome-specific oracles · Scenario→script→Trajectory bridge · CLI `run` / JSON+JUnit · **path-faithful mini-app** + planted-bug proof |
+| **0.1.1 foundations** | CognitionProvider + freeze/record store · temporal + outcome-specific verifiers · Scenario→script→Trajectory bridge · CLI `run` / JSON+JUnit · **path-faithful mini-app** + planted-bug proof |
 | **Still open** | Host HTTP/SSE/Playwright drivers · full CognitionProvider for local/cloud models · richer temporal ops · generation/shrink · agent script-synthesizer · production-scale CLI (shards/retries) |
 
 ### Quick: path-faithful credibility demo
@@ -391,7 +391,7 @@ conjecture run examples/ --adapter path-faithful --json-report /tmp/out.json --j
 
 ## Contribute · Verdict · foundations
 
-**MIT:** portable PRs welcome — drivers, observers, providers, oracle kinds, agent
+**MIT:** portable PRs welcome — drivers, observers, providers, verifier kinds, agent
 synthesizer, Collinear bridges, CLI, docs. Host-private goldens stay in *your* repo.
 
 **Verdict** (planned commercial): may **host**, move **faster**, or **reimplement**

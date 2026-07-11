@@ -43,8 +43,8 @@ def run_script(
 ) -> RunResult:
     """Execute a Conjecture script against a control-plane adapter.
 
-    Loop: resolve cognition → apply effects → observe → step oracles →
-    trajectory oracles. Cognition is independent of the host adapter.
+    Loop: resolve cognition → apply effects → observe → step verifiers →
+    trajectory verifiers. Cognition is independent of the host adapter.
     """
     mode = llm_mode.value if isinstance(llm_mode, LlmMode) else str(llm_mode)
 
@@ -165,7 +165,7 @@ def run_script(
         )
         failures.extend(turn_failures)
 
-    # Trajectory (cross-turn) oracle
+    # Trajectory (cross-turn) verifier
     for inv in script.trajectory_invariants:
         msg = check_trajectory_invariant(observations, inv)
         if msg:

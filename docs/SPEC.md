@@ -7,7 +7,7 @@
 | **Canonical path** | [`docs/SPEC.md`](./SPEC.md) |
 | **Title** | Conjecture Behaviour Runner Specification |
 | **Version** | **0.1.1** (alpha) |
-| **Status** | **Active** — authoritative for IR, pipeline, oracle, scope; foundations ship |
+| **Status** | **Active** — authoritative for IR, pipeline, verifier, scope; foundations ship |
 | **Audience** | Integrators, contributors, agent authors of goldens |
 | **Companion face** | [README](../README.md) — wedge, quickstart, plain-English script language |
 | **One-liner** | Contract testing for the conversational control plane — behavioral envelopes over authoritative state under pinned or replayed cognition |
@@ -117,8 +117,8 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 
 | Related | Relation to Conjecture |
 |---|---|
-| **Playwright** | Complete execution substrate. Conjecture sits **above** it as oracle semantics; Playwright can be **a Driver** (fixtures, traces, isolation). Do not rebuild Playwright. |
-| **Cucumber** | Readable scenarios + step defs that can assert **any** state. Not “exact string only.” Conjecture is specialized agent/control-plane oracles; integration is possible. |
+| **Playwright** | Complete execution substrate. Conjecture sits **above** it as verifier semantics; Playwright can be **a Driver** (fixtures, traces, isolation). Do not rebuild Playwright. |
+| **Cucumber** | Readable scenarios + step defs that can assert **any** state. Not “exact string only.” Conjecture is specialized agent/control-plane verifiers; integration is possible. |
 | **Hypothesis stateful** | Closest **method** analogue: actions → transitions → invariants → **shrink**. Without generation/shrink, Slice 0 is a **hand-authored** transition API. |
 | **Eval platforms** (LangSmith, Braintrust, DeepEval, Promptfoo, Inspect, Phoenix, …) | Already multi-turn / trajectory / tools. Differentiation is **narrower**: verify **authoritative-state contracts** for all acceptable trajectories — not “they only score the model.” |
 | **Collinear-class** | Overlap grows with explorers, ODD, N-run distributions. Honest today: they lean **sim/data**; we lean **app control-plane conformance with pinned cognition**. |
@@ -129,7 +129,7 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 ```text
 Scenario source → validated Scenario IR → ExecutionPlan
        → Runner (Driver + CognitionProvider + Observer)
-       → Trajectory → Oracle results → Report
+       → Trajectory → Verifier results → Report
 ```
 
 | Layer today | Status |
@@ -234,20 +234,20 @@ adversarial generation remain **to build**.
 
 ### What Conjecture *is* (not a script format alone)
 
-Without **our runner** and **our oracle**, `ConjectureScript` would be only an open-source
+Without **our runner** and **our verifier**, `ConjectureScript` would be only an open-source
 scenario schema — useful YAML, not a product. **The project is three co-equal cores:**
 
 | Core | Owns | Ships today (0.1.1) |
 |---|---|---|
 | **IR** | Portable contract language (`ConjectureScript`, scope, pins) | `script.py`, JSON/YAML load, schema surface for agents |
 | **Runner** | Execute a script under pinned/frozen cognition; drive Act/Observe | `run_script`, `CognitionProvider` + freeze store, CLI `conjecture run` |
-| **Oracle** | Verdict on authoritative state (not reply quality) | `invariants.py`, `temporal.py`, outcome-specific sets, fail-closed kinds |
+| **Verifier** | Verdict on authoritative state (not reply quality) | `invariants.py`, `temporal.py`, outcome-specific sets, fail-closed kinds |
 
 ```text
                     ┌──────────────────────────────────────────┐
                     │         CONJECTURE (the product)         │
                     │                                          │
-   seeds / authors  │   IR  ──►  RUNNER  ──►  ORACLE           │
+   seeds / authors  │   IR  ──►  RUNNER  ──►  VERIFIER           │
    ────────────────►│  script    execute     verdict           │
                     │            + freeze    + envelope        │
                     │            + CLI                         │
@@ -267,11 +267,11 @@ scenario schema — useful YAML, not a product. **The project is three co-equal 
 |---|---|
 | Collinear / sim / coding agent / human | **Author or seed** IR — not the verdict engine |
 | Playwright / HTTP / SSE | **Driver plugin** called *by* our runner — not the product |
-| pytest / JUnit / CI | **Host process** that invokes `conjecture run` — not the oracle |
-| Eval platforms | Parallel **scores** — not a substitute for our contract oracle |
+| pytest / JUnit / CI | **Host process** that invokes `conjecture run` — not the verifier |
+| Eval platforms | Parallel **scores** — not a substitute for our contract verifier |
 
 If someone only publishes the schema and runs checks in ad-hoc pytest, they have a
-**format**. Conjecture’s claim requires **runner + oracle in-tree** so green means
+**format**. Conjecture’s claim requires **runner + verifier in-tree** so green means
 *our* envelope semantics.
 
 ### Four extension points (product boundary)
@@ -281,7 +281,7 @@ If someone only publishes the schema and runs checks in ad-hoc pytest, they have
 | **Driver** | Act on the actual system (**plugin**; runner owns the loop) | HTTP, SSE, WebSocket, Playwright, in-process, Temporal, LangGraph |
 | **Observer** | Authoritative evidence | messages, routing, tool I/O, ledger, ownership, terminals, DB, events |
 | **Cognition provider** | Probabilistic interpretation (**ours**: stub/freeze/record; host: local/cloud) | freeze store, record artifacts, host classifiers |
-| **Oracle** | Evaluate envelopes (**ours**, not optional glue) | step asserts, trajectory/temporal invariants, allowed outcomes |
+| **Verifier** | Evaluate envelopes (**ours**, not optional glue) | step asserts, trajectory/temporal invariants, allowed outcomes |
 
 Slice 0 often collapses Driver+Observer into `ControlPlaneAdapter`. Cognition is no longer
 “labels only”: stub + freeze/record providers ship; local/cloud remain host-supplied.
@@ -303,7 +303,7 @@ where applicable, raw + parsed output, validation evidence. **Mode labels alone 
 | Slice | What | Status |
 |---|---|---|
 | **0** | Script model, pin-driven harness, standard invariants, optional CCP goldens | ✅ |
-| **0.1.1 foundations** | `CognitionProvider` + freeze/record disk store; trajectory + outcome-specific oracles; `compile_scenario_to_script` + `run_result_to_trajectory`; CLI `run` / `path-faithful` / JSON+JUnit; **MiniChatApp** path-faithful Act + three planted bugs | ✅ landed (thin but real) |
+| **0.1.1 foundations** | `CognitionProvider` + freeze/record disk store; trajectory + outcome-specific verifiers; `compile_scenario_to_script` + `run_result_to_trajectory`; CLI `run` / `path-faithful` / JSON+JUnit; **MiniChatApp** path-faithful Act + three planted bugs | ✅ landed (thin but real) |
 | **1 next** | Host HTTP/SSE/Playwright drivers; live freeze from real classifiers; agent **script synthesizer** (spec→JSON golden) | open |
 | **2** | Richer temporal ops; generation + shrink; production runner (shards, retries, timeouts) | open |
 | **3** | ODD-driven corpus / explorer / N-run **contract hold-rate** distributions | open |
@@ -313,7 +313,7 @@ where applicable, raw + parsed output, validation evidence. **Mode labels alone 
 | Module | Role |
 |---|---|
 | `cognition.py` | `CognitionProvider`, `FreezeStore`, stub/freeze/record |
-| `temporal.py` | Cross-turn oracle kinds |
+| `temporal.py` | Cross-turn verifier kinds |
 | `compile_scenario.py` | Scenario IR → `ConjectureScript`; `RunResult` → `Trajectory` |
 | `path_faithful.py` | Mini-app Act path + planted-bug proof |
 | `discover.py` / `report.py` / `cli.py` | Discovery, JSON/JUnit, `conjecture run` |
@@ -349,7 +349,7 @@ Short face: [README — Pipeline](../README.md#pipeline-face). **This section is
   └────────────────────────────┬────────────────────────────────────┘
                                ▼
   ┌─────────────────────────────────────────────────────────────────┐
-  │  ORACLE / VERIFY                                                 │
+  │  VERIFIER / VERIFY                                                 │
   │  Step + outcome-specific + trajectory invariants                 │
   │  allowed_outcomes (non-vacuous) → RunResult / Trajectory / CI    │
   └─────────────────────────────────────────────────────────────────┘
@@ -361,15 +361,15 @@ Short face: [README — Pipeline](../README.md#pipeline-face). **This section is
 | Agent interface | Draft goldens | Emits **only** validated IR |
 | IR | Portable contract language | Schema + enum kinds |
 | Runner | Act + observe under pin/freeze | Thin; reuse ecosystem drivers |
-| Oracle | Pass/fail on authoritative state | Owner, pin, terminal, trajectory |
+| Verifier | Pass/fail on authoritative state | Owner, pin, terminal, trajectory |
 
-Agent **authors**; runner **executes**; oracle **verdicts**. Schema = agent “score surface.”
+Agent **authors**; runner **executes**; verifier **verdicts**. Schema = agent “score surface.”
 
 ### Ecosystem (compose — seeds and plugins, not the product)
 
-The old picture that put “ConjectureScript IR” alone in the center and “runner+oracle”
+The old picture that put “ConjectureScript IR” alone in the center and “runner+verifier”
 as a thin next box reads as **open-source scenario scripts**. Correct picture: **one
-product box** (IR + runner + oracle); everything else is seed or plugin.
+product box** (IR + runner + verifier); everything else is seed or plugin.
 
 ```text
   Specs / ODD / epics / bugs
@@ -385,7 +385,7 @@ product box** (IR + runner + oracle); everything else is seed or plugin.
    ┌─────────────────────────────────────┐
    │  CONJECTURE                         │
    │  ┌─────┐   ┌────────┐   ┌────────┐  │
-   │  │ IR  │──►│ RUNNER │──►│ ORACLE │  │
+   │  │ IR  │──►│ RUNNER │──►│ VERIFIER │  │
    │  └─────┘   │ freeze │   │ kinds  │  │
    │            │ CLI    │   │ temp.  │  │
    │            └───┬────┘   └────────┘  │
@@ -395,17 +395,17 @@ product box** (IR + runner + oracle); everything else is seed or plugin.
              Real application
                     │
                     ▼  (reports)
-             pytest / CI / JUnit   ← *host*, not the oracle
+             pytest / CI / JUnit   ← *host*, not the verifier
 ```
 
 | Piece | Pattern |
 |---|---|
 | **Collinear / sim labs** | Upstream **seed** only; Conjecture **verifies** control-plane law on selected paths. Not: we become their sim. |
-| **Eval platforms** | Parallel **scores**; our **oracle** still gates owner/pin/terminal. |
+| **Eval platforms** | Parallel **scores**; our **verifier** still gates owner/pin/terminal. |
 | **Playwright / HTTP / SSE** | **Driver plugins** invoked by *our* runner loop. |
 | **pytest / CI** | Process host for `conjecture run` + freeze dir + exit codes. |
-| **Coding agents** | Author IR against schema; do not replace runner/oracle. |
-| **CCP** | Reference domain bound through adapter — oracle kinds stay Conjecture’s. |
+| **Coding agents** | Author IR against schema; do not replace runner/verifier. |
+| **CCP** | Reference domain bound through adapter — verifier kinds stay Conjecture’s. |
 
 ### Collinear: differentiate and integrate
 
@@ -434,7 +434,7 @@ product box** (IR + runner + oracle); everything else is seed or plugin.
 | Happy/sad **quality** comparative scores | **Defer** — use `scope` / `expected_refusal` |
 | Built-in **sim users / worlds** | **Never core** — integrate upstream |
 | Proprietary “creative” **execution engine** | **Never core** — thin Driver |
-| Logger-as-product | **Support only** — trajectory = oracle evidence |
+| Logger-as-product | **Support only** — trajectory = verifier evidence |
 | Agent script synthesizer (spec→IR) | **In scope** (open) |
 | Freeze / record / replay | **In scope** (shipped foundation) |
 | Path-faithful HTTP/SSE/Playwright | **In scope** (mini-app done; hosts next) |
@@ -626,7 +626,7 @@ Invariants read **only** the observation (plus kind rules). Unknown kinds **fail
 
 Full list: `STANDARD_INVARIANT_KINDS` in `invariants.py`.
 
-**Oracle gaps (roadmap):** temporal (`always` / `eventually` / `until` / `never before`),
+**Verifier gaps (roadmap):** temporal (`always` / `eventually` / `until` / `never before`),
 exactly-once side effects, outcome-**specific** invariant sets (outcome A ⇒ {A1,A2}),
 idempotency keys. Flat global invariant lists cannot express all branching behaviour.
 
@@ -867,7 +867,7 @@ MIT. Alpha.
 | **Wedge** | Control-plane conformance under pinned/replayed cognition |
 | **Slice 0** | Script + invariants + optional CCP contract unit goldens |
 | **Next** | Path-faithful vertical + planted-bug proof + CI freeze/replay |
-| **Then** | Driver/Observer/CognitionProvider, Scenario→Trajectory join, temporal oracles, shrink |
+| **Then** | Driver/Observer/CognitionProvider, Scenario→Trajectory join, temporal verifiers, shrink |
 
 Host adapters and host-private goldens stay in host repos; this package keeps a portable, leak-free surface.
 
@@ -882,14 +882,14 @@ Short face: [README — Contribute · Verdict](../README.md#contribute--verdict-
 
 ### Where open-source contributions can go
 
-MIT: **use, fork, ship** IR + oracle + thin runner. PRs stay **portable**.
+MIT: **use, fork, ship** IR + verifier + thin runner. PRs stay **portable**.
 
 | Area | Examples | Why |
 |---|---|---|
 | **Drivers** | HTTP/SSE, WebSocket, Playwright, LangGraph/Temporal | Path-faithful Act |
 | **Observers** | Ledger / tools / events → `TurnObservation` | Authoritative evidence |
 | **Cognition providers** | Local/cloud wrappers; freeze tooling | CI freeze/replay |
-| **Oracle kinds** | Temporal packs, domain-neutral invariants | Deeper contracts |
+| **Verifier kinds** | Temporal packs, domain-neutral invariants | Deeper contracts |
 | **Agent interface** | Spec → validated `ConjectureScript` + repair | Agentic golden authoring |
 | **Ecosystem bridges** | Collinear → script seed; trace → observation | Integrate, don’t clone |
 | **Corpus** | Portable sole-continue / detour / pin-stable goldens | Shared language |
@@ -905,7 +905,7 @@ goldens in this repo; do not reimplement Playwright/Collinear/eval platforms in 
 | | **Conjecture (MIT)** | **Verdict (commercial — free to diverge)** |
 |---|---|---|
 | Mission | Portable contracts + community extensions | Hosted / enterprise experience |
-| Ships | Schema, runner, oracle, freeze, CLI, examples | Whatever customers need (may use or reimplement) |
+| Ships | Schema, runner, verifier, freeze, CLI, examples | Whatever customers need (may use or reimplement) |
 | Speed | Deliberate core | **Faster or different** (hosted runners, multi-tenant) |
 | Hosting | You run it | **Fully hosted**, VPC, or hybrid |
 | UI | Optional community tools | Studio, dashboards, SSO, audit |
@@ -914,7 +914,7 @@ goldens in this repo; do not reimplement Playwright/Collinear/eval platforms in 
 | License | MIT stays MIT | Proprietary **around/beside** core — not silent relicense of PRs |
 
 ```text
-  Community PRs ──► Conjecture MIT (IR · oracle · drivers · freeze)
+  Community PRs ──► Conjecture MIT (IR · verifier · drivers · freeze)
                          ├── embed in any CI / product
                          └── Verdict (optional): hosted · UI · SSO · managed freeze · SLA
 ```
@@ -931,7 +931,7 @@ OSS and commercial **do not block each other**.
 | Mini-ODD on goldens | `scope` travels with the script |
 | Trajectory as evidence | Not a second product |
 | Outcome-specific contracts | Landing A ⇒ invariant set A |
-| Temporal oracle pack | eventually / never / until / at-most-once |
+| Temporal verifier pack | eventually / never / until / at-most-once |
 | Sim bridge, not sim core | Collinear seeds; Conjecture gates law |
 | Driver plugins | Same IR over in-process / HTTP / Playwright |
 | Failure shrinking (later) | Minimal multi-turn counterexample |

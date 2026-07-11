@@ -59,7 +59,7 @@ Companion runtime contract: [conversation-control-plane](https://github.com/wali
 
 | Slice | What |
 |---|---|
-| **0 (now)** | Portable script model, pin-driven harness, `ControlPlaneAdapter` protocol, null adapter smoke |
+| **0 (now)** | Portable script model, pin-driven harness, `ControlPlaneAdapter` protocol, null adapter smoke, **standard invariant library** (`BaseControlPlaneAdapter`), **CCP stream adapter** + 3 portable goldens (`contrib.control_plane`) |
 | **1** | Path-faithful host chat / SSE driver (host-supplied) |
 | **2** | Optional scenario YAML + UI harness (Playwright or other) as *one* surface driver |
 | **3** | Corpus generation (code seed, user styles, detours, adversarial / OOD) |

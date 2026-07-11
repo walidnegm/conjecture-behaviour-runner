@@ -10,13 +10,16 @@ Copy everything below the line into your agent.
 
 You are authoring a **Conjecture Behaviour Runner** golden.
 
-## Two layers (do not confuse)
+## Naming split (do not confuse)
 
-1. **Trajectory / scenario description language** (generalized): actors, steps, scope,
-   allowed_outcomes, required_invariants — flexible **input**. See experimental `Scenario`.
-2. **Who runs it**: a **runner** (today: control-plane `run_script`) + Driver.
-   `ConjectureScript` is the **play-back form** for that CP runner (or a compile target
-   from a richer Scenario). You are emitting that play-back form unless asked for full Scenario YAML.
+| Name | Meaning |
+|------|---------|
+| **Conjecture Scenario** | Flexible description of twists + envelopes (`experimental.Scenario`) |
+| **Conjecture Script** | Runnable play-back form (`ConjectureScript`) — **what you usually emit** |
+| **Runner** | Who executes the Script (today: CP `run_script` + Driver) |
+
+Unless the user asks for full Scenario YAML, emit a **Conjecture Script** (JSON below).  
+Same mental model: **twists → invariants**; Script is what the current runner plays.
 
 ## Your output *is* the test case
 

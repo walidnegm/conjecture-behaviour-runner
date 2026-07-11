@@ -37,33 +37,34 @@ We differentiate by **what we assert** (the green bar), not by vendor bake-offs.
 
 | | |
 |--|--|
-| **Description language** | Flexible **trajectory/scenario** files: actors, steps, scope, allowed outcomes, required invariants (not tied to one driver) |
-| **Who runs it** | A **runner** + **Driver** (CP `run_script` today; Playwright / LangGraph / Temporal / HTTP as plugins or alternate runners) |
-| **Verifier** | Shared judge: expected envelopes vs **observed** trajectory |
-| **Green bar** | Declared state law holds under pin/freeze — not reply wording |
-| **Play-back form** | `ConjectureScript` = thin form for the **control-plane runner** (compile target) — not the whole language |
+| **Conjecture Scenario** | Load-bearing **trajectory description**: twists & turns + envelopes (not tied to one driver) |
+| **Conjecture Script** | **Runnable play-back** for a runner (`ConjectureScript` today — what goldens/CI usually are) |
+| **Who runs it** | A **runner** + **Driver** (CP `run_script` today; other runners later) |
+| **Verifier** | Judges expected vs **observed** trajectory |
+| **Green bar** | State law under pin/freeze — not reply wording |
 | **Commercial** | Optional **Verdict** — separate from OSS **Verifier** |
+
+**Mnemonic:** Scenario *describes* the twists; Script *runs* (one play-back of) them.
 
 Normative: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
 
 ```text
-  trajectory/scenario DESCRIPTION  (generalized language)
-              │
-              ▼  who runs it? (explicit)
+  Conjecture Scenario  (twists → allowed outcomes + invariants)
+              │  author Script, or compile Scenario → Script
+              ▼
+  Conjecture Script    (play-back form)
+              │  who runs it? (explicit)
      ┌────────┴────────┐
      ▼                 ▼
-  CP runner      other runners (e.g. UI)
+  CP runner      other runners
   (run_script)   (roadmap)
-     │                 │
      └────────┬────────┘
               ▼
-         Driver → app
-              │
-     observed trajectory → VERIFIER → CI
+         Driver → app → observed trajectory → VERIFIER → CI
 ```
 
-**Always core:** description envelopes + at least one runner + verifier.  
-**Never core:** user-sim worlds, quality scoreboards, “the YAML file runs itself.”
+**Always core:** Scenario/Script envelopes + at least one runner + verifier.  
+**Never core:** user-sim worlds, quality scoreboards, “the file runs itself.”
 
 ---
 
@@ -155,11 +156,12 @@ a novel of every chat line.
 
 Path without invariants = a tour. **Twists with invariants = a test.**
 
-Full flexible language (actors, waits, nondeterminism, profiles): `experimental/Scenario`.  
-CP play-back form for today’s runner: `ConjectureScript` (below). Same mental model.
+**Conjecture Scenario** = full flexible language (`experimental/Scenario` + `schema.json`).  
+**Conjecture Script** = CP play-back form for today’s runner (`ConjectureScript` below).  
+Same twists→invariants idea; Script is what most goldens are today.
 
-A **script** is multi-turn steps + optional pins + **expected contracts**. The **runner**
-you choose plays it; the host **adapter** observes; the **verifier** judges.
+A **Script** is multi-turn steps + pins + **expected contracts**. The **runner** you choose
+plays it; the host **adapter** observes; the **verifier** judges.
 
 ### Building blocks
 

@@ -50,44 +50,43 @@ Not “one golden sentence.” Not a new universal testing paradigm.
 The *shape* (IR + runner + verifier over projected state) can host more, but we do not
 market “test the whole agent” until domain ground truth is first-class.
 
-### Product = language + who runs it + who judges (locked)
+### Product naming split (locked): Scenario vs Script
 
-**Do not collapse these.** Recent docs over-narrowed “IR” to `ConjectureScript` (the
-control-plane *driver form*). The original design is wider:
+Two product nouns — do not collapse them:
 
-| Layer | What it is | Not the same as |
+| Product name | What it is | Code today |
 |---|---|---|
-| **Trajectory / scenario description language** | Generalized **input**: actors, steps, scope/ODD, nondeterminism, **allowed_outcomes**, **required_invariants**, waits, evidence, execution profiles | A single Python harness or Playwright |
-| **Who runs the trajectory** | A **runner** + **Driver**: control-plane adapter, HTTP/SSE, Playwright, LangGraph, Temporal, … | The description file itself |
-| **Observed trajectory** | Evidence of **one** run under one profile (`Trajectory` / `RunResult`) | The authored scenario |
-| **Verifier** | Judges envelopes vs observation (portable kinds) | The driver / orchestrator |
+| **Conjecture Scenario** | Load-bearing **trajectory description**: twists & turns, actors, scope/ODD, nondeterminism, **allowed_outcomes**, **required_invariants**, waits, evidence, profiles | `experimental.Scenario` (+ `schema.json`) |
+| **Conjecture Script** | **Runnable play-back form** for a chosen runner (pins, effects, expected kinds) — what CI often checks in | `ConjectureScript` in `script.py` (**stable**) |
+| **Observed trajectory** | Evidence of **one** run under one profile | `Trajectory` / `RunResult` |
+| **Runner** | **Who executes** the script/scenario | CP: `run_script`; later UI / other runners |
+| **Verifier** | Judges envelopes vs observation | `invariants.py`, `temporal.py` |
 
 ```text
-  Scenario / trajectory DESCRIPTION (flexible language)
-       │  actors · steps · scope · allowed_outcomes · required_invariants · waits
-       │
-       ▼  compile / bind for a runner
-  Execution form (e.g. ConjectureScript for CP runner, or UI plan for Playwright)
-       │
-       ▼  WHO RUNS IT (pluggable)
+  Conjecture Scenario  (description of twists → envelopes)
+         │
+         ├── author Script directly, or compile Scenario → Script
+         ▼
+  Conjecture Script   (play-back form for a runner)
+         │
+         ▼  WHO RUNS IT (explicit)
   Runner + Driver ──► app / graph / browser / workflow
-       │
-       ▼  observed trajectory (evidence)
-  Verifier ──► pass/fail on expected envelopes
+         │
+         ▼
+  Observed trajectory ──► Verifier ──► pass/fail
 ```
 
-| Core | Name | Role |
+| | **Conjecture Scenario** | **Conjecture Script** |
 |---|---|---|
-| **Description IR** | `Scenario` (+ related models) · portable envelopes | Flexible trajectory *language* — **input** |
-| **Play-back form** | `ConjectureScript` (Slice 0 stable) | Thin compile target for the **control-plane runner** today |
-| **Runner** | `run_script` / CLI / future UI runners | **Who executes** steps (one of several possible runners) |
-| **Verifier** | invariants + temporal | Judge pass/fail (not Oracle Corp; not commercial **Verdict**) |
+| Job | Flexible language for *which twists* and *what must hold* | Form a **specific runner** can execute today |
+| Contains | steps, actors, scope, nondeterminism envelopes, waits, evidence | turns, pins, effects, `InvariantSpec`s |
+| Tied to one driver? | **No** | Bound to a runner (today: CP `run_script`) |
+| Agent authors | Can write either; Script is the usual CI golden | Yes — and that file *is* the test case |
 
-**Without a runner + verifier**, description files alone are inert YAML.  
-**Without a generalized description language**, you only have an ad-hoc driver API.
+**Mnemonic:** Scenario *describes* the load-bearing trajectory; Script *runs* (one play-back of) it.
 
-`ConjectureScript` is the **first sealable play-back form** for control-plane mid-flight
-law — **not** a replacement for the full scenario/trajectory language.
+**Without a runner + verifier**, Scenarios/Scripts are inert files.  
+**Without Scenario language**, you only have an ad-hoc driver API.
 
 ### Orchestration engines (LangGraph, Crew, Temporal, …)
 

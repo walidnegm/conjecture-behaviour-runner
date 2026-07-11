@@ -12,26 +12,28 @@
 
 | Piece | Package surface | Your job |
 |-------|-----------------|----------|
-| **Trajectory / scenario description** | `experimental.Scenario`, `schema.json` (flexible language) | Optional rich input: actors, steps, scope, allowed_outcomes, required_invariants, waits |
-| **Play-back form** | `ConjectureScript`, `DialogueTurn`, `InvariantSpec`, `ScriptScope` | CP-runner goldens with **expected state** (author or compile from Scenario) |
-| **Runner (who executes)** | `run_script(...)`, CLI `conjecture run` | Choose this CP runner (or later another); supply Driver/adapter + cognition |
+| **Conjecture Scenario** | `experimental.Scenario`, `schema.json` | Describe twists & turns + envelopes (not tied to one driver) |
+| **Conjecture Script** | `ConjectureScript`, `DialogueTurn`, `InvariantSpec` | Runnable play-back form with **expected state** (usual CI golden) |
+| **Runner (who executes)** | `run_script(...)`, CLI `conjecture run` | Choose this CP runner (or later another); supply Driver + cognition |
 | **Verifier** | standard + temporal kinds | Declare `kind` + `expected`; never free-form pass rules |
 | **Host binding** | `ControlPlaneAdapter` / `BaseControlPlaneAdapter` | Map **your** ledger/graph/workflow → `TurnObservation` |
-| **Observed trajectory** | `RunResult` / experimental `Trajectory` | Evidence of one run — output, not input |
+| **Observed trajectory** | `RunResult` / experimental `Trajectory` | Evidence of one run — **output**, not input |
+
+**Mnemonic:** Scenario *describes*; Script *runs* (for a chosen runner).
 
 **Green bar:** owner, pins, legal landings, mid-flight law under pin/freeze — **not** reply wording.
 
 ```text
-  Scenario DESCRIPTION  ──compile?──►  ConjectureScript  ──►  CP runner  ──►  Driver
-         (language)                    (play-back form)     (who runs)      (Act)
+  Conjecture Scenario  ──compile?──►  Conjecture Script  ──►  Runner  ──►  Driver
+   (twists + envelopes)              (play-back form)      (who runs)     (Act)
                                                                               │
                                                                     observed trajectory
                                                                               │
                                                                           VERIFIER
 ```
 
-Without a **runner + verifier**, description files are inert.  
-Without a **description language**, you only have an ad-hoc driver test.
+Without a **runner + verifier**, Scenario/Script files are inert.  
+Without **Scenario language**, you only have an ad-hoc driver test.
 
 ---
 

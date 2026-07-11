@@ -178,11 +178,15 @@ class DialogueTurn:
 
 @dataclass(frozen=True)
 class ConjectureScript:
-    """A multi-turn behaviour script (golden).
+    """Conjecture Script — runnable play-back form for a chosen runner (golden).
 
-    Not limited to human chat in the full design: agent and system steps are in
-    scope later. Slice 0 goldens are user-led by convention.
-    Optional ``scope`` is mini-ODD metadata for the claim (see ``ScriptScope``).
+    Product naming (CBR-SPEC):
+      - **Conjecture Scenario** — flexible trajectory *description* (twists + envelopes);
+        see ``experimental.Scenario``.
+      - **Conjecture Script** — *this* type: play-back form a runner executes (pins + expected).
+
+    Not limited to human chat: agent and system steps are in design scope; Slice 0
+    goldens are user-led by convention. Optional ``scope`` is mini-ODD metadata.
     """
 
     script_id: str

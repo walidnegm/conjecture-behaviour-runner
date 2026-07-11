@@ -1,15 +1,16 @@
-"""Experimental — generalized trajectory *description* language (+ observed run shape).
+"""Experimental — **Conjecture Scenario** language (+ observed trajectory shape).
 
-This is **not** “who runs the test.” It is the flexible **input language** for scenarios:
+Product naming (CBR-SPEC):
 
-- ``Scenario`` — actors, steps, scope/ODD, nondeterminism (allowed_outcomes +
-  required_invariants), waits, evidence, execution profiles
-- ``Trajectory`` — **observed** evidence of one run under one profile (output of a runner)
-- ``schema.json`` — for LLM extractors / agents authoring description files
+- **Conjecture Scenario** (this package) — flexible *description* of twists & turns,
+  scope/ODD, nondeterminism envelopes, waits, evidence, profiles. Not tied to one driver.
+- **Conjecture Script** (``ConjectureScript`` in ``script.py``) — *play-back form* a
+  runner executes; usual CI golden.
+- **Observed trajectory** — evidence of one run (``Trajectory`` here / ``RunResult``).
 
-**Who runs a trajectory** is a separate choice: the stable control-plane runner
-(``run_script`` on ``ConjectureScript``), or later Playwright/other runners.
-Bridge today: ``compile_scenario_to_script`` (description → CP play-back form).
+This is **not** “who runs the test.” Who runs a Scenario/Script is a separate choice:
+CP runner (``run_script``), or later Playwright/other runners.
+Bridge today: ``compile_scenario_to_script`` (Scenario → Script).
 
 Import explicitly::
 

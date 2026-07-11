@@ -2,14 +2,24 @@
 
 | Field | Value |
 |---|---|
-| **Document role** | **Public contract / design spec** for the open-source project (not a commercial product brief) |
-| **Status** | Alpha (0.1) — design stated; Slice 0 ships a **narrow** vertical |
+| **Document role** | **Normative public contract / design spec** (authoritative for IR, pipeline, scope) |
+| **Companion face** | [README](../README.md) — wedge, quickstart, plain-English script language |
+| **Status** | Alpha **0.1.1** — design stated; foundations ship; path-faithful mini-app |
 | **Defensible one-liner** | **Contract testing for the conversational control plane** — behavioral envelopes over authoritative state under pinned/replayed cognition |
 | **Alternate** | Stateful conformance testing for probabilistic workflows |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Companion (reference domain)** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
 
-This document is the **spec**. The [README](../README.md) is the short public face.  
+### Doc balance (README vs this spec)
+
+| | **README** | **This spec** |
+|---|---|---|
+| **Job** | Why / how to start / friendly script language | Normative design, tables, field contracts |
+| **Pipeline · Collinear · scope** | Short face + links here | **Full** diagrams and comparison |
+| **Script IR** | Intro + kinds + mini story | Field tables, multi-turn patterns, mid-flight state machine, golden JSON |
+| **Contributions / Verdict** | One paragraph + link | **Full** maps and commercial boundary |
+| **On conflict** | Follow this spec for contracts; update README |
+
 Claims below distinguish **what is true today** from **aspiration**.
 
 ---
@@ -260,39 +270,104 @@ where applicable, raw + parsed output, validation evidence. **Mode labels alone 
 
 ## 2.1 Pipeline, ecosystem, and Collinear
 
-Public face of this section: [README — pipeline · ecosystem · Collinear](../README.md#end-to-end-pipeline-spec--agent--runner--verify).
+Short face: [README — Pipeline](../README.md#pipeline-face). **This section is normative.**
 
 ### Pipeline (normative)
 
 ```text
-Spec / epic / story / ODD / incident
-        → Agent interface (draft against Conjecture schema; validate; repair)
-        → ConjectureScript IR (deterministic golden)
-        → Runner (CognitionProvider + Driver + Observer)
-        → Oracle (step + outcome-specific + trajectory)
-        → Report (RunResult / Trajectory / JUnit) → CI gate
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  INPUTS                                                          │
+  │  Epic · user story · ODD/scope · incident · transcript           │
+  │  optional: traffic · Collinear/sim trajectory · bug report       │
+  └────────────────────────────┬────────────────────────────────────┘
+                               ▼
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  AGENT INTERFACE (authoring)                                     │
+  │  LLM/coding agent drafts ConjectureScript against our schema     │
+  │  → validate · fail-closed kinds · one-shot repair                │
+  │  Output: deterministic IR (JSON/YAML golden)                     │
+  └────────────────────────────┬────────────────────────────────────┘
+                               │  ConjectureScript
+                               ▼
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  RUNNER (thin — not a sim world)                                 │
+  │  CognitionProvider: stub | freeze | record | host local/cloud    │
+  │  Driver: in-process | HTTP/SSE | Playwright | …                  │
+  │  Observer: TurnObservation                                       │
+  └────────────────────────────┬────────────────────────────────────┘
+                               ▼
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  ORACLE / VERIFY                                                 │
+  │  Step + outcome-specific + trajectory invariants                 │
+  │  allowed_outcomes (non-vacuous) → RunResult / Trajectory / CI    │
+  └─────────────────────────────────────────────────────────────────┘
 ```
 
-Agent interface **authors**; runner **executes**; oracle **verdicts**. The schema is the
-shared “score surface” for agents — not free-form pass criteria.
+| Stage | Owns | Rule |
+|---|---|---|
+| Spec / epic / story | Claimed scope (`ScriptScope`) | Humans own the claim |
+| Agent interface | Draft goldens | Emits **only** validated IR |
+| IR | Portable contract language | Schema + enum kinds |
+| Runner | Act + observe under pin/freeze | Thin; reuse ecosystem drivers |
+| Oracle | Pass/fail on authoritative state | Owner, pin, terminal, trajectory |
 
-### Ecosystem
+Agent **authors**; runner **executes**; oracle **verdicts**. Schema = agent “score surface.”
 
-Compose with Collinear-class sim (upstream seeds / optional downstream re-probe),
-Playwright/HTTP (drivers), pytest/CI (host), coding agents (author IR), eval platforms
-(parallel trajectory scores — not a substitute for contract gates).
+### Ecosystem (compose)
+
+```text
+  Specs/ODD ─┬─► Collinear/sim (seed) ─┐
+             ├─► Coding agent (IR) ────┼─► ConjectureScript ─► Runner+Oracle
+             └─► Human goldens ────────┘         │
+                                    ┌────────────┴────────────┐
+                                    ▼                         ▼
+                             Playwright/HTTP            pytest / JUnit / CI
+                             (Driver)                   Real app ledger
+```
+
+| Piece | Pattern |
+|---|---|
+| **Collinear / sim labs** | Upstream **seed** paths; optional Conjecture as deterministic verifier on sim paths. Not: replace their world. |
+| **Eval platforms** | Parallel trajectory **scores**; we **gate contracts**. |
+| **Playwright / HTTP / SSE** | **Drivers** under the oracle. |
+| **pytest / CI** | Host for `conjecture run` + freeze dir. |
+| **Coding agents** | Author IR against schema. |
+| **CCP** | Reference ownership domain. |
 
 ### Collinear: differentiate and integrate
 
-| | Collinear-class | Conjecture |
+| Dimension | **Collinear-class** | **Conjecture** |
 |---|---|---|
-| Job | Sim users/worlds, multi-turn **data**, rubrics | **Control-plane contracts** under pin/freeze |
-| Green bar | Quality / task / preference scores | Owner · pin · terminal · refusal envelope |
-| Integration | → seed scripts; ← failed contracts as sim regression seeds | CI gate on authoritative state |
+| Primary job | Sim users/worlds; multi-turn **data**; rubrics / training | **Authoritative control-plane contracts** under pin/freeze |
+| Pass criterion | Quality / task success / preference | Envelope: owner, pin, terminal, ledger |
+| Cognition | Live or simulated agents in the loop | Pinned / frozen / recorded for CI |
+| World | Stateful environments | **No world engine** — Driver hits *your* app |
+| Artifact | Datasets, scores, sim runs | `ConjectureScript` + `RunResult` / Trajectory |
+| Strength | Scale of **exploration** | Precision of mid-flow **law** |
+| Weak alone | Can score a path that **violates** ledger law | Only checks paths **you already have** |
 
-**Tempting features that would erase the wedge** (happy/sad quality scores, built-in sim
-world, creative execution engine, logger-as-product) stay **out of core** — see README
-scope table.
+| Direction | How |
+|---|---|
+| Collinear → Conjecture | Sim finds paths → curate → IR with pins/invariants → CI freeze → fail dual owner / lost pin |
+| Conjecture → Collinear | Failed contracts as sim **regression seeds**; later N-run **contract hold-rates** (not preference) |
+| Shared CI | Sim explores; Conjecture **gates merge** |
+
+**Smell test:** green bar “0.87 quality” → Collinear. Green bar “pin held, no dual owner” → Conjecture.
+
+### Tempting features (scope pin — normative)
+
+| Tempting feature | Decision |
+|---|---|
+| Happy/sad **quality** comparative scores | **Defer** — use `scope` / `expected_refusal` |
+| Built-in **sim users / worlds** | **Never core** — integrate upstream |
+| Proprietary “creative” **execution engine** | **Never core** — thin Driver |
+| Logger-as-product | **Support only** — trajectory = oracle evidence |
+| Agent script synthesizer (spec→IR) | **In scope** (open) |
+| Freeze / record / replay | **In scope** (shipped foundation) |
+| Path-faithful HTTP/SSE/Playwright | **In scope** (mini-app done; hosts next) |
+| Generation + shrink | **Later** |
+| N-run contract hold-rates | **Later** (contracts only) |
+| Model leaderboards | **Out of scope** |
 
 Not the mission: replace general runners or become a sim-data platform.
 
@@ -729,20 +804,63 @@ Host adapters and host-private goldens stay in host repos; this package keeps a 
 
 ## 8. Contributions, Verdict, and foundational ideas
 
-See the public README for the full tables:
+Short face: [README — Contribute · Verdict](../README.md#contribute--verdict--foundations).  
+**This section is the full map.**
 
-- [Where open-source contributions can go](../README.md#where-open-source-contributions-can-go)
-- [Conjecture (OSS) vs Verdict (commercial)](../README.md#conjecture-oss-vs-verdict-commercial)
-- [Foundational ideas](../README.md#foundational-ideas-open-for-community-or-verdict)
+### Where open-source contributions can go
 
-**Normative summary:**
+MIT: **use, fork, ship** IR + oracle + thin runner. PRs stay **portable**.
 
-1. MIT core welcomes portable drivers, observers, providers, oracle kinds, agent
-   synthesizers, ecosystem bridges, CLI, and docs.  
-2. **Verdict** (commercial) may host, accelerate, or reimplement product surfaces
-   independently — it is not required to land every idea in OSS first, and OSS is
-   not blocked by Verdict.  
-3. Host-private goldens stay out of this repository.  
-4. Foundational ideas (schema-as-agent-API, arrange≠act, freeze for CI, sim bridge
-   not sim core, temporal packs, contract hold-rates) are shared design stakes —
-   implementable by community **or** commercial without changing IR meaning.
+| Area | Examples | Why |
+|---|---|---|
+| **Drivers** | HTTP/SSE, WebSocket, Playwright, LangGraph/Temporal | Path-faithful Act |
+| **Observers** | Ledger / tools / events → `TurnObservation` | Authoritative evidence |
+| **Cognition providers** | Local/cloud wrappers; freeze tooling | CI freeze/replay |
+| **Oracle kinds** | Temporal packs, domain-neutral invariants | Deeper contracts |
+| **Agent interface** | Spec → validated `ConjectureScript` + repair | Agentic golden authoring |
+| **Ecosystem bridges** | Collinear → script seed; trace → observation | Integrate, don’t clone |
+| **Corpus** | Portable sole-continue / detour / pin-stable goldens | Shared language |
+| **CLI / CI** | Sharding, timeouts, richer JUnit, rerun | Production runner |
+| **Docs & examples** | Adapter tutorials, ODD recipes | First green run |
+| **Schema / IR** | Versioned format, stronger validators | Stable agent surface |
+
+**Norms:** one concept per PR; tests for new kinds/providers; fail closed; no host-private
+goldens in this repo; do not reimplement Playwright/Collinear/eval platforms in core.
+
+### Conjecture (OSS) vs Verdict (commercial)
+
+| | **Conjecture (MIT)** | **Verdict (commercial — free to diverge)** |
+|---|---|---|
+| Mission | Portable contracts + community extensions | Hosted / enterprise experience |
+| Ships | Schema, runner, oracle, freeze, CLI, examples | Whatever customers need (may use or reimplement) |
+| Speed | Deliberate core | **Faster or different** (hosted runners, multi-tenant) |
+| Hosting | You run it | **Fully hosted**, VPC, or hybrid |
+| UI | Optional community tools | Studio, dashboards, SSO, audit |
+| Corpus | Portable goldens only | Private corpora, fleets, sim-seed ops |
+| Support | Best-effort issues | Commercial SLA |
+| License | MIT stays MIT | Proprietary **around/beside** core — not silent relicense of PRs |
+
+```text
+  Community PRs ──► Conjecture MIT (IR · oracle · drivers · freeze)
+                         ├── embed in any CI / product
+                         └── Verdict (optional): hosted · UI · SSO · managed freeze · SLA
+```
+
+OSS and commercial **do not block each other**.
+
+### Foundational ideas (community or Verdict)
+
+| Idea | Sketch |
+|---|---|
+| Schema as agent API | Versioned JSON is what agents target |
+| Arrange ≠ Act | Effects/seeds arrange; Driver Act is SUT |
+| Freeze as CI law | Merge gates prefer freeze-replay |
+| Mini-ODD on goldens | `scope` travels with the script |
+| Trajectory as evidence | Not a second product |
+| Outcome-specific contracts | Landing A ⇒ invariant set A |
+| Temporal oracle pack | eventually / never / until / at-most-once |
+| Sim bridge, not sim core | Collinear seeds; Conjecture gates law |
+| Driver plugins | Same IR over in-process / HTTP / Playwright |
+| Failure shrinking (later) | Minimal multi-turn counterexample |
+| Contract hold-rates (later) | N-run *invariant hold*, not preference |
+| Verdict-shaped ops | Multi-tenant history, RBAC, webhooks, fleets |

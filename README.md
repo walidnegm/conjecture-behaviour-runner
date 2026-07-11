@@ -13,8 +13,17 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 |---|---|
 | **GitHub** | [github.com/walidnegm/conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner) |
 | **Import** | `conjecture_behaviour_runner` |
-| **Public contract (spec)** | [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) |
-| **License** | MIT · **Status** | Alpha — Slice 0 |
+| **Public contract (spec)** | [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) — full design, IR, Collinear, contributions |
+| **License** | MIT · **Status** | Alpha — 0.1.1 |
+
+### How to read the docs
+
+| Doc | Role | Length |
+|-----|------|--------|
+| **This README** | Why it exists, how to run, script language in plain English | Short face |
+| **[Public contract (spec)](docs/conjecture-behaviour-runner.md)** | Normative pipeline, architecture, field tables, Collinear, OSS/Verdict, roadmap | Full design |
+
+If the README and the spec disagree, **the spec wins** for contracts; fix the README next.
 
 ### The valuable idea (what we actually claim)
 
@@ -62,319 +71,65 @@ with frozen/sampled cognition** is the defensible framing.
 
 ---
 
-## End-to-end pipeline (spec → agent → runner → verify)
-
-This is the intended product flow — same shape as “agentic coding takes a spec and produces
-something the framework executes,” but the artifact is a **contract script**, not free prose.
+## Pipeline (face)
 
 ```text
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  INPUTS (human / system)                                         │
-  │  Epic · user story · ODD/scope · incident note · transcript      │
-  │  optional: traffic seed · Collinear sim trajectory · bug report  │
-  └────────────────────────────┬────────────────────────────────────┘
-                               │
-                               ▼
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  AGENT INTERFACE (authoring — organic NL in)                     │
-  │  LLM / coding agent drafts a ConjectureScript against our schema │
-  │  (script_id, turns, pins, invariants, scope, allowed_outcomes) │
-  │  → schema validate · fail-closed kinds · one-shot repair loop    │
-  │  Output: deterministic IR (JSON/YAML golden)                     │
-  └────────────────────────────┬────────────────────────────────────┘
-                               │  ConjectureScript (portable IR)
-                               ▼
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  RUNNER (thin execution — not a sim world)                       │
-  │  CognitionProvider: stub | freeze | record | host local/cloud    │
-  │  Driver: in-process adapter | HTTP/SSE | Playwright | …          │
-  │  Observer: TurnObservation (owner, pins, extras, outcome)        │
-  └────────────────────────────┬────────────────────────────────────┘
-                               │
-                               ▼
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  ORACLE / VERIFY                                                 │
-  │  Step invariants · outcome-specific sets · trajectory (temporal) │
-  │  allowed_outcomes membership (non-vacuous)                       │
-  │  → RunResult · Trajectory · JSON/JUnit report · CI exit code     │
-  └─────────────────────────────────────────────────────────────────┘
+Spec / epic / ODD / incident / sim seed
+  → Agent or human authors ConjectureScript (schema-validated IR)
+  → Runner (CognitionProvider + Driver + Observer)
+  → Oracle (step + trajectory invariants, allowed outcomes)
+  → Report / CI gate
 ```
 
-| Stage | Owns | Must stay true |
-|-------|------|----------------|
-| **Spec / epic / story** | Intent and claimed scope (`ScriptScope` mini-ODD) | Humans (or tickets) own the claim |
-| **Agent interface** | Drafting goldens from specs | Emits **only** validated IR — not live product mutations |
-| **IR (`ConjectureScript`)** | Portable contract language | Schema + enum kinds; no free-form “pass if nice” |
-| **Runner** | Act + observe under pinned cognition | Thin; reuses Playwright/HTTP as drivers |
-| **Oracle** | Pass/fail on authoritative state | Ownership, pins, terminals, trajectory rules |
+Same idea as agentic coding: **organic authoring → deterministic artifact → framework executes.**  
+Full stage table, ecosystem diagram, Collinear compare, tempting-features scope:  
+**[spec §2.1](docs/conjecture-behaviour-runner.md#21-pipeline-ecosystem-and-collinear)**.
 
-**Status:** IR + runner + oracle + path-faithful mini-app ship today. **Agent script synthesizer**
-(spec→JSON with repair) is the next authoring surface — the schema is ready; the agent loop is open.
+| | Collinear-class | Conjecture |
+|--|-----------------|------------|
+| **Job** | Sim users/worlds, multi-turn **data**, rubrics | **Control-plane contracts** under pin/freeze |
+| **Green bar** | Quality / task / preference scores | Owner · pin · terminal · refusal envelope |
+| **Integrate** | Sim **seeds** scripts; failed contracts re-probe in sim | CI **gates** merge on authoritative state |
 
----
+**Smell test:** “sim scored 0.87” → their lane. “No dual owner, pin held” → ours.
 
-## Ecosystem integration (compose — do not replace)
+**Never core here:** built-in sim worlds, quality scoreboards, creative execution engines.  
+**In scope:** agent script synthesizer, freeze, path-faithful drivers, portable IR.
 
-Conjecture is a **contract layer**. It sits beside simulators, eval platforms, and drivers.
+### Multi-actor scripts
 
-```text
-                    ┌──────────────────┐
-                    │  Specs / ODD /   │
-                    │  epics / bugs    │
-                    └────────┬─────────┘
-                             │
-           ┌─────────────────┼─────────────────┐
-           ▼                 ▼                 ▼
-   ┌───────────────┐  ┌─────────────┐  ┌────────────────┐
-   │ Collinear /   │  │ Coding agent│  │ Human / CI     │
-   │ sim labs      │  │ (Cursor etc)│  │ hand goldens   │
-   │ multi-turn    │  │ drafts IR   │  │                │
-   │ trajectories  │  └──────┬──────┘  └────────┬───────┘
-   └───────┬───────┘         │                  │
-           │ seed / filter   │ schema           │
-           └────────┬────────┴──────────┬───────┘
-                    ▼                   ▼
-            ┌────────────────────────────────┐
-            │  ConjectureScript IR + scope   │
-            │  (our schema / score surface)  │
-            └────────────────┬───────────────┘
-                             ▼
-            ┌────────────────────────────────┐
-            │  Conjecture runner + oracle    │
-            └────────┬───────────┬───────────┘
-                     │           │
-         ┌───────────┘           └───────────┐
-         ▼                                   ▼
-  Playwright / HTTP / SSE              pytest / CI / JUnit
-  (Driver)                             (exit + reports)
-         │
-         ▼
-  Real application (ledger / control plane)
-```
-
-| Ecosystem piece | Integration pattern |
-|-----------------|---------------------|
-| **Collinear (or similar sim)** | **Upstream seed:** export multi-turn trajectories / edge cases → curate → compile to `ConjectureScript` (or agent rewrites into our schema). Optional: run Conjecture oracle as a **deterministic verifier** on paths discovered in sim. **Not:** replace Collinear’s sim world. |
-| **LangSmith / Braintrust / …** | **Parallel:** they score trajectories and tool paths; we **gate contracts** (owner/pin/terminal). Share conversation ids / traces as Observer inputs later. |
-| **Playwright / Cypress** | **Driver** under the oracle — browser Act when UI is the surface. |
-| **pytest / CI** | **Harness host** — `conjecture run` + JUnit/JSON; freeze dir for deterministic PR gates. |
-| **Coding agents** | **Author** goldens from epics against our schema (agent interface). |
-| **Conversation Control Plane** | **Reference domain** — portable goldens prove mid-flow ownership contracts. |
+Turns may be **user**, **agent**, **agent→agent**, or **system/completion**.  
+Slice 0 API is user-centric (`user_text`); `actor` + experimental `Actor` expand later.  
+Details: [spec §1.1](docs/conjecture-behaviour-runner.md#11-behaviour-driven-testing-and-odd-full-objective).
 
 ---
 
-## Collinear comparison (specific) and where we integrate
+## Why this exists (short)
 
-We are **not** “unrelated to Collinear.” Buyers will compare. Honest split:
+Agentic apps fail as wrong **owner**, lost **pin**, illegal **restart** — while wording looks fine.  
+We verify **authoritative-state contracts** under pinned/frozen cognition.
 
-| Dimension | **Collinear-class** (sim / eval data) | **Conjecture** (this project) |
-|-----------|--------------------------------------|-------------------------------|
-| **Primary job** | Simulate users & environments; produce multi-turn behavior data; rubrics / training signal | Verify **authoritative control-plane contracts** under pinned/replayed cognition |
-| **Pass criterion** | Often quality / task success / preference / rubric | **Envelope:** allowed outcomes + invariants on owner, pin, terminal, ledger |
-| **Cognition** | Live or simulated user/agent models in the loop | **Pinned / frozen / recorded** for CI-safe conformance; live optional later |
-| **World / sim** | Stateful environments, tools, APIs, simulated users | **No world engine** — Driver hits *your* app or a thin path-faithful harness |
-| **Artifact** | Datasets, scores, sim runs | `ConjectureScript` IR + `RunResult` / Trajectory + contract fail reasons |
-| **Strength today** | Scale of multi-turn **exploration** and data | Precision of **mid-flow ownership / identity** checks |
-| **Weak without the other** | Can score a path that **violates** ledger law if rubric ignores it | Can only check paths **you already have** (hand/agent/sim-seeded) |
+| Point | Role (0.1.1) |
+|-------|----------------|
+| **Driver** | Act on the system (mini-app + CCP adapter; HTTP/Playwright open) |
+| **Observer** | `TurnObservation` (owner, pins, extras, outcome) |
+| **Cognition** | Stub + FreezeStore record/replay; local/cloud host-supplied |
+| **Oracle** | Step + outcome-specific + trajectory kinds |
 
-### Integrate (preferred), don’t clone
+**Honesty:** many goldens still **inject** pin + effects (contract unit path). Path-faithful mini-app proves Act-through-`handle` + planted bugs. Full host drivers next — [spec](docs/conjecture-behaviour-runner.md).
 
-| Direction | How |
-|-----------|-----|
-| **Collinear → Conjecture** | Sim finds weird multi-turn paths → filter to control-plane-relevant → agent or compiler emits `ConjectureScript` with pins + invariants → CI freezes cognition and fails on dual owner / lost pin / illegal restart. |
-| **Conjecture → Collinear** | Export failed contracts as **regression seeds** for sim (“always re-probe dual-owner mid cost-out”). Contract hold-rates over N sim runs = distribution later — still **contract** rates, not reply-quality rubrics. |
-| **Shared CI** | Collinear job explores; Conjecture job **gates merge** on authoritative-state goldens. |
-
-**Smell test:** if the default green bar is “sim user scored 0.87,” that’s Collinear’s lane.  
-If it is “no dual owner, pin held, illegal restart refused,” that’s Conjecture.
+ODD/scope, scenario seed sources, delivery slices: **[spec §1–2](docs/conjecture-behaviour-runner.md)**.
 
 ---
 
-## Scope pin: tempting features (do / defer / never-core)
+## What ships today (0.1.1)
 
-| Tempting feature | Risk | Decision |
-|------------------|------|----------|
-| Happy/sad path **comparative quality scores** | Eval-lab / Collinear center | **Defer** — use `scope` + `expected_refusal` scripts instead |
-| Rich **simulated users / worlds** | You become a sim platform | **Never core** — integrate upstream (Collinear etc.) for seeds |
-| “Creative” proprietary **execution engine** | Rebuild Playwright + agent sandbox | **Never core** — thin Driver; reuse ecosystem |
-| **Logger-as-product** | Observability company | **Support only** — trajectory is evidence for the oracle |
-| **Agent script synthesizer** (spec→IR) | Authoring UX | **In scope** — next open item; schema is the score surface |
-| Freeze / record / replay cognition | Needed for CI | **In scope** — shipped foundation |
-| Path-faithful Driver (HTTP/SSE/Playwright) | Credibility | **In scope** — mini-app done; host drivers next |
-| Generation + shrink (Hypothesis-class) | Differentiation depth | **Later** — after path-faithful hosts |
-| N-run **contract hold-rate** distributions | Overlaps sim analytics | **Later** — contracts only, not preference data |
-| Dual-license / model leaderboards | Wrong market | **Out of scope** |
+- **Script IR** + `run_script` · scope · outcome-specific + trajectory oracles  
+- **CognitionProvider** + freeze/record store · standard + temporal invariants  
+- **CLI** `run` / `path-faithful` · JSON + JUnit · path-faithful mini-app + planted bugs  
+- Optional **CCP** goldens · experimental Scenario → script → Trajectory bridge  
 
-### Scripts are multi-actor (not “user only”)
-
-A script is a **sequence of turns that move system state**. Initiation is not limited to a human:
-
-| Actor / turn kind | Examples | What we pin |
-|-------------------|----------|-------------|
-| **User** | Chat message, chip, confirm | Ownership, pin, legal outcome after the human act |
-| **Agent** | Specialist continues, tool result applied, handoff | Same contracts when **an agent** drives the next step |
-| **Agent → agent** | Handoff, subagent complete → parent, multi-agent pipeline | Exclusive owner, pin identity, no steal / no double-write |
-| **System / completion** | Job done, SSE terminal, timeout, lease reclaim, scheduled tick | Terminal vs mid-flight, recovery honesty, cancel semantics |
-
-The experimental scenario model already names actors: `user` · `agent` · `system`
-(`Actor` in `experimental.scenario_models`). Slice 0’s `DialogueTurn.user_text` is the
-**user-centric first surface** — not a claim that only humans exist in the design.
-
-**Phasing (intentional):**
-
-1. **Now — user-centric.** Author and play back scripts as human-led multi-turn flows
-   (stub/freeze cognition). Highest pain today; easiest to seal.
-2. **Next — agent-initiated and completion.** Turns that fire without a new human message
-   (async job complete, mid-flight continue, system cancel/timeout).
-3. **Later — agent-to-agent.** Multi-agent handoffs and completion chains under the same
-   invariant envelope — still **host contracts**, not model-feedback scoring.
-
-Same idea the whole way: **behavioral envelopes over authoritative state**.
-
----
-
-## Why this project exists
-
-Vibe/auto-coded agentic apps accrete **unknown pathways**. Production breaks as wrong
-**owner**, lost **pin**, illegal **restart**, dual writers — while the reply still “looks fine.”
-Answer-quality and many trajectory *scores* can stay green.
-
-Conjecture aims to verify: **every acceptable path still preserves explicit
-authoritative-state contracts** (with cognition pinned, frozen, or later sampled).
-
-### Target architecture (four extension points)
-
-| Point | Role | 0.1.1 |
-|-------|------|-------|
-| **Driver** | Act on the real system (HTTP, SSE, Playwright, in-process, …) | Mini-app path-faithful + CCP unit adapter; HTTP/Playwright open |
-| **Observer** | Collect authoritative evidence (ledger, tools, events, ownership) | `TurnObservation` from adapter |
-| **Cognition provider** | stub / freeze-replay / record / local / cloud | **Stub + FreezeStore record/replay shipped**; local/cloud host-supplied |
-| **Oracle** | Allowed outcomes + invariants (+ temporal) | Step + outcome-specific + trajectory kinds |
-
-### Slice 0 honesty
-
-| Green today means | Does **not** yet mean |
-|-------------------|------------------------|
-| Given **injected** pin + ledger effects, pure control-plane rules hold | User NL was classified by the real app |
-| Adapter projects owner/pins/extras correctly under those inputs | Path-faithful chat/SSE through production |
-| Multi-turn **script API** works with fail-closed checks | Full scenario IR → runner → trajectory → report pipeline |
-
-**Arrange / Act / Observe / Assert** is the intended shape. Slice 0 goldens often
-**arrange** mid-flight state via `LedgerEffect` and **supply** cognition via pin —
-useful contract unit tests; the natural-language text is partly **documentary** until
-a real Driver path lands.
-
-**Next credibility milestone** (see public contract): drive a real example app,
-freeze real cognition, observe real ledger mutations, catch three deliberate bugs,
-deterministic CI replay.
-
-### Behaviour-driven testing and ODD (methodology we keep)
-
-Classical tests often pin **exact outputs**. Behaviour-driven evaluation pins:
-
-| Idea | Meaning |
-|------|---------|
-| **Allowed outcomes** | Legal landings for a step/turn (more than one is fine) |
-| **Required invariants** | Must hold **no matter which** allowed outcome occurred |
-| **Trajectory** | One observed run of a scenario under one profile |
-| **Distribution** (later) | Rates across N trajectories when cognition is live |
-
-Without those, you cannot tell “happy path passed” from “happy path passed by accident.”
-
-**ODD (Operational Design Domain)** — from ISO 21448 / SOTIF practice — is the
-**claimed input boundary** for a scenario class: what the system says it handles.
-It is **metadata on the claim**, not a single test case.
-
-| Field (plain language) | Role |
-|------------------------|------|
-| `in_scope` | Supported — should handle |
-| `out_of_scope` | Unsupported — refuse / degrade gracefully |
-| `expected_refusal` | Probes that must be rejected |
-
-**ODD vs adversarial** (do not conflate):
-
-- **ODD / scope** = specification of the boundary  
-- **Adversarial generation** = technique that *uses* the boundary (in-scope stress + out-of-scope refusal)  
-
-### Where scenarios and use-cases come from (important distinctions)
-
-Scenarios are **seeded from different ground truths**. Mixing them without labels
-confuses trust and triage.
-
-| Source | What you read / write | What you get | Build status |
-|--------|----------------------|--------------|--------------|
-| **Specs** | Epics, ODD/scope, design contracts, acceptance intent | *Intended* use-cases — what the design claims | **Partial** (authored by hand today) |
-| **Codebase scan** | Routers, ledgers, state machines, tools, prompts, existing regs | *Structural* use-cases — transitions the code actually admits | **Partial** (Slice 0 goldens are hand-curated from contracts; **automated scan → draft scripts not built out**) |
-| **Raw scripts / ideas / edge lists** | Free-form scenario seeds, “what if…”, sticky notes, incident notes | *Hypothesis* and **edge conditions** before they are formal ODD probes | **Partial** (humans write `ConjectureScript`s; **idea → scenario pipeline not built out**) |
-| **User traffic** | Sessions, transcripts, telemetry | *Empirical* routes people actually drive | **Not built out** |
-| **Explorer** (“agent plays the game”) | Deployed app exploration | *Operational* reachability | **Not built out** |
-| **Adversarial from ODD** | Stress generation on/inside/outside scope | *Refusal* and stress contracts | **Seed only** (threat regs); formal generator **not built out** |
-
-These are **different extractors into the same corpus**, not synonyms:
-
-```text
-  specs ──┐
-  codebase scan ──┼──► curate / promote ──► scenario + invariants ──► play back
-  raw ideas / edges ──┘
-  (later: traffic · explorer · adversarial gen)
-```
-
-**Honest status:** Slice 0 proves we can **play back** pinned scripts with real
-invariant checks. We have **not** fully built automated “scan the codebase →
-draft use-cases,” “specs → scenario pack,” or “raw edge list → formal probes.”
-That generation and curation stack is still on the **project roadmap**.
-
-Full write-up: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) §1.1.
-
----
-
-## Full project shape (not only Slice 0)
-
-```text
-                    ┌──────────────────────────────────────┐
-                    │   Conjecture Behaviour Runner         │
-                    │   Scripts · scenarios · trajectories  │
-                    │   Cognition modes · drivers · corpus  │
-                    └──────────────────────────────────────┘
-           ┌────────────────┬─────────────────┬──────────────────┐
-           ▼                ▼                 ▼                  ▼
-     Slice 0 (now)    Slice 1             Slice 2            Slice 3+
-     Control-plane    Path-faithful       Scenario YAML      Generation:
-     multi-turn       chat / SSE          + optional UI      code seed,
-     invariants       driver              surface driver     explorer,
-     (stub/freeze)                        (e.g. Playwright)  adversarial /
-                                                             OOD · N-run
-                                                             distribution
-```
-
-| Layer | Owns |
-|-------|------|
-| **Script / scenario** | Multi-turn steps, pins, expected contracts, allowed outcomes |
-| **Cognition mode** | How labels are obtained: `stub` · `freeze` · `record` · `local` · `cloud` |
-| **Driver** | How a step is applied (in-process adapter today; later chat/SSE; later UI) |
-| **Trajectory** | Evidence of one run under one profile (distribution later) |
-| **Corpus** | Goldens humans own; later code-bootstrap and adversarial generation |
-
-**Slice 0 does not erase Slices 1–4.** It is the first *sealable* surface: prove
-behaviour contracts with **deterministic cognition** and a **host adapter**, without
-requiring a browser or free live LLM on every CI run.
-
----
-
-## What ships today (0.1 / Slice 0)
-
-- Portable **script model** + **`run_script`**
-- **Cognition pins** (portable labels; host-specific flags in `extras`)
-- **Invariant library** (`BaseControlPlaneAdapter`, fail-closed unknown kinds)
-- **Adapter protocol** — plug *your* control plane / ledger / app state
-- Optional **Conversation Control Plane** binding + **3 portable goldens**
-- **Experimental** scenario YAML / trajectory models (quarantined; later slices)
-
-Companion for the ownership domain:  
-[conversation-control-plane](https://github.com/walidnegm/conversation-control-plane)  
-(*who owns the thread* — Conjecture *proves it still holds across turns*).
-
-That pairing is the **reference domain**, not a claim that Conjecture *is only* a CCP test kit.
+Companion reference domain: [conversation-control-plane](https://github.com/walidnegm/conversation-control-plane).
 
 ---
 
@@ -619,92 +374,17 @@ conjecture run examples/ --adapter path-faithful --json-report /tmp/out.json --j
 
 ---
 
-## Where open-source contributions can go
+## Contribute · Verdict · foundations
 
-MIT is intentional: **use, fork, and ship** the IR + oracle + thin runner. Good first
-(and deep) PRs stay **portable** — no host-private goldens, no monorepo dumps.
+**MIT:** portable PRs welcome — drivers, observers, providers, oracle kinds, agent
+synthesizer, Collinear bridges, CLI, docs. Host-private goldens stay in *your* repo.
 
-### High-value OSS contribution map
+**Verdict** (planned commercial): may **host**, move **faster**, or **reimplement**
+product surfaces (studio, SSO, managed freeze, private corpus, SLA). OSS and commercial
+do not block each other.
 
-| Area | Examples of what to build | Why it helps |
-|------|---------------------------|--------------|
-| **Drivers** | HTTP/SSE chat client, WebSocket, Playwright adapter, LangGraph/Temporal hooks | Path-faithful Act without rebuilding a sim world |
-| **Observers** | Map your ledger / tool log / event bus → `TurnObservation` | Authoritative evidence for the oracle |
-| **Cognition providers** | Host local/cloud classifier wrappers; better freeze artifact tooling | CI freeze/replay against real routers |
-| **Oracle kinds** | Temporal ops, outcome-specific packs, domain-neutral invariants | Deeper contracts without quality rubrics |
-| **Agent interface** | Spec/epic → validated `ConjectureScript` (schema + repair loop) | “Agentic coding for goldens” |
-| **Ecosystem bridges** | Collinear/sim trajectory → script seed; LangSmith/Braintrust trace → observation | Integrate, don’t clone |
-| **Corpus / goldens** | Portable multi-turn patterns (sole-continue, detour, pin-stable) with `scope` | Shared regression language |
-| **CLI / CI** | Discovery filters, sharding, timeouts, richer JUnit, rerun manifests | Make `conjecture run` production-grade |
-| **Docs & examples** | Host adapter tutorials, failure postmortems, ODD/scope recipes | Lower the barrier to first green run |
-| **Schema / IR** | Safer `from_dict` validators, versioned script format, compile rules | Stable score surface for agents |
-
-**Contribution norms:** one concept per PR; tests for new invariant kinds and providers;
-fail closed on unknown kinds; keep Collinear/Playwright/eval platforms as **integrations**,
-not reimplementations in core.
-
-Host-private goldens and product-specific pins stay in **your** app repo (or a private
-adapter package). The public tree stays leak-free.
-
----
-
-## Conjecture (OSS) vs Verdict (commercial)
-
-**Conjecture** is the open project: language (IR), oracle, cognition freeze primitives,
-thin runner, extension points.
-
-**Verdict** (planned commercial line — name may evolve) is a **separate product** that
-can sit on Conjecture or reimplement pieces. The company is free to move fast, host
-differently, or productize UX that does not belong in MIT core.
-
-| | **Conjecture (MIT OSS)** | **Verdict (commercial — free to diverge)** |
-|--|-------------------------|-----------------------------------------------|
-| **Mission** | Portable contracts + community extensions | Hosted / enterprise product experience |
-| **What ships** | Schema, runner, oracle, freeze store, CLI, examples | Whatever customers need — may use Conjecture or a fork |
-| **Speed** | Community + maintainers; deliberate core | **Can implement faster or differently** (hosted runners, managed freeze, multi-tenant) |
-| **Hosting** | You run it | **Verdict can be fully hosted**, VPC, or hybrid |
-| **UI / studio** | Optional community tools | Scenario studio, dashboards, org SSO, audit packs |
-| **Corpus** | Portable goldens only | Private corpora, sim-seed pipelines, fleet hold-rates |
-| **Support / SLA** | Best-effort issues | Commercial support |
-| **License boundary** | MIT core stays MIT | Proprietary layers **around** or **beside** the core — not a silent relicensing of community PRs |
-
-**Principle:** OSS builds the **contract substrate**. Verdict (or any vendor) builds
-**ops, scale, and product surface**. Contributors are not blocked by commercial roadmap;
-commercial is not blocked by waiting for every OSS PR.
-
-```text
-  Community PRs ──► Conjecture MIT core (IR · oracle · drivers · freeze)
-                              │
-                              ├── anyone embeds in CI / products
-                              │
-                              └── Verdict (optional): hosted runs · UI · SSO ·
-                                  managed freeze · private corpus · SLA
-                                  (may implement the same ideas differently)
-```
-
----
-
-## Foundational ideas (open for community or Verdict)
-
-These are **design stakes**, not promises of who implements them first:
-
-| Idea | Sketch |
-|------|--------|
-| **Schema as agent API** | One versioned JSON schema is the only thing agents must target to author goldens |
-| **Arrange ≠ Act** | `LedgerEffect` / seeds arrange; Driver Act is the SUT; never conflate in path-faithful mode |
-| **Pin / freeze as law for CI** | Live cognition optional; merge gates prefer freeze-replay |
-| **Mini-ODD on every golden** | `scope.in_scope` / `out_of_scope` / `expected_refusal` travel with the script |
-| **Trajectory as evidence** | Logs support the oracle; they are not a second product |
-| **Outcome-specific contracts** | Allowed landing A ⇒ invariant set A; branching without quality scores |
-| **Temporal oracle pack** | eventually / never / until / at-most-once ownership and side effects |
-| **Sim bridge, not sim core** | Collinear-class tools seed and stress; Conjecture gates law |
-| **Driver plugins** | Same IR over in-process, HTTP, SSE, Playwright |
-| **Failure shrinking** (later) | Minimal multi-turn counterexample (Hypothesis-class), still contract-focused |
-| **Contract hold-rates** (later) | N-run rates of *invariant hold*, not preference rubrics |
-| **Verdict-shaped ops** | Multi-tenant run history, RBAC, webhooks, scheduled fleets — commercial-friendly |
-
-Community can implement any of the portable rows. Verdict can ship hosted or alternate
-implementations of the same ideas without forking the meaning of `ConjectureScript`.
+**Full contribution map, OSS vs Verdict table, foundational ideas:**  
+**[spec §8](docs/conjecture-behaviour-runner.md#8-contributions-verdict-and-foundational-ideas)**.
 
 ---
 

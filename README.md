@@ -61,6 +61,51 @@ Normative: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
 
 ---
 
+## End-to-end example (try this first)
+
+A **multi-turn agentic conversation** against our in-repo mini control plane
+(`MiniChatApp` — real `handle()` Act path). Reply wording is irrelevant; **state law** is not.
+
+### The conversation
+
+| Turn | User says | Pin (frozen) | Expected after the turn |
+|------|-----------|--------------|-------------------------|
+| 1 | `cost out the onboarding workflow` | `new_task` | owner `cost_out` · pin `workflow_id` |
+| 2 | `make the volume 10k` | `continue` | still `cost_out` · same pin · `blocks_resolve` |
+
+```text
+  User messages ──► MiniChatApp.handle() ──► ledger observation
+                            │
+                            ▼
+               Conjecture IR + runner + verifier
+                            │
+               PASS only if expected state holds
+```
+
+### Run it
+
+```bash
+git clone https://github.com/walidnegm/conjecture-behaviour-runner.git
+cd conjecture-behaviour-runner
+pip install -e ".[dev]"
+
+python examples/e2e_multi_turn.py
+# or: conjecture path-faithful --prove-bugs
+```
+
+### What you should see
+
+| Scenario | Result | Why it helps |
+|----------|--------|--------------|
+| Healthy continue | **PASS** | Mid-flight contracts hold under freeze |
+| Bug: continue steals to front door | **FAIL** | Dual owner — reply can still look fine |
+| Bug: continue drops `workflow_id` | **FAIL** | Lost identity pin |
+| Bug: continue wipes the task | **FAIL** | Illegal restart mid-flight |
+
+That is the product in one screen: **multi-turn path + expected state + our runner/verifier**.
+
+---
+
 ## What scenarios actually test
 
 | Assert (control-plane ground truth) | Do not assert (default wedge) |

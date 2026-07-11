@@ -15,6 +15,15 @@ enforcement is soft, the model can **steal or hijack** the path and still produc
 helpful-looking answer. Conjecture is regression for the **enforce** half: after each
 scripted turn it checks that owner · pin · handoff law still hold.
 
+**Owners and kinds are yours, not Conjecture’s.** The package does not ship a fixed
+catalog of agents or task types. Whatever **type** your ledger defines—
+`cost_out`, `invoice_intake`, `claim_review`, `onboarding`, a Temporal activity name,
+a LangGraph node id—is what you assert as `exclusive_owner` / `active_kind`. The
+same for pins: `workflow_id`, `claim_id`, `invoice_id`, … — host vocabulary projected
+into Observation. Demos below use **`cost_out` + `workflow_id` only as a concrete
+stand-in** from the path-faithful mini-app (Conversation Control Plane dogfood). Swap
+the strings for your ledger; the invariants stay the same shape.
+
 CI needs a **fixed classification** (pin or freeze), not a live model roll every
 run—so the same golden fails for the same state break on every PR. That is deliberate:
 this package does **not** prove the classifier was right. Pair it with separate
@@ -22,7 +31,8 @@ classifier tests for cognition drift; use Conjecture for “given these labels, 
 still seal the ledger?”
 
 The ledger can live anywhere (session DB, LangGraph, Temporal, Vercel AI session, …).
-If you can project owner/pins after Act, you can import a Driver and get a **verdict**.
+If you can project **your** owner/kind/pins after Act, you can import a Driver and get
+a **verdict**.
 
 MIT · **0.1.5** · [Bot0.ai](https://bot0.ai)
 
@@ -46,22 +56,30 @@ That is the principle:
 > missing sole-continue), a model can fool the path; Conjecture is built to fail those
 > steals.
 
-| Check | Meaning |
+| Check | Meaning (host-defined values) |
 |-------|---------|
-| **Who owns this turn?** | Who is allowed to answer (e.g. cost-out vs front door) |
-| **What is locked?** | Same entity pin (workflow / claim / invoice id) |
-| **Mid-flight / handoff law** | No illegal restart, no silent pin drop; handoff only when rules allow |
+| **Who owns this turn?** | Your ledger’s exclusive owner / kind string vs front door / idle |
+| **What is locked?** | Your pin map (whatever ids the host freezes for this task) |
+| **Mid-flight / handoff law** | No illegal restart, no silent pin drop; handoff only when *your* rules allow |
+
+**Demo shape only** (mini-app vocabulary — not the only kind Conjecture knows):
 
 ```text
-User: "cost out Keynote"
-User: "make volume 10k"     ← reply can still sound fine
+# Host example vocabulary: kind=cost_out, pin key=workflow_id
+# (could just as well be claim_review + claim_id, invoice_intake + invoice_id, …)
+
+User: "start <your mid-flight task> on record R"
+User: "change a field mid-flight"     ← reply can still sound fine
 
 Unit / ordinal tests:  ✅ something returned
 LLM eval:              ✅ text looks helpful
-Conjecture:            ✅ still cost_out owns the turn
-                       ✅ still pinned to the same workflow_id
-                       ❌ FAIL if continue stole to front door or lost the pin
+Conjecture:            ✅ exclusive_owner still equals the kind your ledger started
+                       ✅ pin still equals the same record id
+                       ❌ FAIL if continue stole to front_door or dropped the pin
 ```
+
+In the shipped mini-app that kind string is `cost_out` and the pin is `workflow_id=wf_1`
+— convenient dogfood, **not** a product enum.
 
 **One line:** regression for multi-turn **state law** (owner · pin · handoff) under
 **pinned cognition** — *looks fine in chat, broken underneath* — against the principle
@@ -72,16 +90,18 @@ that **code, not the model, owns enforcement**.
 In a control-plane style app, that is **not** “parse the last chat line for keywords.”
 It is roughly:
 
-1. **Ledger state** — what is mid-flight? (`active_task.kind`, e.g. `cost_out`)  
-2. **Entity pin** — which record is locked? (`workflow_id`, …)  
+1. **Ledger state** — what **kind** is mid-flight?  
+   (`active_task.kind` / `exclusive_owner` — **any string your rule-set defines**)  
+2. **Entity pin** — which record is locked?  
+   (**any** pin keys your host freezes: workflow, claim, ticket, …)  
 3. **This turn’s classification** (pinned for CI) — `continue` vs `detour` vs `new_task` / `abandon`
 
-If the ledger says cost-out is active and the turn is **continue**, cost-out **owns**
-delivery even if the user text *looks* like a glossary or scorecards question.  
-If the turn is **detour** / **abandon**, ownership **yields**.
+If the ledger says kind **K** is active and the turn is **continue**, **K** owns
+delivery even if the user text *looks* like a detour (glossary, FAQ, another product
+surface). If the turn is **detour** / **abandon**, ownership **yields** per your rules.
 
-Conjecture asserts those rules still held **after** Act. Ordinary ordinal tests do not
-model exclusive owner or pins.
+Conjecture asserts those rules still held **after** Act for the **expected strings you
+wrote in the golden**. Ordinary ordinal tests do not model exclusive owner or pins.
 
 ### Where the ledger lives (does not matter)
 
@@ -106,9 +126,11 @@ types beyond that projection.
 
 In multi-turn control planes, the reply can look fine while **exclusive owner**, **entity
 pin**, or **handoff law** breaks — classic **steal/hijack** when the model’s proposal was
-not sealed by code. Dogfood on the Conversation Control Plane hit this class (e.g.
-discovery-shaped turns mid cost-out looking helpful while sole-continue still owned the
-stream). Evals score prose; they miss the ledger rule-set.
+not sealed by code. Dogfood on the Conversation Control Plane hit this class with one
+particular mid-flight kind (`cost_out`): discovery-shaped turns mid-flight looked
+helpful while sole-continue still owned the stream. The failure class is the same for
+**any** sole-continue kind your ledger defines. Evals score prose; they miss the
+rule-set.
 
 Conjecture freezes the classification for CI, runs the real Act path (or HTTP), and fails
 the build when **state law** breaks.
@@ -153,6 +175,10 @@ That spawns four independent HTTP processes (healthy + `owner_steal` / `drop_pin
 
 ## Minimal golden
 
+The mini-app’s mid-flight kind is hard-coded to `cost_out` for the proof path.
+On **your** host, replace `cost_out` / `workflow_id` with whatever owner and pin
+keys your ledger emits in Observation.
+
 ```python
 from conjecture_behaviour_runner import (
     ConjectureScript, DialogueTurn, InvariantSpec, CognitionPin,
@@ -160,9 +186,12 @@ from conjecture_behaviour_runner import (
 )
 from conjecture_behaviour_runner.path_faithful import MiniAppAdapter, MiniChatApp
 
+# Demo vocabulary only — your golden uses YOUR ledger strings:
+#   exclusive_owner / active_kind  e.g. "cost_out" | "invoice_intake" | "claim_review"
+#   pin keys                       e.g. "workflow_id" | "invoice_id" | "claim_id"
 script = ConjectureScript(
     script_id="demo",
-    description="continue keeps owner and pin",
+    description="continue keeps host owner and pin",
     conversation_id="conv_1",
     turns=[
         DialogueTurn(

@@ -68,13 +68,13 @@ def _html_page() -> bytes:
     Catch state-law breaks that still look fine in chat. The model may
     <em>propose</em> continue / detour / new task; your coded ledger and handoff
     rules must <em>enforce</em> who owns the turn, which record stays locked, and
-    when ownership may yield. If that seal is soft, a label can steal or hijack
-    the path while the reply still sounds helpful. Conjecture regression-tests
-    that enforce half under a fixed classification (pin/freeze)—not whether the
-    classifier was right (test cognition separately). This UI runs the built-in
-    mini-app’s real <code>handle()</code> path. Where the ledger lives (DB,
-    LangGraph, Temporal, …) does not matter if Act projects owner and pins for a
-    verdict.
+    when ownership may yield. <strong>Owner/kind strings are host-defined</strong>
+    (this demo uses <code>cost_out</code> + <code>workflow_id</code> as stand-ins—
+    your ledger might use any mid-flight type and pin keys). If the seal is soft,
+    a label can steal or hijack while the reply still sounds helpful. Conjecture
+    tests the enforce half under pin/freeze—not classifier correctness. This UI
+    runs the mini-app’s real <code>handle()</code>. Ledger store (DB, LangGraph,
+    Temporal, …) does not matter if Act projects owner and pins for a verdict.
   </p>
 
   <div class="card">

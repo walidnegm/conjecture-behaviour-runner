@@ -49,6 +49,7 @@ mechanism language **supports** the face claim; it does **not** expand it into p
 | **What** | Regression goldens that check **deterministic ledger + handoff rules** after each turn (owner, pin, mid-flight vs restart / yield). Principle: **LLM proposes · code enforces**. Conjecture gates the **enforce** half under pinned labels so a soft fall-through or missing sole-continue fails CI. |
 | **So** | **CI goes red** when those rules break — even if the prose still looks polished. Labels are **pinned/frozen** so the same golden fails the same way every PR. **Not** a classifier correctness suite: pair with separate cognition tests for drift; Conjecture answers “given these labels, did code still seal the ledger?” |
 | **Where state lives** | Irrelevant to the product claim: custom session DB, LangGraph checkpoint, Temporal, Vercel AI session, … — **import the rule-set via Driver + Observation → verdict**. |
+| **What “kind/owner” means** | **Host vocabulary**, not a Conjecture catalog. Demos use `cost_out` / `workflow_id` as CCP dogfood stand-ins. Goldens assert **your** `exclusive_owner` / `active_kind` / pin keys (`invoice_intake`, `claim_review`, …). |
 
 **Precise (spec short name):**
 

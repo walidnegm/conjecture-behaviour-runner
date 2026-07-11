@@ -226,17 +226,20 @@ def sole_continue_story() -> dict[str, Any]:
         "title": "What this golden tests",
         "why": (
             "LLM proposes · code enforces. We are not grading chat prose. We check "
-            "whether the coded ledger + handoff rules still hold after Act: mid-flight "
-            "cost-out keeps the right owner and locked workflow — even when a message "
-            "looks like ordinary chat or a model would try to steal to the front door."
+            "whether the coded ledger + handoff rules still hold after Act. "
+            "This demo’s mid-flight kind is cost_out with pin workflow_id — host-defined "
+            "strings, not a Conjecture enum. Your ledger might use claim_review + claim_id "
+            "(or any other type). Same shape: owner and pin must hold on continue, even when "
+            "a message looks like ordinary chat or a model would try to steal to the front door."
         ),
         "plot": (
-            "User starts cost-out on a workflow, then continues with a volume change. "
-            "Owner must stay cost_out and workflow_id must stay pinned."
+            "Demo vocabulary: user starts cost_out on a workflow, then continues with a "
+            "volume change. Owner must stay cost_out and workflow_id must stay pinned. "
+            "On your host, substitute your own exclusive_owner / pin keys."
         ),
         "what_green_means": (
             "PASS = measured owner/pin/blocks match the rule-set after each turn "
-            "(enforcement held under pinned labels). "
+            "(enforcement held under pinned labels for whatever kind strings you asserted). "
             "FAIL = steal, pin drop, or illegal restart — even if a reply could still look fine."
         ),
         "turns": [

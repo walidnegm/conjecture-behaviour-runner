@@ -230,15 +230,175 @@ The portable core is **pin-driven**. It does not call your LLM factory; hosts su
 
 ---
 
-## 4.1 Script language (invariants)
+## 4.1 Script structure (Slice 0 + multi-turn design)
 
-A **script** is turns + optional pins + **invariants** (rules that must hold after each
-step, independent of reply wording). Plain-language table and mini-story live in the
-[README — Script language](../README.md#script-language-what-you-write).
+Friendly intro + mini-story: [README — Script language](../README.md#script-language-what-you-write).  
+This section is the **formal shape** and **why multi-turn needs more than a single assert**.
 
-Load-bearing kinds: `exclusive_owner` (who drives), `pin_equals` / `pin_present` (same
-entity), `extra_true` e.g. `blocks_resolve` (no mid-flight re-resolve). Full list:
-`STANDARD_INVARIANT_KINDS` in `invariants.py`.
+### Why multi-turn scripts (not one-shot checks)
+
+Agentic systems fail **between** turns: ownership flips, pins drop, resolve re-runs,
+detours steal mid-flight, completion lands without a human message. A single-turn
+assert (“owner was X once”) does not prove the **stream** stayed legal.
+
+A **script** is therefore an **ordered trajectory of steps** over one conversation
+(or multi-agent pipeline). Each step may change host state; each step ends with
+**invariants** (and optionally **allowed outcomes**) that must hold **after** that step.
+
+```text
+  initial_context
+        │
+        ▼
+  turn 1  →  pin?  →  effects  →  observe  →  invariants ✓/✗
+        │
+        ▼
+  turn 2  →  … (context carries forward) …
+        │
+        ▼
+  turn N  →  … terminal / mid-flight contract …
+```
+
+What **must carry** across turns (host projection; adapter fills observation):
+
+| Carries | Why multi-turn cares |
+|---------|----------------------|
+| **Conversation / session id** | Same thread; not a fresh greenfield each step |
+| **Active task / kind** | Sole-continue vs new_task vs detour |
+| **Exclusive owner** | Who may act next; dual-writer / steal detection |
+| **Entity pins** | Same workflow/project/subject — not ambient last_read |
+| **Phase / mid-flight flags** | e.g. `blocks_resolve` during sole-continue |
+| **Pending / completion** | Job done, cancel, timeout as system turns later |
+
+What **does not** need to match turn-to-turn: assistant wording, markdown layout.
+
+### Formal types (portable core — Slice 0)
+
+Implemented in `script.py` / `pins.py` / `protocol.py`.
+
+#### `ConjectureScript`
+
+| Field | Type | Role |
+|-------|------|------|
+| `script_id` | `str` | Stable golden id (CI / reports) |
+| `description` | `str` | Human intent of the behaviour claim |
+| `conversation_id` | `str` | Thread identity for the run |
+| `turns` | `DialogueTurn[]` | Ordered steps (length ≥ 1 for real goldens) |
+| `initial_context` | `dict` | Host projection seed (ledger-like facts) **before** turn 1 |
+| `tags` | `str[]` | Optional corpus labels (`sole_continue`, `detour`, …) |
+
+#### `DialogueTurn` (one step)
+
+| Field | Type | Role |
+|-------|------|------|
+| `user_text` | `str` | Primary stimulus (Slice 0 user-centric surface) |
+| `actor` | `str` | `user` \| `agent` \| `system` — default `user`; multi-actor later |
+| `pin` | `CognitionPin?` | Stub/freeze labels for this step (`task_intent`, kinds, …) |
+| `effects` | `LedgerEffect[]` | Deterministic host mutations after cognition, before invariants |
+| `invariants` | `InvariantSpec[]` | **Must hold after** this step |
+| `allowed_outcomes` | `str[]` | Optional envelope when cognition is live (later slices) |
+| `freeze_key` | `str` | Optional key for freeze/record mode replay |
+
+#### `InvariantSpec`
+
+| Field | Type | Role |
+|-------|------|------|
+| `kind` | `str` | Stable checker code (see below) |
+| `expected` | any | Kind-specific target |
+| `reason` | `str` | Optional human note for failures / docs |
+
+#### `CognitionPin` (portable)
+
+Portable cognition labels for the step. Host-specific router flags go in **`extras`** —
+do not grow the public pin type with host-private fields.
+
+Typical portable fields: task/read/discovery-style enums the host maps into ownership.
+See `pins.py` and optional CCP adapter.
+
+#### `LedgerEffect`
+
+| Field | Type | Role |
+|-------|------|------|
+| `op` | `str` | Host-defined op (`ensure_task`, `set_pin`, `clear_task`, …) |
+| `payload` | `dict` | Op arguments |
+
+Effects let a script **set up** mid-flight state without a free live LLM (e.g. ensure
+active task + pin already present before “continue”).
+
+#### `TurnObservation` (adapter → harness)
+
+| Field | Type | Role |
+|-------|------|------|
+| `exclusive_owner` | `str?` | Who owns this turn after apply |
+| `active_kind` | `str?` | Active task/kind |
+| `pins` | `dict` | Bound entity ids |
+| `context` | `dict` | Updated host projection |
+| `observed_outcome` | `str?` | Optional outcome code |
+| `extras` | `dict` | Host facts (`blocks_resolve`, preferred ids, …) |
+
+Invariants read **only** the observation (plus kind rules). Unknown kinds **fail closed**.
+
+### Standard invariant kinds
+
+| Kind | Multi-turn meaning |
+|------|--------------------|
+| `exclusive_owner` | After this step, owner is still (or now) X |
+| `owner_not` | Owner must not remain X (e.g. detour superseded) |
+| `active_kind` / `kind_equals` | Active kind matches |
+| `pin_present` / `pin_absent` | Identity pin bound or cleared |
+| `pin_equals` | **Same** entity as earlier step — continuity |
+| `extra_true` / `extra_false` | Host flag (e.g. `blocks_resolve` mid sole-continue) |
+| `extra_equals` | Host extra equals value |
+| `observed_outcome` | Adapter outcome code |
+| `always_true` | Smoke only |
+
+Full list: `STANDARD_INVARIANT_KINDS` in `invariants.py`.
+
+### Multi-turn script patterns (authoring guidance)
+
+These are **scenario-class patterns**, not phrase lists. Use tags + turn sequences.
+
+| Pattern | Shape of turns | Typical invariants |
+|---------|----------------|--------------------|
+| **Sole-continue** | Setup (new task + pin) → `continue` | `exclusive_owner`, `pin_present`/`pin_equals`, `extra_true` `blocks_resolve` |
+| **Detour supersedes** | Mid-flow specialist → discovery/detour pin | `owner_not` specialist, `exclusive_owner` front_door (or detour owner), often `extra_false` `blocks_resolve` |
+| **Pin beats ambient** | Pin set → stimulus that might re-resolve | `pin_equals` to pinned id; `blocks_resolve` or preferred id extras |
+| **Illegal restart** | Mid-flight chip/text that must **not** re-start | `owner_not` reset path; kind still mid-flight (host-defined) |
+| **Agent / completion** *(later)* | `actor=agent` or `system` with empty/minimal text | Same envelope: owner, pin, terminal honesty |
+| **Agent → agent** *(later)* | Handoff + parent continue | Exclusive owner + pin identity; no double-write |
+
+**Greenfield vs mid-flight:** greenfield scripts seed little `initial_context` and open a
+task. Mid-flight scripts **seed or effect** active task + pins first, then probe continue /
+detour / completion. Most production bugs live mid-flight — author there.
+
+**Multi-actor (design):** experimental YAML already has `Actor`: `user` · `agent` ·
+`system`. Slice 0 `DialogueTurn.actor` defaults to `user`. Same invariant language applies
+when the stimulus is not a human chat line.
+
+### Script vs experimental `Scenario`
+
+| | **ConjectureScript** (Slice 0) | **Scenario** (experimental / later) |
+|--|-------------------------------|-------------------------------------|
+| Purpose | CI-safe multi-turn **play back** | Rich route: scope/ODD, profiles, waits, evidence |
+| Step unit | `DialogueTurn` | `Step` (actor, control_point, maneuver, wait, …) |
+| Cognition | Pin + modes | Nondeterminism + execution profiles |
+| Status | **Stable enough for goldens** | Quarantined; not 0.1 public API |
+
+Scripts do not go away when Scenario lands: scripts remain the thin multi-turn
+**control-plane** vertical; Scenario adds ODD metadata, UI/async waits, and trajectory
+evidence for broader surfaces.
+
+### Run loop (harness contract)
+
+For each turn, roughly:
+
+1. Resolve cognition (stub pin / freeze / later live)  
+2. Apply `effects` via adapter  
+3. `observe_turn` → `TurnObservation`  
+4. Evaluate each `InvariantSpec` (fail closed on unknown kind)  
+5. Record turn result; abort or continue per runner policy  
+6. Carry `context` into the next turn  
+
+Result: `RunResult` (`passed`, `failures[]`, `turn_results[]`, optional `artifact`).
 
 ---
 

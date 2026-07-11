@@ -340,6 +340,9 @@ detour supersedes, pin beats ambient last_read.
 Adapters map **your** host state into a `TurnObservation` (`exclusive_owner`, `pins`,
 `extras`, …). The script language stays the same; only the adapter binding changes.
 
+**Formal field tables, multi-turn patterns, and script vs Scenario:**  
+[docs/conjecture-behaviour-runner.md §4.1](docs/conjecture-behaviour-runner.md#41-script-structure-slice-0--multi-turn-design).
+
 ---
 
 ## Quickstart

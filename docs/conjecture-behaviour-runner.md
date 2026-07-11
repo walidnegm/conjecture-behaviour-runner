@@ -1,57 +1,70 @@
-# Conjecture Behaviour Runner
+# Conjecture Behaviour Runner — public contract
 
 | Field | Value |
 |---|---|
-| **Status** | Alpha (0.1) — Slice 0 portable surface |
-| **One line** | Behaviour-based multi-turn evaluation — **invariants and allowed outcomes**, not string equality |
-| **First cut** | Multi-turn **conversation control-plane** invariant testing (stub/freeze cognition) |
+| **Status** | Alpha (0.1) — **product vision** full; **Slice 0** portable surface shipping |
+| **Product one-liner** | Behaviour-based evaluation for agentic multi-turn systems — **invariants and allowed outcomes**, not string equality |
+| **Why it exists** | Vibe-coded / auto-coded systems accrete **unknown pathways** (probabilistic specs, weak or dynamic scope, changing requirements). You cannot inventory every path; you pin **behaviour contracts** that must hold when paths appear. |
+| **Slice 0 (now)** | Multi-turn **control-plane** invariant testing (stub/freeze cognition) + optional CCP goldens |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` |
-| **Companion** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
+| **Companion (reference domain)** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
+
+This document is the **public contract**. It states the full product shape first; Slice 0 is the first implementation cut, not a redefinition of the product as “only CCP tests.”
 
 ---
 
-## 1. Problem
+## 1. Problem (behaviour, not strings)
 
-LLM and agentic systems fail in **behaviour space**:
+LLM and agentic systems — especially those grown by generation and iteration — fail in **behaviour space**:
 
-- Wrong *owner* of the turn (a knowledge detour steals an in-flight multi-turn task)
-- Lost *entity pin* / identity across turns
-- Detour vs continue vs capability vs adversarial probe — different user styles, same contracts
-- Pass/fail cannot be “assistant said exactly this sentence”
+| Failure class | Example |
+|---|---|
+| Wrong *owner* of the turn | A detour steals an in-flight multi-turn task |
+| Lost *pin* / identity | Ambient `last_read_*` hijacks ledger identity |
+| Illegal *outcome* | Continue restarts a flow instead of staying mid-flight |
+| Unknown *pathway* | Auto-generated branch never named in a ticket |
+| Scope *drift* | Feature reaches states authors never mapped |
+
+Pass/fail **cannot** be “assistant said exactly this sentence.” String match is brittle and blind to ownership, identity, and allowed envelopes.
 
 Evaluation must pin:
 
-1. **Required invariants** (always true — e.g. exclusive turn owner, pin present, no phantom id)
-2. **Allowed outcomes** (envelope of legal behaviours)
-3. Optionally **distribution** (outcome rates over N runs when cognition is live)
+1. **Required invariants** (always true after a turn)  
+2. **Allowed outcomes** (envelope of legal behaviours)  
+3. Optionally **distribution** (outcome rates over N runs when cognition is live)  
+
+That is the load-bearing idea of the **behaviour runner**. Conjecture is that product. Slice 0 implements it first on **turn-ownership / mid-flow contracts** because that is where agentic chat products fail most loudly — not because the product *is only* a control-plane unit test.
 
 ---
 
-## 2. Architecture
+## 2. Product architecture (full runner)
 
 ```text
-        Conjecture Behaviour Runner
-     scripts · modes · trajectories
-                 │
-     ┌───────────┼───────────┐
-     ▼           ▼           ▼
-  stub/freeze  host LLM    later: chat/SSE / UI drivers
-     │
-     ▼
-  ControlPlaneAdapter  ──►  conversation-control-plane
-                            (or your host ledger)
+                    ┌──────────────────────────────────────┐
+                    │   Conjecture Behaviour Runner         │
+                    │   Scripts · scenarios · trajectories  │
+                    │   Cognition modes · drivers · corpus  │
+                    └──────────────────────────────────────┘
+           ┌────────────────┬─────────────────┬──────────────────┐
+           ▼                ▼                 ▼                  ▼
+     Slice 0 (now)    Slice 1             Slice 2            Slice 3+
+     Control-plane    Path-faithful       Scenario YAML      Generation:
+     multi-turn       chat / SSE          + optional UI      code seed,
+     invariants       driver              surface driver     explorer,
+     (stub/freeze)                        (e.g. Playwright)  adversarial /
+                                                             OOD · N-run
+                                                             distribution
 ```
 
 | Layer | Owns |
 |---|---|
-| **Script** | Multi-turn steps, pins, expected owner, allowed outcomes |
+| **Script / scenario** | Multi-turn steps, pins, expected contracts, allowed outcomes |
 | **Cognition mode** | How labels are obtained: `stub` · `freeze` · `record` · `local` · `cloud` |
-| **Adapter** | Host binding: apply ledger effects, observe exclusive owner / pins, check invariants |
-| **Trajectory** (later UI surface) | Evidence of one run under one profile |
+| **Driver** | How a step is applied (adapter today; later chat/SSE; later UI) |
+| **Trajectory** | Evidence of one run under one profile (distribution later) |
+| **Corpus** | Goldens humans own; later bootstrap and adversarial generation |
 
-**Invariant:** scripts assert **control-plane contracts** (see companion SDK). They do not invent a second product model.
-
-Companion runtime contract: [conversation-control-plane](https://github.com/walidnegm/conversation-control-plane) — multi-turn stream / sole-continue / turn ownership.
+**Scripts assert host contracts** (control plane, ledger, or other adapter-projected state). They do not invent a second product model out of thin air — but the **host is not required to be CCP**. CCP is the reference binding for Slice 0.
 
 ---
 
@@ -59,13 +72,13 @@ Companion runtime contract: [conversation-control-plane](https://github.com/wali
 
 | Slice | What |
 |---|---|
-| **0 (now)** | Portable script model, pin-driven harness, `ControlPlaneAdapter` protocol, null adapter smoke, **standard invariant library** (`BaseControlPlaneAdapter`), **CCP stream adapter** + 3 portable goldens (`contrib.control_plane`) |
+| **0 (now)** | Portable script model, pin-driven harness, adapter protocol, invariant library, optional CCP stream adapter + 3 goldens |
 | **1** | Path-faithful host chat / SSE driver (host-supplied) |
-| **2** | Optional scenario YAML + UI harness (Playwright or other) as *one* surface driver |
+| **2** | Scenario YAML + optional UI harness as *one* surface driver |
 | **3** | Corpus generation (code seed, user styles, detours, adversarial / OOD) |
 | **4** | Distribution monitoring when cognition is live |
 
-Deterministic UI (click → assert text) stays outside this framework.
+Deterministic “click → assert fixed text” UI tests can remain outside this framework; UI is an optional **driver** for behaviour contracts, not the product definition.
 
 ---
 
@@ -73,15 +86,15 @@ Deterministic UI (click → assert text) stays outside this framework.
 
 | Mode | Cognition | Proves |
 |---|---|---|
-| `stub` (default) | Pin on the turn | Control-plane invariants only — CI-safe |
+| `stub` (default) | Pin on the turn | Behaviour contracts under fixed labels — CI-safe |
 | `freeze` / `record` | Recorded pin JSON | Replay / capture |
-| `local` / `cloud` | Host routes a real bounded classifier | Enum parity + same invariants (host provides pins or driver) |
+| `local` / `cloud` | Host routes a real bounded classifier | Enum parity + same invariants |
 
 The portable core is **pin-driven**. It does not call your LLM factory; hosts supply pins or a richer driver.
 
 ---
 
-## 5. Public API (0.1)
+## 5. Public API (0.1 / Slice 0)
 
 ```python
 from conjecture_behaviour_runner import (
@@ -93,16 +106,26 @@ from conjecture_behaviour_runner import (
     ConjectureScript,
     ControlPlaneAdapter,   # Protocol
     NullControlPlaneAdapter,
+    BaseControlPlaneAdapter,
+    check_standard_invariant,
     run_script,
 )
 ```
 
-Implement `ControlPlaneAdapter` against your ledger (or the Conversation Control Plane package) to check real `exclusive_owner` / pin invariants. The null adapter is for packaging smoke only.
+Implement `ControlPlaneAdapter` (or subclass `BaseControlPlaneAdapter`) against your ledger or the Conversation Control Plane package. The null adapter is packaging smoke only.
 
-Scenario YAML models and trajectory shapes live under
-`conjecture_behaviour_runner.experimental` (unstable; not part of the 0.1 API).
-YAML loading needs `pip install conjecture-behaviour-runner[scenarios]` (PyYAML).
-Slice 0 scripts do not use them.
+**Optional CCP binding:**
+
+```python
+from conjecture_behaviour_runner.contrib.control_plane import (
+    ControlPlaneStreamAdapter,
+    control_plane_golden_scripts,
+)
+```
+
+Requires `pip install conjecture-behaviour-runner[control-plane]`.
+
+**Experimental** (not stable 0.1 API): `conjecture_behaviour_runner.experimental` — scenario YAML models and trajectory shapes for later surface drivers. YAML loading needs `pip install conjecture-behaviour-runner[scenarios]` (PyYAML).
 
 ---
 
@@ -110,11 +133,20 @@ Slice 0 scripts do not use them.
 
 - Replacing all unit tests with multi-turn scripts  
 - Live LLM on every PR by default  
-- Browser as the only truth for control-plane bugs  
-- Phrase laundry lists as scenario generators (cognition stays label-based; scripts pin outcomes and owners)
+- Browser as the *only* truth for ownership / mid-flow bugs  
+- Phrase laundry lists as scenario generators (cognition stays label-based; scripts pin outcomes and owners)  
+- Claiming Conjecture *is* the Conversation Control Plane (it **proves** contracts; CCP **is** one contract surface)
 
 ---
 
 ## 7. License & status
 
-MIT. Alpha surface is intentional and small. Host adapters and product-specific goldens are out of scope for this package until documented as portable examples.
+MIT. Alpha.
+
+| Horizon | Intent |
+|---|---|
+| **Product** | Full behaviour runner: scenarios, trajectories, drivers, generation, distribution |
+| **Slice 0** | Control-plane multi-turn invariants + portable package + CCP goldens |
+| **Next** | Path-faithful chat · scenario/UI surface · corpus · N-run distribution |
+
+Host adapters and product-private goldens stay in host repos; this package keeps a portable, leak-free surface.

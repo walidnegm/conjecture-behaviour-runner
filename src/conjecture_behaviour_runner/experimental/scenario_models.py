@@ -232,8 +232,19 @@ class Scenario(BaseModel):
 
 
 def load_scenario_from_yaml(path: str) -> Scenario:
-    """Load and validate a scenario YAML. Raises ValidationError on failure."""
-    import yaml  # local import to keep yaml an optional dep at module-import time
+    """Load and validate a scenario YAML. Raises ValidationError on failure.
+
+    Requires optional dependency ``PyYAML``::
+
+        pip install conjecture-behaviour-runner[scenarios]
+    """
+    try:
+        import yaml  # type: ignore[import-untyped]
+    except ImportError as exc:  # pragma: no cover - depends on install
+        raise ImportError(
+            "load_scenario_from_yaml requires PyYAML — install the optional "
+            "extra: pip install conjecture-behaviour-runner[scenarios]"
+        ) from exc
     with open(path, "r", encoding="utf-8") as fh:
         data = yaml.safe_load(fh)
     return Scenario.model_validate(data)

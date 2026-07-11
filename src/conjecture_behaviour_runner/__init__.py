@@ -1,8 +1,11 @@
 """Conjecture Behaviour Runner — public package surface.
 
-Portable multi-turn behaviour eval: script model, cognition modes,
-adapter protocol, and scenario/trajectory contracts. Hosts bind a
-``ControlPlaneAdapter`` to their control plane or ledger.
+Portable multi-turn behaviour eval: script model, cognition pins (generic),
+invariant library, adapter protocol. Hosts bind a ``ControlPlaneAdapter`` to
+their control plane or ledger.
+
+Scenario YAML / trajectory models live under
+``conjecture_behaviour_runner.experimental`` (not part of the stable 0.1 API).
 """
 from __future__ import annotations
 

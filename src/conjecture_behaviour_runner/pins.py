@@ -1,29 +1,31 @@
-"""Cognition pins — structured labels only (no free-form NL interpretation)."""
+"""Cognition pins — portable structured labels (no free-form NL interpretation).
+
+Entity *identity* (which workflow / project / run is in flight) is **not** a
+field on this pin. Hosts project entity ids via ``TurnObservation.pins`` after
+ledger apply — pin keys are host/control-plane defined (e.g. CCP uses
+``workflow_id``). Product-specific router flags belong in ``extras``.
+"""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, fields
 from typing import Any, Mapping
 
-
 @dataclass(frozen=True)
 class CognitionPin:
-    """Pinned classifier/router output for one turn.
+    """Pinned classifier/router output for one turn — portable control-plane labels.
 
-    Hosts map these fields onto their control-plane router signal. Values are
-    **enums / flags**, not prose — code owns execution; the pin stands in for
-    LLM cognition under ``LlmMode.STUB`` / ``FREEZE``.
+    Core fields are generic multi-turn control signals. Host-specific router
+    booleans and product concepts go in ``extras`` (opaque to the harness).
+
+    Values are **enums / flags**, not prose — code owns execution; the pin
+    stands in for LLM cognition under ``LlmMode.STUB`` / ``FREEZE``.
     """
 
-    task_intent: str = "continue"
+    # Portable turn-ownership signals (companion control-plane vocabulary).
+    task_intent: str = "continue"  # continue | detour | new_task | abandon | handoff
     route_intent: str = "default"
     discovery_kind: str = "none"
     read_kind: str = "none"
-    product_concept_kind: str = "none"
-    cost_estimate_request: bool = False
-    workflow_draft_request: bool = False
-    catalog_role_request: bool = False
-    reset_request: bool = False
-    attachment_capability_request: bool = False
     confidence: float = 0.95
     reason: str = "conjecture_stub"
     freeze_key: str = ""
@@ -36,7 +38,32 @@ class CognitionPin:
             d.pop("extras", None)
         return d
 
+    def extra(self, key: str, default: Any = None) -> Any:
+        """Read a host-specific flag from ``extras``."""
+        if not self.extras:
+            return default
+        return self.extras.get(key, default)
+
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "CognitionPin":
+        """Build a pin; unknown / host-product keys land in ``extras``.
+
+        Accepts legacy Bot0 field names (``cost_estimate_request``, …) and
+        folds them into ``extras`` so freezes and monorepo exports remain
+        loadable without re-baking product identity into the public type.
+        """
         known = {f.name for f in fields(cls)}
-        return cls(**{k: v for k, v in data.items() if k in known})
+        payload = dict(data)
+        extras: dict[str, Any] = dict(payload.pop("extras", None) or {})
+        core: dict[str, Any] = {}
+        for key, value in list(payload.items()):
+            if key in known and key != "extras":
+                core[key] = value
+            else:
+                extras[key] = value
+        if extras:
+            core["extras"] = extras
+        return cls(**core)
+
+
+__all__ = ["CognitionPin"]

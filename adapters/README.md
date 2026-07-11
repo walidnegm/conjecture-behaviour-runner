@@ -22,5 +22,13 @@ Built-in invariant kinds (`conjecture_behaviour_runner.invariants`, free via
 Worked binding + three golden scripts: `examples/control_plane_goldens.py`
 (`control_plane_golden_scripts()`), ratcheted in `tests/test_control_plane_adapter.py`.
 
+### Cognition pin vs entity pin
+
+- **`CognitionPin`** — portable turn labels (`task_intent`, `discovery_kind`, …).
+  Host/product router flags go in **`extras`** (do not add product fields to the
+  public dataclass).
+- **`TurnObservation.pins`** — ledger **entity identity** after `apply_effect`
+  (keys are host/control-plane defined; CCP uses e.g. `workflow_id`).
+
 Do not publish product-private goldens into this repository. Keep host-specific
 scripts in your application repo; depend on this package for the harness only.

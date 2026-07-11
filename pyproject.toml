@@ -36,6 +36,8 @@ dependencies = [
 dev = ["pytest>=7.0"]
 # Optional: when running against the Conversation Control Plane runtime package.
 control-plane = ["conversation-control-plane>=0.1.0"]
+# Optional: experimental YAML scenario loader (``experimental.scenario_models``).
+scenarios = ["PyYAML>=6.0"]
 
 [project.urls]
 Homepage = "https://github.com/walidnegm/conjecture-behaviour-runner"
@@ -52,7 +54,8 @@ include = ["conjecture_behaviour_runner*"]
 # Public package only — no application layout under src/.
 
 [tool.setuptools.package-data]
-conjecture_behaviour_runner = ["py.typed", "schema.json"]
+conjecture_behaviour_runner = ["py.typed"]
+"conjecture_behaviour_runner.experimental" = ["schema.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

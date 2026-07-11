@@ -134,6 +134,9 @@ class ControlPlaneStreamAdapter(BaseControlPlaneAdapter):
             exclusive_owner = FRONT_DOOR_OWNER
             observed_outcome = "front_door"
 
+        # CCP projects workflow identity; expose both the CCP name and a
+        # generic preferred_entity_id so hosts without workflow vocabulary
+        # can still assert pin-over-ambient identity.
         preferred_workflow_id = _mtsc.preferred_workflow_id_from_stream(
             context, allow_ambient_last_read=not blocks_resolve
         )
@@ -150,6 +153,7 @@ class ControlPlaneStreamAdapter(BaseControlPlaneAdapter):
                 "blocks_resolve": blocks_resolve,
                 "front_door_blocked": bool(kind) and not supersede,
                 "preferred_workflow_id": preferred_workflow_id,
+                "preferred_entity_id": preferred_workflow_id,
             },
         )
 

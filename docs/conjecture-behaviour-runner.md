@@ -99,7 +99,10 @@ from conjecture_behaviour_runner import (
 
 Implement `ControlPlaneAdapter` against your ledger (or the Conversation Control Plane package) to check real `exclusive_owner` / pin invariants. The null adapter is for packaging smoke only.
 
-Scenario YAML models and trajectory shapes are included for later surface drivers; they are not required for Slice 0 scripts.
+Scenario YAML models and trajectory shapes live under
+`conjecture_behaviour_runner.experimental` (unstable; not part of the 0.1 API).
+YAML loading needs `pip install conjecture-behaviour-runner[scenarios]` (PyYAML).
+Slice 0 scripts do not use them.
 
 ---
 

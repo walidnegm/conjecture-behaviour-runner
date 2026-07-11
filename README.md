@@ -109,7 +109,7 @@ Later slices: path-faithful chat drivers, optional UI surface, corpus generation
 | Symbol | Role |
 |---|---|
 | `LlmMode` | `stub` / `freeze` / `record` / `local` / `cloud` |
-| `CognitionPin` | Structured router/classifier labels for a turn |
+| `CognitionPin` | Portable cognition labels (`task_intent`, …); host flags in `extras`; entity ids on `TurnObservation.pins` |
 | `ConjectureScript` / `DialogueTurn` / `InvariantSpec` | Multi-turn script model |
 | `ControlPlaneAdapter` | Protocol hosts implement |
 | `NullControlPlaneAdapter` | Packaging smoke only |
@@ -129,10 +129,21 @@ See `examples/` and `adapters/README.md`.
 ```bash
 pip install conjecture-behaviour-runner[control-plane]
 # or editable: pip install -e ".[dev,control-plane]"
+# experimental YAML scenarios only:
+# pip install -e ".[scenarios]"
 ```
+
+### Experimental (not stable 0.1 API)
+
+`conjecture_behaviour_runner.experimental` — Scenario YAML models + trajectory
+shapes (quarantined so they are not a second public scenario framework). May
+change without a major version bump.
 
 ---
 
 ## Status
 
-**Alpha.** MIT. Portable surface is intentional and small. Slice 0 now includes a real invariant library and a CCP-binding adapter with portable goldens. Host product-private scripts stay out of this package.
+**Alpha.** MIT. Portable surface is intentional and small. Slice 0 includes a
+real invariant library, a CCP-binding adapter with portable goldens, a **generic**
+`CognitionPin` (product flags → `extras`), and quarantined experimental
+scenario/trajectory modules. Host product-private scripts stay out of this package.

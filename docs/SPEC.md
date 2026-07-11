@@ -385,7 +385,7 @@ If someone only publishes the schema and runs checks in ad-hoc pytest, they have
 Slice 0 often collapses Driver+Observer into `ControlPlaneAdapter`. Cognition is no longer
 “labels only”: stub + freeze/record providers ship; local/cloud remain host-supplied.
 
-### Target cognition provider (not fully implemented)
+### Cognition provider (implementation status)
 
 ```python
 class CognitionProvider(Protocol):
@@ -394,28 +394,39 @@ class CognitionProvider(Protocol):
     def replay(self, freeze_key) -> CognitionDecision: ...
 ```
 
-Artifacts should carry model identity, prompt/version hashes, schema version, seed/temperature
-where applicable, raw + parsed output, validation evidence. **Mode labels alone ≠ mode system.**
+| Mode | Status (0.1.2) |
+|---|---|
+| `stub` | ✅ `StubCognitionProvider` — pin on turn |
+| `freeze` / `record` | ✅ `FreezeStore` + freeze/record providers (disk JSON) |
+| `local` / `cloud` | ⬜ Host must supply provider (core does not call LLMs) |
 
-### Delivery slices (revised priorities)
+Artifacts may carry model identity, prompt hashes, seed/temperature later. Core freeze
+artifact today: pin + source + freeze_key + optional evidence.
+
+### Delivery slices
 
 | Slice | What | Status |
 |---|---|---|
 | **0** | Script model, pin-driven harness, standard invariants, optional CCP goldens | ✅ |
-| **0.1.1 foundations** | `CognitionProvider` + freeze/record disk store; trajectory + outcome-specific verifiers; `compile_scenario_to_script` + `run_result_to_trajectory`; CLI `run` / `path-faithful` / JSON+JUnit; **MiniChatApp** path-faithful Act + three planted bugs | ✅ landed (thin but real) |
-| **1 next** | Host HTTP/SSE/Playwright drivers; **LangGraph / Temporal / Crew adapters**; agent **script synthesizer** (spec→JSON with required expected); fail closed if golden has no expected | open |
+| **0.1.1–0.1.2** | CognitionProvider + freeze; temporal + outcome-specific verifiers; compile bridge; CLI run/JUnit; path-faithful mini-app + planted bugs; **§0 claim locked** | ✅ |
+| **1 next** | HTTP/SSE/Playwright drivers; **LangGraph / Temporal / Crew adapters**; agent synthesizer **with required expected**; fail closed if golden has no expected | open |
 | **2** | Richer temporal ops; observation/domain ground truth; generation + shrink; production runner (shards, retries) | open |
-| **3** | ODD-driven corpus / explorer / N-run **contract hold-rate** distributions | open |
+| **3** | ODD corpus / explorer / N-run **contract hold-rate** distributions | open |
 
-### 0.1.1 module map
+### Module map (implementation package)
 
 | Module | Role |
 |---|---|
+| `script.py` | IR: `ConjectureScript`, turns, scope, expected fields, load/dump |
+| `harness.py` | `run_script` — cognition → effects → observe → verifier |
 | `cognition.py` | `CognitionProvider`, `FreezeStore`, stub/freeze/record |
-| `temporal.py` | Cross-turn verifier kinds |
-| `compile_scenario.py` | Scenario IR → `ConjectureScript`; `RunResult` → `Trajectory` |
+| `invariants.py` | Step verifier kinds (`STANDARD_INVARIANT_KINDS`) |
+| `temporal.py` | Trajectory verifier kinds |
+| `protocol.py` | `ControlPlaneAdapter`, `TurnObservation` |
 | `path_faithful.py` | Mini-app Act path + planted-bug proof |
-| `discover.py` / `report.py` / `cli.py` | Discovery, JSON/JUnit, `conjecture run` |
+| `compile_scenario.py` | Scenario IR → script; `RunResult` → Trajectory |
+| `discover.py` / `report.py` / `cli.py` | Discovery, JSON/JUnit, CLI |
+| `contrib/control_plane.py` | Optional CCP binding + portable goldens |
 
 ---
 
@@ -509,13 +520,28 @@ Compelling demo line:
 
 ---
 
-## 4. Cognition modes (honest status)
+## 3. Implementation surface (aligned with 0.1.2 code)
 
-| Mode | Intended meaning | Slice 0 reality |
+Normative mapping of **product cores → modules**. If code drifts, fix code or bump SPEC.
+
+| Product core | Primary modules | Public entry |
 |---|---|---|
-| `stub` | Pin on the turn | **Implemented** path — pin-driven |
-| `freeze` / `record` | Replay / capture freeze artifacts | Labels + `freeze_key` field; full provider not shipped |
-| `local` / `cloud` | Host-routed real classifier | Fail-closed without host-supplied pins; no built-in model lifecycle |
+| IR | `script.py`, `pins.py` | `ConjectureScript`, `load_script_json` |
+| Runner | `harness.py`, `cognition.py`, `cli.py` | `run_script`, `conjecture run` |
+| Verifier | `invariants.py`, `temporal.py` | `check_standard_invariant`, trajectory kinds |
+| Host binding | `protocol.py`, `path_faithful.py`, `contrib/*` | `ControlPlaneAdapter` |
+
+**Arrange vs Act (path-faithful):** `LedgerEffect` / seeds **arrange**; Driver
+`observe_turn` / `handle` is **Act**. Do not use effects to fake the SUT’s side effects
+on the path-faithful path.
+
+## 4. Cognition modes (status)
+
+| Mode | Intended meaning | 0.1.2 reality |
+|---|---|---|
+| `stub` | Pin on the turn | ✅ Implemented |
+| `freeze` / `record` | Replay / capture freeze artifacts | ✅ `FreezeStore` + providers |
+| `local` / `cloud` | Host-routed real classifier | Host `CognitionProvider` required |
 
 The portable core is **pin-driven**. It does not call an LLM factory.
 
@@ -607,10 +633,17 @@ scope = ScriptScope(
 | `user_text` | `str` | Primary stimulus (Slice 0 user-centric surface) |
 | `actor` | `str` | `user` \| `agent` \| `system` — default `user`; multi-actor later |
 | `pin` | `CognitionPin?` | Stub/freeze labels for this step (`task_intent`, kinds, …) |
-| `effects` | `LedgerEffect[]` | Deterministic host mutations after cognition, before invariants |
-| `invariants` | `InvariantSpec[]` | **Must hold after** this step |
-| `allowed_outcomes` | `str[]` | Optional envelope when cognition is live (later slices) |
-| `freeze_key` | `str` | Optional key for freeze/record mode replay |
+| `effects` | `LedgerEffect[]` | Deterministic **arrange** mutations (not a substitute for Act) |
+| `invariants` | `InvariantSpec[]` | **Expected ground truth** after this step |
+| `allowed_outcomes` | `str[]` | Legal landing envelope; if set, `observed_outcome` required |
+| `outcome_invariants` | `map[str → InvariantSpec[]]` | Expected rules **given** a specific outcome |
+| `freeze_key` | `str` | Key for freeze/record cognition replay |
+
+On `ConjectureScript` also: `trajectory_invariants` — cross-turn expected law (see `temporal.py`).
+
+**CI rule (product):** a merge-gating golden must declare non-empty expected contracts
+(step and/or trajectory). Exploratory scripts without expected must not gate CI
+(enforcement hardening is slice 1).
 
 #### `InvariantSpec`
 
@@ -670,14 +703,18 @@ Invariants read **only** the observation (plus kind rules). Unknown kinds **fail
 
 Full list: `STANDARD_INVARIANT_KINDS` in `invariants.py`.
 
-**Verifier gaps (roadmap):** temporal (`always` / `eventually` / `until` / `never before`),
-exactly-once side effects, outcome-**specific** invariant sets (outcome A ⇒ {A1,A2}),
-idempotency keys. Flat global invariant lists cannot express all branching behaviour.
+**Shipped verifier surface:** standard step kinds; trajectory kinds
+(`eventually_exclusive_owner`, `pin_stable`, `owner_changes_at_most`, …);
+`outcome_invariants` per landing.
 
-**Harness contracts (sealed):**
+**Verifier gaps (roadmap):** richer temporal (`until`, `never before`), exactly-once
+side effects, domain ground-truth plugins, first-class observation gold snapshots.
+
+**Harness contracts (sealed in code):**
 
 - If `allowed_outcomes` is non-empty, `observed_outcome` is **required** (no vacuous green).  
-- `TurnObservation.context`: `None` = no update; `{}` = explicit clear; mapping = replace.
+- `TurnObservation.context`: `None` = no update; `{}` = explicit clear; mapping = replace.  
+- Pin/extra presence is **not** truthiness-collapsed (`extra_true` requires key present and `True`).
 
 ### Multi-turn script patterns (authoring guidance)
 
@@ -851,7 +888,7 @@ adapter that implements `begin_task` + the standard observation fields.
 
 ---
 
-## 5. Public API (0.1 / Slice 0)
+## 5. Public API (0.1.2)
 
 ```python
 from conjecture_behaviour_runner import (

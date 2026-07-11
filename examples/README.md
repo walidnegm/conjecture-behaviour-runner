@@ -1,23 +1,21 @@
 # Examples
 
-- `minimal_script.py` — stub pin + null adapter (no control-plane install required)
-- `control_plane_goldens.py` — three portable goldens against the real Conversation Control Plane multi-turn stream contract (`pip install -e ".[control-plane]"`)
+**Start here:** multi-turn agentic conversation E2E (healthy + planted bugs):
 
-Host-private goldens stay in your application repository; these examples are contract demos only.
+```bash
+pip install -e ".[dev]"
+python examples/e2e_multi_turn.py
+# or: conjecture path-faithful --prove-bugs
+```
 
 | File | What |
 |------|------|
+| **`e2e_multi_turn.py`** | **Upfront demo** — conversation → MiniChatApp Act → verifier PASS/FAIL |
 | `minimal_script.py` | Null-adapter smoke (`always_true`) |
-| `control_plane_goldens.py` | Live CCP adapter + three portable goldens |
-| `sole_continue_golden.json` | Full multi-turn sole-continue golden (load with `load_script_json`) |
-| `sole_continue_golden.yaml` | Same shape in YAML (`load_script_yaml`, needs PyYAML / `[scenarios]`) |
+| `control_plane_goldens.py` | CCP adapter goldens (`pip install -e ".[control-plane]"`) |
+| `sole_continue_golden.json` / `.yaml` | Portable sole-continue IR (load with `load_script_*`) |
 
-Path-faithful vertical (Act through mini-app `handle`, not pure contract injection):
-
-```bash
-conjecture path-faithful --prove-bugs
-conjecture run examples/sole_continue_golden.json --adapter null   # structure only
-```
+Host-private goldens stay in your application repository; these examples are contract demos only.
 
 ```bash
 # Structure load (no host adapter required for parse)

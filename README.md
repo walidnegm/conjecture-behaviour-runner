@@ -217,16 +217,12 @@ Companion reference domain: [conversation-control-plane](https://github.com/wali
 
 ## Quickstart
 
-```bash
-git clone https://github.com/walidnegm/conjecture-behaviour-runner.git
-cd conjecture-behaviour-runner
-pip install -e ".[dev]"
-pytest tests/ -q
-conjecture path-faithful --prove-bugs
-# clean passes; dual_owner / drop_pin / illegal_restart each fail
-```
+Prefer the [E2E example](#end-to-end-example-try-this-first) first. Then:
 
 ```bash
+pip install -e ".[dev]"
+pytest tests/ -q
+
 # optional CCP goldens
 pip install -e ".[dev,control-plane]"
 python examples/control_plane_goldens.py

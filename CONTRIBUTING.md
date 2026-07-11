@@ -7,8 +7,9 @@ philosophy to land useful work.**
 
 ```bash
 pip install -e ".[dev]"
-conjecture path-faithful --prove-bugs   # CLI red bar
-conjecture ui                           # browser story + planted bugs
+conjecture path-faithful --prove-bugs   # in-process path-faithful
+PYTHONPATH=src python proofs/run_external_http_proof.py --prove-bugs  # external SUT
+# conjecture ui   # optional demo viewer only (not required)
 pytest tests/ -q
 ```
 

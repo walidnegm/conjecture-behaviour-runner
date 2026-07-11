@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "conjecture-behaviour-runner"
+version = "0.1.0"
+description = "Behaviour-based multi-turn eval for agentic control planes — invariants and allowed outcomes, not string equality (reference by Bot0.ai)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Bot0.ai" }]
+keywords = [
+  "agents",
+  "evaluation",
+  "multi-turn",
+  "control-plane",
+  "behaviour",
+  "conjecture",
+  "testing",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Testing",
+]
+dependencies = [
+  "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+# Optional: when running against the Conversation Control Plane runtime package.
+control-plane = ["conversation-control-plane>=0.1.0"]
+
+[project.urls]
+Homepage = "https://github.com/walidnegm/conjecture-behaviour-runner"
+Documentation = "https://github.com/walidnegm/conjecture-behaviour-runner#readme"
+Repository = "https://github.com/walidnegm/conjecture-behaviour-runner"
+"Control plane (companion)" = "https://github.com/walidnegm/conversation-control-plane"
+
+[project.scripts]
+conjecture = "conjecture_behaviour_runner.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["conjecture_behaviour_runner*"]
+# Public package only — no application layout under src/.
+
+[tool.setuptools.package-data]
+conjecture_behaviour_runner = ["py.typed", "schema.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

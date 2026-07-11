@@ -1,0 +1,481 @@
+{
+  "$defs": {
+    "Actor": {
+      "enum": [
+        "user",
+        "agent",
+        "system"
+      ],
+      "title": "Actor",
+      "type": "string"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "description": "What proves a step happened. Typed \u2014 bare paths are not enough.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/EvidenceType"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "assertion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assertion"
+        },
+        "confidence": {
+          "$ref": "#/$defs/EvidenceConfidence",
+          "default": "medium"
+        }
+      },
+      "required": [
+        "type",
+        "path"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "EvidenceConfidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "title": "EvidenceConfidence",
+      "type": "string"
+    },
+    "EvidenceType": {
+      "description": "The kind of artifact that proves a step happened.",
+      "enum": [
+        "regression_test",
+        "api_contract",
+        "ui_component",
+        "db_assertion",
+        "event_log"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    },
+    "ExecutionProfile": {
+      "additionalProperties": false,
+      "description": "Envelope the scenario must hold under \u2014 device, network, tier, SLA.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "device": {
+          "title": "Device",
+          "type": "string"
+        },
+        "viewport": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Viewport",
+          "type": "object"
+        },
+        "network": {
+          "title": "Network",
+          "type": "string"
+        },
+        "sla": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Sla",
+          "type": "object"
+        },
+        "feature_flags": {
+          "additionalProperties": true,
+          "title": "Feature Flags",
+          "type": "object"
+        },
+        "tenant_tier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tenant Tier"
+        },
+        "input_mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Mode"
+        },
+        "browser": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Browser"
+        }
+      },
+      "required": [
+        "id",
+        "device",
+        "network"
+      ],
+      "title": "ExecutionProfile",
+      "type": "object"
+    },
+    "FailureState": {
+      "additionalProperties": false,
+      "description": "A non-success terminal state plus its graceful-handling contract.",
+      "properties": {
+        "state": {
+          "title": "State",
+          "type": "string"
+        },
+        "required_graceful_handling": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Graceful Handling",
+          "type": "array"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "title": "FailureState",
+      "type": "object"
+    },
+    "Nondeterminism": {
+      "additionalProperties": false,
+      "description": "Agentic / stochastic layer \u2014 what outcomes are legal and what must hold across them.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/NondeterminismType",
+          "default": "none"
+        },
+        "allowed_outcomes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Outcomes",
+          "type": "array"
+        },
+        "required_invariants": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Invariants",
+          "type": "array"
+        }
+      },
+      "title": "Nondeterminism",
+      "type": "object"
+    },
+    "NondeterminismType": {
+      "description": "Why a step might land in different observable outcomes per run.",
+      "enum": [
+        "none",
+        "async",
+        "llm",
+        "stochastic",
+        "agentic",
+        "race"
+      ],
+      "title": "NondeterminismType",
+      "type": "string"
+    },
+    "Scope": {
+      "additionalProperties": false,
+      "description": "Scenario-class metadata \u2014 the input space the system claims to handle.\n\nReplaces ODD with plain language. `in_scope` = supported inputs;\n`out_of_scope` = unsupported (system should refuse gracefully);\n`expected_refusal` = adversarial probes the system must reject.",
+      "properties": {
+        "in_scope": {
+          "items": {
+            "type": "string"
+          },
+          "title": "In Scope",
+          "type": "array"
+        },
+        "out_of_scope": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Out Of Scope",
+          "type": "array"
+        },
+        "expected_refusal": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expected Refusal",
+          "type": "array"
+        }
+      },
+      "title": "Scope",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "description": "One unit of forward motion in the scenario.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "actor": {
+          "$ref": "#/$defs/Actor"
+        },
+        "control_point": {
+          "title": "Control Point",
+          "type": "string"
+        },
+        "maneuver": {
+          "title": "Maneuver",
+          "type": "string"
+        },
+        "entry_surface": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry Surface"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Payload"
+        },
+        "preconditions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Preconditions",
+          "type": "array"
+        },
+        "blocked_conditions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocked Conditions",
+          "type": "array"
+        },
+        "postconditions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Postconditions",
+          "type": "array"
+        },
+        "wait": {
+          "$ref": "#/$defs/WaitPolicy"
+        },
+        "nondeterminism": {
+          "$ref": "#/$defs/Nondeterminism"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "actor",
+        "control_point",
+        "maneuver",
+        "wait"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "TerminalStates": {
+      "additionalProperties": false,
+      "description": "Three buckets \u2014 separates success from degraded-success from failure-with-required-handling.",
+      "properties": {
+        "expected": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expected",
+          "type": "array"
+        },
+        "tolerated_degraded": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tolerated Degraded",
+          "type": "array"
+        },
+        "failure": {
+          "items": {
+            "$ref": "#/$defs/FailureState"
+          },
+          "title": "Failure",
+          "type": "array"
+        }
+      },
+      "title": "TerminalStates",
+      "type": "object"
+    },
+    "WaitPolicy": {
+      "additionalProperties": false,
+      "description": "Temporal layer \u2014 how long to wait for a step to settle.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/WaitType"
+        },
+        "settle_condition": {
+          "description": "Named condition the runner watches (e.g., 'agent_turn_complete', 'scenarios_list_visible').",
+          "title": "Settle Condition",
+          "type": "string"
+        },
+        "timeout_ms": {
+          "exclusiveMinimum": 0,
+          "title": "Timeout Ms",
+          "type": "integer"
+        },
+        "poll_interval_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Poll Interval Ms"
+        }
+      },
+      "required": [
+        "type",
+        "settle_condition",
+        "timeout_ms"
+      ],
+      "title": "WaitPolicy",
+      "type": "object"
+    },
+    "WaitType": {
+      "description": "How the runner knows a step has settled.",
+      "enum": [
+        "render_wait",
+        "network_wait",
+        "async_job_wait",
+        "stream_wait",
+        "human_confirmation_wait"
+      ],
+      "title": "WaitType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A goal-directed route through the experience. Validates against schema.json.",
+  "properties": {
+    "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "scenario_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Class"
+    },
+    "scope": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Scope"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "goal_state": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Goal State",
+      "type": "array"
+    },
+    "initial_state": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Initial State",
+      "type": "array"
+    },
+    "execution_profiles": {
+      "items": {
+        "$ref": "#/$defs/ExecutionProfile"
+      },
+      "minItems": 1,
+      "title": "Execution Profiles",
+      "type": "array"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "minItems": 1,
+      "title": "Steps",
+      "type": "array"
+    },
+    "terminal_states": {
+      "$ref": "#/$defs/TerminalStates"
+    }
+  },
+  "required": [
+    "scenario_id",
+    "goal_state",
+    "execution_profiles",
+    "steps"
+  ],
+  "title": "Scenario",
+  "type": "object"
+}

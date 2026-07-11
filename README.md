@@ -241,9 +241,9 @@ More: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md)
 ## Who this is for
 
 - Teams shipping **agentic / LLM-shaped** products that grow by generation and iteration  
-- Anyone whose **string evals pass** while **routing, ownership, or mid-flow state** fails  
+- Anyone whose **output looks fine** while **flow, identity, or legal outcomes** fail  
 - Codebases where **scope is incomplete** and new paths keep appearing  
-- Hosts that need a **CI-safe behaviour contract layer** (CCP goldens = reference, not the ceiling)
+- Hosts that need a **CI-safe behaviour contract layer** (reference goldens are examples, not the ceiling)
 
 ---
 

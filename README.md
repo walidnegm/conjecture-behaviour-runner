@@ -3,10 +3,27 @@
 **Behaviour-based evaluation for agentic, multi-turn systems** —  
 **invariants and allowed outcomes**, not “the assistant said this exact sentence.”
 
-Built by [Bot0.ai](https://bot0.ai) for a world of **vibe-coded and auto-coded** products:
-unknown pathways, probabilistic specs, incomplete scope, and requirements that move
-while the code is still being generated. You cannot inventory every path. You *can*
-pin the **behaviour that must not break** when paths appear anyway.
+Built by [Bot0.ai](https://bot0.ai).
+
+Vibe-coded and auto-coded programs **don’t fail like classical apps**. They accrete
+**unknown pathways**. Chat and agents make that worse across turns. **Conjecture** is
+a harness for pinning what **must stay true** when you **cannot inventory every path
+in advance**.
+
+| What accrues in vibe / auto-coded systems | Why classical tests miss it |
+|-------------------------------------------|------------------------------|
+| **Probabilistic specs** (“make it handle handoff”) | Paths appear that no ticket named |
+| **Half-scoped features** | Code reaches states the Epic never closed |
+| **Dynamic / shifting scope** | Requirements move while code is still generating |
+| **Changing requirements** week to week | String goldens rot or get rewritten to “pass” |
+| **Code nobody deliberately designed** | Unknown branches, dual writers, silent fallthroughs |
+| **Chat + multi-turn agents on top** | Failures = wrong *owner*, lost *pin*, illegal *outcome* — not typos |
+
+| What Conjecture pins instead | Meaning |
+|------------------------------|---------|
+| **Required invariants** | Must hold after the turn (owner, pin, policy, …) |
+| **Allowed outcomes** | Envelope of legal landings — not one golden sentence |
+| **Optional distribution** | Rates over N runs when cognition is live (later slices) |
 
 | | |
 |---|---|
@@ -19,7 +36,9 @@ pin the **behaviour that must not break** when paths appear anyway.
 > **Slice 0 (now):** multi-turn **control-plane** invariants (stub/freeze cognition) + optional
 > [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) goldens.  
 > **Later slices:** path-faithful chat drivers, scenario YAML + UI surfaces, corpus generation,
-> distribution monitoring over live cognition.
+> distribution monitoring over live cognition.  
+> **Objective is not skinned down** because the first phase is simpler — we still build out
+> ODD/scope, modalities, drivers, and distribution.
 
 ---
 
@@ -27,18 +46,8 @@ pin the **behaviour that must not break** when paths appear anyway.
 
 ### The software under test is not a closed machine
 
-Agentic apps and auto-generated codebases fail differently from classical apps:
-
-| Reality | Testing consequence |
-|---------|---------------------|
-| Specs are **probabilistic** (“handle handoff”) | Paths appear that no ticket named |
-| **New / changing requirements** mid-build | Happy-path tests stay green |
-| **Weak, dynamic, or missing scope** | States authors never mapped |
-| Code **generated faster than reviewed** | Unknown branches, dual writers, silent fallthroughs |
-| Multi-turn chat / agents on top | Failures = wrong *owner*, lost *identity*, illegal *outcome* — not typos |
-
-String equality and one-shot snapshots answer the wrong question. They score **prose**.  
-Production breaks in **behaviour**.
+The table above is the core claim. In short: **prose tests score wording; production
+breaks in behaviour.** String equality and one-shot snapshots answer the wrong question.
 
 ### What evaluation must pin instead
 

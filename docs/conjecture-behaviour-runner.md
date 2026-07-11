@@ -67,18 +67,43 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 | **Scenario** | One goal-directed route with contracts filled |
 | **Trajectory** | One observed run of a scenario under one profile |
 
-### Analogy: CARLA / AV scenarios — not Playwright, not model-eval labs
+### Analogy: CARLA / AV scenarios — not Playwright, not LLM-feedback labs
 
 Conjecture is methodologically closer to **scenario construction for autonomous
 systems** (e.g. CARLA scenario runner, SOTIF edge-case work) than to:
 
 - **Playwright-class E2E** — click → assert fixed UI text (UI may later be *a driver*, not the product);
-- **LLM simulation / eval labs** — score or train the **model** in a sandbox (task success, synthetic users, RL data).
+- **LLM feedback / model-eval products** — score reply quality, preference data, synthetic users,
+  RL signal, leaderboards. **We deliberately do not compete there.** Our primary verdict is
+  **host behaviour contracts** (ownership, pins, legal landings, honest terminals), not
+  “was the model’s answer good?”
 
 Like AV scenario work: declare an **ODD**, collect **ground truth** (maps/sensors ↔ here:
 code contracts, session traffic, explorer), build **scenarios**, generate **edge conditions**,
 and pin **invariants / allowed outcomes** when the world is nondeterministic. Edge generation
 from ground-truth collection is a later slice; Slice 0 seals the first contracts mid-flow.
+
+### Scripts are multi-actor (user → agent → agent-to-agent)
+
+A script is **not only a human chat transcript**. Turns may be:
+
+| Actor / kind | Role in the script |
+|---|---|
+| **User** | Human message, chip, finite confirm |
+| **Agent** | Specialist step, tool-backed continue, agent-initiated progress |
+| **Agent → agent** | Handoff, subagent completion into parent, multi-agent pipeline |
+| **System / completion** | Job complete, stream terminal, timeout, cancel, scheduled tick |
+
+Experimental YAML already models this (`Actor`: `user` · `agent` · `system`).
+Slice 0’s `DialogueTurn.user_text` is the **user-centric first API**, not the product ceiling.
+
+**Product phasing:**
+
+1. **User-centric (Slice 0+)** — human-led multi-turn scripts; pin-driven cognition.  
+2. **Agent-initiated + completion** — steps with no new human utterance (async finish, mid-flight).  
+3. **Agent-to-agent** — multi-agent handoffs under the same invariant envelope.  
+
+Throughout: evaluate the **host system’s contracts**, not LLM feedback quality.
 
 ### ODD (Operational Design Domain)
 
@@ -181,11 +206,13 @@ adversarial generation remain **to build**.
 
 | Slice | What |
 |---|---|
-| **0 (now)** | Portable script model, pin-driven harness, adapter protocol, invariant library, optional CCP stream adapter + 3 goldens |
-| **1** | Path-faithful host chat / SSE driver (host-supplied) |
-| **2** | Scenario YAML + optional UI harness as *one* surface driver |
-| **3** | Corpus generation (code seed, user styles, detours, adversarial / OOD) |
+| **0 (now)** | Portable script model (**user-centric** first), pin-driven harness, adapter protocol, invariant library, optional CCP stream adapter + 3 goldens |
+| **1** | Path-faithful host chat / SSE driver; **agent-initiated + completion** turns (no new human message) |
+| **2** | Scenario YAML + multi-actor steps (`user` · `agent` · `system`); optional UI harness as *one* surface driver |
+| **3** | **Agent-to-agent** handoff scripts + corpus generation (code seed, styles, detours, adversarial / OOD) |
 | **4** | Distribution monitoring when cognition is live |
+
+Not in scope as a product line: **LLM feedback scoring** / preference datasets / model leaderboards.
 
 Deterministic “click → assert fixed text” UI tests can remain outside this framework; UI is an optional **driver** for behaviour contracts, not the product definition.
 

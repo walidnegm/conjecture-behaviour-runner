@@ -40,22 +40,52 @@ in advance**.
 > **Objective is not skinned down** because the first phase is simpler — we still build out
 > ODD/scope, modalities, drivers, and distribution.
 
-### Where this sits (not Collinear, not Playwright)
+### Where this sits (not LLM-feedback labs, not Playwright)
 
 Conjecture is closer to **scenario construction in autonomous driving** (e.g. **CARLA** /
-SOTIF-style ODD work) than to LLM product-eval platforms or browser E2E tools.
+SOTIF-style ODD work) than to **LLM feedback / model-quality eval products** or browser E2E tools.
+
+We are **careful not to compete** as “the company that scores LLM replies / trains models from
+simulated users.” That market already exists. We pin **host-system behaviour contracts**
+when code and multi-turn ownership are incomplete.
 
 | Approach | What it optimizes for | How Conjecture differs |
 |----------|----------------------|-------------------------|
 | **Playwright / Cypress-style E2E** | Deterministic UI: click → wait → assert fixed text/DOM | UI can be *one driver later*. The product is **behaviour contracts** (outcomes + invariants), not click-assert-text as the definition of “pass.” |
-| **LLM eval / simulation labs** (e.g. multi-turn agent sandboxes for model improvement) | Score or train the **model**: task success, rubrics, synthetic users, RL signal | We evaluate the **host system’s contracts** (ownership, pins, refusal, mid-flow state) under incomplete, auto-grown code — not primarily model leaderboard quality. |
+| **LLM feedback / model-eval labs** (rubrics, preference data, synthetic users, RL signal, leaderboards) | Score or improve the **model** | **Out of scope as a product.** We do not ship “was the answer good?” as the primary verdict. We check **who may own the turn, what must stay pinned, which landings are legal** on the *host*. |
 | **CARLA-style scenario building** | Scenarios + edge cases under an **ODD**; ground truth from the world / maps / sensors; generate stress and out-of-domain probes | **Closest analogy.** Declare the claimed domain (ODD/scope), author scenarios from **ground truth** (code contracts, real traffic, explorer), generate **edge conditions**, pin **what must hold** when the world is nondeterministic. |
 | **Conjecture (this package)** | Multi-turn **behaviour envelopes** for agentic products built under vibe/auto coding | Scenario + trajectory + optional edge generation from ground-truth collection; first sealable surface is control-plane mid-flow contracts. |
 
-**In short:** Playwright automates the browser. Many eval platforms stress the **model**.  
+**In short:** Playwright automates the browser. LLM-feedback companies evaluate **model quality**.  
 Conjecture is for **scenario- and edge-driven behaviour contracts** on systems whose path set
 is incomplete — the same *kind of problem* AV stacks face with ODD and edge cases, applied
 to agentic product control flow.
+
+### Scripts are multi-actor (not “user only”)
+
+A script is a **sequence of turns that move system state**. Initiation is not limited to a human:
+
+| Actor / turn kind | Examples | What we pin |
+|-------------------|----------|-------------|
+| **User** | Chat message, chip, confirm | Ownership, pin, legal outcome after the human act |
+| **Agent** | Specialist continues, tool result applied, handoff | Same contracts when **an agent** drives the next step |
+| **Agent → agent** | Handoff, subagent complete → parent, multi-agent pipeline | Exclusive owner, pin identity, no steal / no double-write |
+| **System / completion** | Job done, SSE terminal, timeout, lease reclaim, scheduled tick | Terminal vs mid-flight, recovery honesty, cancel semantics |
+
+The experimental scenario model already names actors: `user` · `agent` · `system`
+(`Actor` in `experimental.scenario_models`). Slice 0’s `DialogueTurn.user_text` is the
+**user-centric first surface** — not a claim that only humans exist in the product.
+
+**Phasing (intentional):**
+
+1. **Now — user-centric.** Author and play back scripts as human-led multi-turn flows
+   (stub/freeze cognition). Highest pain today; easiest to seal.
+2. **Next — agent-initiated and completion.** Turns that fire without a new human message
+   (async job complete, mid-flight continue, system cancel/timeout).
+3. **Later — agent-to-agent.** Multi-agent handoffs and completion chains under the same
+   invariant envelope — still **host contracts**, not model-feedback scoring.
+
+Same product idea the whole way: **behaviour envelopes**, not “grade this LLM reply.”
 
 ---
 

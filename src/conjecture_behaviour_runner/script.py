@@ -32,7 +32,14 @@ class LedgerEffect:
 
 @dataclass(frozen=True)
 class DialogueTurn:
-    """One user turn + optional pin + expected invariants."""
+    """One step in a multi-turn behaviour script.
+
+    Slice 0 is **user-centric**: ``user_text`` is the primary stimulus. The product
+    trajectory includes agent-initiated, agent-to-agent, and system/completion turns
+    (see public README / experimental ``Actor``: user | agent | system). Optional
+    ``actor`` defaults to ``"user"`` so later multi-actor scripts can land without
+    renaming this field; adapters may ignore it until host drivers support it.
+    """
 
     user_text: str
     pin: Optional[Any] = None  # CognitionPin | None
@@ -41,11 +48,17 @@ class DialogueTurn:
     # Optional envelope of legal outcomes when cognition is live.
     allowed_outcomes: Sequence[str] = ()
     freeze_key: str = ""
+    # user | agent | system — Slice 0 authors leave default; multi-actor is later.
+    actor: str = "user"
 
 
 @dataclass(frozen=True)
 class ConjectureScript:
-    """A multi-turn behaviour script (golden)."""
+    """A multi-turn behaviour script (golden).
+
+    Not limited to human chat in product terms: agent and system steps are in
+    scope later. Slice 0 goldens are user-led by convention.
+    """
 
     script_id: str
     description: str

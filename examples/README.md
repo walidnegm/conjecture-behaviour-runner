@@ -15,7 +15,9 @@ python examples/e2e_multi_turn.py
 
 | File | What |
 |------|------|
-| **`e2e_multi_turn.py`** | **Hero** — MiniChatApp Act → verifier PASS/FAIL (planted bugs) |
+| **`e2e_multi_turn.py`** | In-process MiniChatApp → verifier PASS/FAIL (planted bugs) |
+| **`http_debug_app.py`** | **Portable host** — MiniChatApp over HTTP with `debug.owner` / `debug.pins` |
+| **`http_e2e.py`** | **HttpJsonAdapter e2e** — real loopback HTTP + `--prove-bugs` |
 | **`trajectory_authored_sole_continue.json`** | Script golden (authored trajectory + envelopes) |
 | **`trajectory_observed_pass.json`** / **`…_fail_dual_owner.json`** | Observed evidence shapes |
 | **`scenario_sole_continue.yaml`** / **`.json`** | Experimental Scenario description language |

@@ -6,13 +6,13 @@
 | **Document ID** | `CBR-SPEC` |
 | **Canonical path** | [`docs/SPEC.md`](./SPEC.md) |
 | **Title** | Conjecture Behaviour Runner Specification |
-| **Version** | **0.1.4** (alpha) — single version source; path-faithful + UI + HTTP adapter + CI |
+| **Version** | **0.1.5** (alpha) — HTTP e2e proven; face claim frozen-cognition honesty; single version |
 | **Status** | **Active** — authoritative for claim, Script/verifier contracts, scope |
 | **Audience** | Integrators, contributors, agent authors of goldens |
 | **Companion face** | [README](../README.md) — **lead with planted-bug demo**; use cases; trap line |
 | **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
 | **Prompt seed** | [prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) — trajectory + ODD → Script |
-| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.4** (see `_version.py`) |
+| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.5** (see `_version.py`) |
 | **Claim hierarchy (locked)** | **Face (plain):** catch agent bugs that still look fine in chat · **Precise:** freeze-safe state-law gates · **Technical:** envelopes / pin-freeze · **Gloss:** CCP-shaped conformance only — see §0 |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Inspiration / primary pattern** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) — hosts isomorphic to that format are the apt application |
@@ -580,7 +580,8 @@ artifact today: pin + source + freeze_key + optional evidence.
 | **0** | Script model, pin-driven harness, standard invariants, optional CCP goldens | ✅ |
 | **0.1.1–0.1.2** | CognitionProvider + freeze; temporal + outcome-specific verifiers; compile bridge; CLI run/JUnit; path-faithful mini-app + planted bugs | ✅ |
 | **0.1.3** | Claim reframe: face = path-faithful state-law gates; CCP inspiration; high-stakes use cases; trap = not chat validator; vision quarantined | ✅ docs |
-| **1 next** | HTTP/SSE/Playwright drivers; **LangGraph / Temporal / Crew adapters**; agent synthesizer **with required expected**; fail closed if golden has no expected | open |
+| **1 next** | Playwright / LangGraph / Temporal / Crew adapters; agent synthesizer **with required expected**; fail closed if golden has no expected | open |
+| **0.1.5** | HttpJsonAdapter + loopback HTTP host e2e + planted bugs over HTTP; face frozen-cognition honesty | ✅ |
 | **2** | Richer temporal ops; observation/domain ground truth; generation + shrink; production runner (shards, retries) | open |
 | **3** | ODD corpus / explorer / N-run **contract hold-rate** distributions | open |
 

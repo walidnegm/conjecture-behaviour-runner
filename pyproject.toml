@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "conjecture-behaviour-runner"
-version = "0.1.4"
+version = "0.1.5"
 description = "Catch agent bugs that still look fine in chat — Script/Turn/Driver/Observation/Invariant for multi-turn state law under pinned cognition"
 readme = "README.md"
 requires-python = ">=3.11"

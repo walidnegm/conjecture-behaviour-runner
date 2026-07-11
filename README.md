@@ -1,29 +1,61 @@
 # Conjecture Behaviour Runner
 
-**Catch the agent bugs that still look fine in chat.**
+**Catch state-law breaks that still look fine in chat** — given a fixed classification
+(pin/freeze). Pair with classifier tests for cognition drift.
 
-Multi-turn agents fail *quietly*: the reply still sounds fine, but the system dropped
-who owns the turn, lost the locked record, or restarted finished work. Conjecture makes
-CI go red on **state law**, not wording — with cognition **pinned/frozen** so runs stay
-cheap and identical every PR.
-
-MIT · **0.1.4** · [Bot0.ai](https://bot0.ai)
+MIT · **0.1.5** · [Bot0.ai](https://bot0.ai)
 
 ---
 
-## Install & first run
+## The pain (real, not only synthetic)
+
+In multi-turn control planes, the reply can look fine while **exclusive owner**, **entity
+pin**, or **mid-flight law** breaks. Dogfood on the Conversation Control Plane repeatedly
+hit this class (e.g. discovery/scorecards-shaped turns mid cost-out looking like a helpful
+detour while sole-continue still owned the stream). Evals score prose; they miss the ledger.
+
+Conjecture freezes the classification for CI, runs the real Act path (or HTTP), and fails
+the build when **state law** breaks.
+
+> **Honest scope:** this gates **execution** given a pin/freeze — not “the classifier was
+> wrong.” Test cognition separately; use Conjecture for owner/pin/terminal regression.
+
+---
+
+## 30-second proof (two paths)
+
+### A. In-process mini-app (fastest)
 
 ```bash
 git clone https://github.com/walidnegm/conjecture-behaviour-runner.git
 cd conjecture-behaviour-runner
 pip install -e ".[dev]"
 
-conjecture path-faithful --prove-bugs   # healthy PASS + 3 planted FAILs
-conjecture ui                           # browser UI → http://127.0.0.1:8765
-pytest tests/ -q
+conjecture path-faithful --prove-bugs   # PASS + 3 planted FAILs
+# optional local demo UI (not a product — just a viewer):
+conjecture ui --port 8765
 ```
 
-### Minimal golden (15 lines)
+### B. HTTP/JSON Driver (proves it is not CCP-only)
+
+```bash
+# self-contained: spawns a tiny HTTP host + HttpJsonAdapter + planted bugs
+PYTHONPATH=src python examples/http_e2e.py --self-host --prove-bugs
+```
+
+Or two terminals:
+
+```bash
+python examples/http_debug_app.py --port 8766
+python examples/http_e2e.py --endpoint http://127.0.0.1:8766/chat --prove-bugs
+```
+
+Same sole-continue golden, **real HTTP process**, portable `debug.owner` / `debug.pins`
+envelope. Any FinTech (or other) app that returns that JSON shape can use the same adapter.
+
+---
+
+## Minimal golden
 
 ```python
 from conjecture_behaviour_runner import (
@@ -64,30 +96,7 @@ result = run_script(
 assert result.passed
 ```
 
-### Planted bugs (the signature claim)
-
-| Run | Result | What broke |
-|-----|--------|------------|
-| Healthy continue | **PASS** | Mid-flight owner + pin hold |
-| Dual owner | **FAIL** | Steal to front door |
-| Drop pin | **FAIL** | Lost `workflow_id` |
-| Illegal restart | **FAIL** | Task wiped mid-flight |
-
-### Five concepts (that’s the public model)
-
-| | |
-|--|--|
-| **Script** | Multi-turn golden with expected rules |
-| **Turn** | Stimulus + optional pin + invariants |
-| **Driver** | How you Act on the app (`handle`, HTTP, …) |
-| **Observation** | Projected state after the turn |
-| **Invariant** | Rule that must hold (owner, pin, …) |
-
-Deeper architecture (Scenario, ODD, multi-runner, Verdict): [`docs/SPEC.md`](docs/SPEC.md) — **optional** for first contributions.
-
----
-
-## HTTP Driver (portable hosts)
+### Wire your own HTTP app
 
 ```python
 from conjecture_behaviour_runner.contrib.http_json import HttpJsonAdapter
@@ -101,27 +110,34 @@ adapter = HttpJsonAdapter(
 # result = run_script(script, adapter=adapter, llm_mode=LlmMode.STUB)
 ```
 
-Your app returns JSON with owner/pins; Conjecture checks invariants. No Python protocol
-required to try. More: [CONTRIBUTING.md](CONTRIBUTING.md).
+---
+
+## Five concepts (public model)
+
+**Script · Turn · Driver · Observation · Invariant**
+
+Everything else (Scenario, ODD, multi-runner, Verdict) is advanced — [`docs/SPEC.md`](docs/SPEC.md).
+
+Local browser UI (`conjecture ui`) is a **demo viewer**, not a second product.
 
 ---
 
-## Why not just LangSmith / DeepEval?
+## Planted-bug table (machinery)
 
-Those own traces and LLM-as-judge. Conjecture owns **“reply fine, ledger wrong”** under
-freeze-safe CI. Use **alongside** quality tools — not instead.
+| Run | Result | Break |
+|-----|--------|--------|
+| Healthy | **PASS** | — |
+| Dual owner | **FAIL** | Steal to front door |
+| Drop pin | **FAIL** | Lost `workflow_id` |
+| Illegal restart | **FAIL** | Task wiped mid-flight |
 
 ---
 
 ## Contribute
 
-See **[CONTRIBUTING.md](CONTRIBUTING.md)** (matrix, sized issues, five-minute path).
+[CONTRIBUTING.md](CONTRIBUTING.md) — matrix, sized issues, five-minute path.
 
-| Integration | Driver | Example |
-|-------------|--------|---------|
-| Path-faithful mini-app | ✅ | ✅ planted bugs |
-| HTTP/JSON | ✅ adapter | ⬜ host sample |
-| LangGraph / Temporal / Playwright | ⬜ | ⬜ |
+Help wanted: real host samples (HTTP), LangGraph/Temporal adapters, incident goldens.
 
 ---
 

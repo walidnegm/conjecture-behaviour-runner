@@ -15,17 +15,19 @@ This document is the **public contract**. It states the full product shape first
 
 ## 1. Problem (behaviour, not strings)
 
-LLM and agentic systems — especially those grown by generation and iteration — fail in **behaviour space**:
+LLM and agentic systems — especially those grown by generation and iteration — fail in
+**behaviour space**, not wording space.
 
-| Failure class | Example |
+| What goes wrong | Why string / snapshot checks miss it |
 |---|---|
-| Wrong *owner* of the turn | A detour steals an in-flight multi-turn task |
-| Lost *pin* / identity | Ambient `last_read_*` hijacks ledger identity |
-| Illegal *outcome* | Continue restarts a flow instead of staying mid-flight |
-| Unknown *pathway* | Auto-generated branch never named in a ticket |
-| Scope *drift* | Feature reaches states authors never mapped |
+| **Wrong control flow** mid-task | Reply still “looks fine” |
+| **Identity or state lost** across turns | No fixed sentence fails |
+| **Illegal landing** (restart, wrong mode, silent degrade) | Snapshot of one turn still green |
+| **Unknown pathway** after generated code | No test ever named that branch |
+| **Scope drift** (feature reaches unmapped states) | Goldens updated to match, contracts not |
 
-Pass/fail **cannot** be “assistant said exactly this sentence.” String match is brittle and blind to ownership, identity, and allowed envelopes.
+Exact reply text and frozen screenshots answer a different question. They do not pin
+**who may act**, **what must stay bound**, or **which outcomes are legal**.
 
 Evaluation must pin:
 
@@ -33,7 +35,9 @@ Evaluation must pin:
 2. **Allowed outcomes** (envelope of legal behaviours)  
 3. Optionally **distribution** (outcome rates over N runs when cognition is live)  
 
-That is the load-bearing idea of the **behaviour runner**. Conjecture is that product. Slice 0 implements it first on **turn-ownership / mid-flow contracts** because that is where agentic chat products fail most loudly — not because the product *is only* a control-plane unit test.
+That is the load-bearing idea of the **behaviour runner**. Conjecture is that product.
+Slice 0 implements a first vertical on multi-turn control-flow contracts (stub/freeze
+cognition) — not a claim that the product *is only* one domain’s unit tests.
 
 The **objective is not skinned down** because the first phase is simpler. We still
 build out ODD/scope, generation modalities, trajectories, UI drivers, and

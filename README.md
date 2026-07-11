@@ -21,7 +21,7 @@ in advance**.
 
 | What Conjecture pins instead | Meaning |
 |------------------------------|---------|
-| **Required invariants** | Must hold after the turn (owner, pin, policy, …) |
+| **Required invariants** | Must hold after the turn regardless of wording |
 | **Allowed outcomes** | Envelope of legal landings — not one golden sentence |
 | **Optional distribution** | Rates over N runs when cognition is live (later slices) |
 
@@ -68,14 +68,16 @@ breaks in behaviour.** String equality and one-shot snapshots answer the wrong q
 
 ### What evaluation must pin instead
 
-1. **Required invariants** — always true after a turn (e.g. exclusive owner, pin present, no phantom id)  
-2. **Allowed outcomes** — envelope of legal behaviours (not one golden string)  
-3. **Optionally distribution** — outcome rates over N runs when cognition is live  
+String match and one-shot snapshots miss **control flow, state identity, and legal
+landings** — even when the wording looks fine. So evaluation pins:
 
-That thesis comes from the full **behaviour-runner** product idea (scenario + trajectory +
-modes + generation + monitoring). Conjecture is that product. The first *runner
-implementation* that ships is where agentic products hurt first: **turn ownership and
-mid-flow contracts** — not “browser click-assert-text” as the MVP.
+1. **Required invariants** — what must still be true after the turn  
+2. **Allowed outcomes** — envelope of legal landings (not one golden string)  
+3. **Optionally distribution** — rates over N runs when cognition is live  
+
+That is the full **behaviour-runner** product idea (scenario + trajectory + modes +
+generation + monitoring). Conjecture is that product. Slice 0 is the first sealable
+vertical — not a redefinition as “browser click-assert-text” or “one product’s unit tests.”
 
 **Slice 0 is simpler. The product objective is not.** We still build out ODD/scope,
 modalities, UI drivers, corpus generation, and N-run distribution.

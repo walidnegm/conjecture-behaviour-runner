@@ -414,129 +414,74 @@ where applicable, raw + parsed output, validation evidence. **Mode labels alone 
 
 ---
 
-## 2.1 Pipeline, ecosystem, and Collinear
+## 2.1 Pipeline and ecosystem
 
-Short face: [README — Pipeline](../README.md#pipeline-face). **This section is normative (`CBR-SPEC`).**
+Short face: [README](../README.md). **This section is normative (`CBR-SPEC`).**
+
+Differentiation lives in **§0** (job + green bar). This section is **flow and plugins** —
+not a feature bake-off against named sim/eval vendors.
 
 ### Pipeline (normative)
 
 ```text
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  INPUTS                                                          │
-  │  Epic · user story · ODD/scope · incident · transcript           │
-  │  optional: traffic · Collinear/sim trajectory · bug report       │
-  └────────────────────────────┬────────────────────────────────────┘
-                               ▼
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  AGENT INTERFACE (authoring)                                     │
-  │  LLM/coding agent drafts ConjectureScript against our schema     │
-  │  → validate · fail-closed kinds · one-shot repair                │
-  │  Output: deterministic IR (JSON/YAML golden)                     │
-  └────────────────────────────┬────────────────────────────────────┘
-                               │  ConjectureScript
-                               ▼
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  RUNNER (thin — not a sim world)                                 │
-  │  CognitionProvider: stub | freeze | record | host local/cloud    │
-  │  Driver: in-process | HTTP/SSE | Playwright | …                  │
-  │  Observer: TurnObservation                                       │
-  └────────────────────────────┬────────────────────────────────────┘
-                               ▼
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  VERIFIER / VERIFY                                                 │
-  │  Step + outcome-specific + trajectory invariants                 │
-  │  allowed_outcomes (non-vacuous) → RunResult / Trajectory / CI    │
-  └─────────────────────────────────────────────────────────────────┘
+  INPUTS: epic · ODD · incident · transcript · optional path seed
+        → Agent/human authors ConjectureScript (schema + **expected state**)
+        → RUNNER (freeze · Driver · Observer)
+        → VERIFIER (invariants · allowed outcomes · trajectory)
+        → Report / CI gate
 ```
 
 | Stage | Owns | Rule |
 |---|---|---|
-| Spec / epic / story | Claimed scope (`ScriptScope`) | Humans own the claim |
-| Agent interface | Draft goldens | Emits **only** validated IR |
-| IR | Portable contract language | Schema + enum kinds |
-| Runner | Act + observe under pin/freeze | Thin; reuse ecosystem drivers |
+| Spec / epic / story | Claimed scope | Humans own the claim |
+| Authoring | Draft goldens | Validated IR **with expected** |
+| IR | Contract language | Schema + enum kinds |
+| Runner | Act + observe under pin/freeze | Thin; drivers are plugins |
 | Verifier | Pass/fail on authoritative state | Owner, pin, terminal, trajectory |
 
-Agent **authors**; runner **executes**; verifier **judges**. Schema = agent “score surface.”
+### Ecosystem (seeds and plugins)
 
-### Ecosystem (compose — seeds and plugins, not the product)
-
-The old picture that put “ConjectureScript IR” alone in the center and “runner+verifier”
-as a thin next box reads as **open-source scenario scripts**. Correct picture: **one
-product box** (IR + runner + verifier); everything else is seed or plugin.
+**One product box:** IR + runner + verifier. Everything else feeds it or plugs in.
 
 ```text
-  Specs / ODD / epics / bugs
-           │
-     ┌─────┼──────────────┐
-     ▼     ▼              ▼
-  Collinear   Coding      Human
-  / sim       agent       goldens
-  (seed)      (draft IR)  (author)
-     │         │            │
-     └────┬────┴─────┬──────┘
-          ▼          ▼
-   ┌─────────────────────────────────────┐
-   │  CONJECTURE                         │
-   │  ┌─────┐   ┌────────┐   ┌────────┐  │
-   │  │ IR  │──►│ RUNNER │──►│ VERIFIER │  │
-   │  └─────┘   │ freeze │   │ kinds  │  │
-   │            │ CLI    │   │ temp.  │  │
-   │            └───┬────┘   └────────┘  │
-   └────────────────┼────────────────────┘
-                    │ Driver plugin
-                    ▼
-             Real application
+  specs / agents / humans / optional path seeds
                     │
-                    ▼  (reports)
-             pytest / CI / JUnit   ← *host*, not the verifier
+                    ▼
+         ┌──────────────────────┐
+         │ CONJECTURE           │
+         │ IR → RUNNER → VERIFY │
+         └──────────┬───────────┘
+                    │ Driver (HTTP · Playwright · LangGraph · Temporal · …)
+                    ▼
+              Real application
+                    │
+             pytest / CI (process host only)
 ```
 
 | Piece | Pattern |
 |---|---|
-| **Collinear / sim labs** | Upstream **seed** only; Conjecture **verifies** control-plane law on selected paths. Not: we become their sim. |
-| **Eval platforms** | Parallel **scores**; our **verifier** still gates owner/pin/terminal. |
-| **Playwright / HTTP / SSE** | **Driver plugins** invoked by *our* runner loop. |
-| **pytest / CI** | Process host for `conjecture run` + freeze dir + exit codes. |
-| **Coding agents** | Author IR against schema; do not replace runner/verifier. |
-| **CCP** | Reference domain bound through adapter — verifier kinds stay Conjecture’s. |
-
-### Collinear: differentiate and integrate
-
-| Dimension | **Collinear-class** | **Conjecture** |
-|---|---|---|
-| Primary job | Sim users/worlds; multi-turn **data**; rubrics / training | **Authoritative control-plane contracts** under pin/freeze |
-| Pass criterion | Quality / task success / preference | Envelope: owner, pin, terminal, ledger |
-| Cognition | Live or simulated agents in the loop | Pinned / frozen / recorded for CI |
-| World | Stateful environments | **No world engine** — Driver hits *your* app |
-| Artifact | Datasets, scores, sim runs | `ConjectureScript` + `RunResult` / Trajectory |
-| Strength | Scale of **exploration** | Precision of mid-flow **law** |
-| Weak alone | Can score a path that **violates** ledger law | Only checks paths **you already have** |
-
-| Direction | How |
-|---|---|
-| Collinear → Conjecture | Sim finds paths → curate → IR with pins/invariants → CI freeze → fail dual owner / lost pin |
-| Conjecture → Collinear | Failed contracts as sim **regression seeds**; later N-run **contract hold-rates** (not preference) |
-| Shared CI | Sim explores; Conjecture **gates merge** |
-
-**Smell test:** green bar “0.87 quality” → Collinear. Green bar “pin held, no dual owner” → Conjecture.
+| Path seeds (traffic, sim export, explorer) | Optional **input**; still need **expected state** for CI |
+| Coding agents | Author IR; do not replace runner/verifier |
+| Playwright / HTTP / SSE | Driver plugins |
+| LangGraph / Crew / Temporal | Orchestration hosts + adapters |
+| Trajectory scorers | Parallel scores if useful; **not** our merge gate |
 
 ### Tempting features (scope pin — normative)
 
 | Tempting feature | Decision |
 |---|---|
 | Happy/sad **quality** comparative scores | **Defer** — use `scope` / `expected_refusal` |
-| Built-in **sim users / worlds** | **Never core** — integrate upstream |
+| Built-in **sim users / worlds** | **Never core** — optional external path seeds only |
 | Proprietary “creative” **execution engine** | **Never core** — thin Driver |
 | Logger-as-product | **Support only** — trajectory = verifier evidence |
-| Agent script synthesizer (spec→IR) | **In scope** (open) |
+| Agent script synthesizer (spec→IR + expected) | **In scope** (open) |
 | Freeze / record / replay | **In scope** (shipped foundation) |
-| Path-faithful HTTP/SSE/Playwright | **In scope** (mini-app done; hosts next) |
+| Path-faithful HTTP/SSE/Playwright + orchestrator adapters | **In scope** (mini-app done; hosts next) |
 | Generation + shrink | **Later** |
 | N-run contract hold-rates | **Later** (contracts only) |
 | Model leaderboards | **Out of scope** |
 
-Not the mission: replace general runners or become a sim-data platform.
+Not the mission: replace general runners or become a multi-turn user-sim platform.
 
 ### What would make the repo materially credible
 
@@ -985,14 +930,14 @@ MIT: **use, fork, ship** IR + verifier + thin runner. PRs stay **portable**.
 | **Cognition providers** | Local/cloud wrappers; freeze tooling | CI freeze/replay |
 | **Verifier kinds** | Temporal packs, domain-neutral invariants | Deeper contracts |
 | **Agent interface** | Spec → validated `ConjectureScript` + repair | Agentic golden authoring |
-| **Ecosystem bridges** | Collinear → script seed; trace → observation | Integrate, don’t clone |
+| **Ecosystem bridges** | Orchestrator adapters; optional path-seed import; trace → observation | Integrate, don’t clone |
 | **Corpus** | Portable sole-continue / detour / pin-stable goldens | Shared language |
 | **CLI / CI** | Sharding, timeouts, richer JUnit, rerun | Production runner |
 | **Docs & examples** | Adapter tutorials, ODD recipes | First green run |
 | **Schema / IR** | Versioned format, stronger validators | Stable agent surface |
 
 **Norms:** one concept per PR; tests for new kinds/providers; fail closed; no host-private
-goldens in this repo; do not reimplement Playwright/Collinear/eval platforms in core.
+goldens in this repo; do not reimplement Playwright, sim worlds, or eval platforms in core.
 
 ### Conjecture (OSS) vs Verdict (commercial)
 
@@ -1026,7 +971,7 @@ OSS and commercial **do not block each other**.
 | Trajectory as evidence | Not a second product |
 | Outcome-specific contracts | Landing A ⇒ invariant set A |
 | Temporal verifier pack | eventually / never / until / at-most-once |
-| Sim bridge, not sim core | Collinear seeds; Conjecture gates law |
+| Path-seed bridge, not sim core | External exploration may seed; Conjecture gates law |
 | Driver plugins | Same IR over in-process / HTTP / Playwright |
 | Failure shrinking (later) | Minimal multi-turn counterexample |
 | Contract hold-rates (later) | N-run *invariant hold*, not preference |

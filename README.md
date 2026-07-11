@@ -107,21 +107,15 @@ the YAML would be only a schema. Conjecture is three cores:
          Real application          pytest/CI only *hosts* the run
 ```
 
-**Pipeline:** author IR → our runner executes → our verifier judges → report/CI.  
-Playwright is a **driver**, not the product. Collinear **seeds** paths; it does not replace the verifier.
+**Pipeline:** author IR (with **expected state**) → our runner executes → our verifier judges → CI.
 
-Full ecosystem + Collinear: **[Specification §2](docs/SPEC.md#2-project-architecture)** · **[§2.1](docs/SPEC.md#21-pipeline-ecosystem-and-collinear)**.
+Differentiation is the **green bar**: *control-plane law held under freeze* — not a quality score, not a sim rubric.  
+Orchestrators and browsers are **drivers**; sim/eval tools may **seed** paths. None of them is our verifier.
 
-| | Collinear-class | Conjecture |
-|--|-----------------|------------|
-| **Job** | Sim users/worlds, multi-turn **data**, rubrics | **Control-plane contracts** under pin/freeze |
-| **Green bar** | Quality / task / preference scores | Owner · pin · terminal · refusal envelope |
-| **Integrate** | Sim **seeds** scripts; failed contracts re-probe in sim | CI **gates** merge on *our* verifier |
+Architecture: **[Specification §2](docs/SPEC.md#2-project-architecture)** · **[§2.1](docs/SPEC.md#21-pipeline-and-ecosystem)**.
 
-**Smell test:** “sim scored 0.87” → their lane. “No dual owner, pin held” → ours.
-
-**Never core:** built-in sim worlds, quality scoreboards, creative execution engines.  
-**Always core:** IR + runner + verifier (if any one is missing, the claim collapses).
+**Always core:** IR + runner + verifier.  
+**Never core:** built-in user-sim worlds, preference/quality scoreboards, creative execution engines.
 
 ### Multi-actor scripts
 
@@ -370,7 +364,7 @@ More: [docs/SPEC.md](docs/SPEC.md) ·
 ## Explicit non-goals
 
 - Replacing Playwright, pytest, or Cucumber as general runners  
-- Rebuilding sim/world platforms (Collinear-class) as the core mission  
+- Rebuilding multi-turn user-sim / world platforms as the core mission  
 - Live LLM on every PR by default  
 - Claiming CARLA-class generation/runtime **today**  
 - Phrase laundry lists as “understanding” (cognition stays label-based / pinned)  
@@ -404,7 +398,7 @@ conjecture run examples/ --adapter path-faithful --json-report /tmp/out.json --j
 ## Contribute · Verdict · foundations
 
 **MIT:** portable PRs welcome — drivers, observers, providers, verifier kinds, agent
-synthesizer, Collinear bridges, CLI, docs. Host-private goldens stay in *your* repo.
+synthesizer, orchestrator adapters, CLI, docs. Host-private goldens stay in *your* repo.
 
 **Verdict** (planned commercial): may **host**, move **faster**, or **reimplement**
 product surfaces (studio, SSO, managed freeze, private corpus, SLA). OSS and commercial

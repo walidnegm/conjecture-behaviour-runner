@@ -47,8 +47,8 @@ Not “one golden sentence.” Not a new universal testing paradigm.
 | Optional later: domain facts *if* projected into observation + verifier kinds | Built-in full domain sim / world model |
 
 **Default product scope = multi-turn control-plane contracts.**  
-The *shape* (IR + runner + verifier over projected state) can host more, but we do not
-market “test the whole agent” until domain ground truth is first-class.
+The *shape* (Scenario → Script → runner → verifier over projected state) can host more,
+but we do not market “test the whole agent” until domain ground truth is first-class.
 
 ### Product naming split (locked): Scenario vs Script
 
@@ -151,7 +151,7 @@ Authoring (human or agent) must emit expected contracts against the schema.
 **Agent-written IR is the test case.** A coding agent following
 `prompts/conjecture_script_author.seed.md` should produce the golden file the runner
 executes — not a prose plan that still needs hand translation. Product laws remain
-human-owned; the agent **encodes** them into description/play-back IR.
+human-owned; the agent **encodes** them into Conjecture Scenario and/or Script.
 
 ### What “green” means
 
@@ -269,9 +269,9 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 ### Canonical pipeline (target — partial today)
 
 ```text
-Scenario source → validated Scenario IR → ExecutionPlan
-       → Runner (Driver + CognitionProvider + Observer)
-       → Trajectory → Verifier results → Report
+  seeds → Conjecture Scenario → Conjecture Script
+       → Runner (who runs it) + Driver + CognitionProvider
+       → observed trajectory → Verifier → Report
 ```
 
 | Layer today (0.1.2) | Status |
@@ -468,14 +468,14 @@ artifact today: pin + source + freeze_key + optional evidence.
 
 | Module | Role |
 |---|---|
-| `script.py` | IR: `ConjectureScript`, turns, scope, expected fields, load/dump |
+| `script.py` | Conjecture Script: `ConjectureScript`, turns, scope, expected fields, load/dump |
 | `harness.py` | `run_script` — cognition → effects → observe → verifier |
 | `cognition.py` | `CognitionProvider`, `FreezeStore`, stub/freeze/record |
 | `invariants.py` | Step verifier kinds (`STANDARD_INVARIANT_KINDS`) |
 | `temporal.py` | Trajectory verifier kinds |
 | `protocol.py` | `ControlPlaneAdapter`, `TurnObservation` |
 | `path_faithful.py` | Mini-app Act path + planted-bug proof |
-| `compile_scenario.py` | Scenario IR → script; `RunResult` → Trajectory |
+| `compile_scenario.py` | Conjecture Scenario → Conjecture Script; `RunResult` → observed trajectory |
 | `discover.py` / `report.py` / `cli.py` | Discovery, JSON/JUnit, CLI |
 | `contrib/control_plane.py` | Optional CCP binding + portable goldens |
 
@@ -491,57 +491,47 @@ not a feature bake-off against named sim/eval vendors.
 ### Pipeline (normative)
 
 ```text
-  INPUTS: epic · ODD · incident · transcript · optional path seed
-        → Author Scenario / trajectory DESCRIPTION
-             (actors, steps, scope, allowed_outcomes, required_invariants, …)
-        → Choose WHO RUNS IT (runner + Driver)
-             e.g. compile → ConjectureScript → CP run_script
-             or later: UI plan → Playwright runner
-        → Observed trajectory (evidence of one run)
-        → VERIFIER (envelopes vs observation)
-        → Report / CI gate
+  seeds (specs · sim · agent · human)
+              │
+              ▼
+  Conjecture Scenario   (description: twists → envelopes)
+              │  author Script, or compile Scenario → Script
+              ▼
+  Conjecture Script     (play-back form for a runner)
+              │  who runs it? (explicit)
+     ┌────────┴────────┐
+     ▼                 ▼
+  CP runner      other runners (roadmap)
+  (run_script)
+     └────────┬────────┘
+              │ Driver plugin (HTTP · Playwright · LangGraph ·
+              │               Temporal · Crew · in-process · …)
+              ▼
+       Real application
+              │
+     observed trajectory → VERIFIER → pass/fail
+              │
+       pytest / CI only *hosts* the run
 ```
 
 | Stage | Owns | Rule |
 |---|---|---|
-| Spec / epic / story | Claimed scope | Humans own the claim |
-| Description language | Flexible trajectory file | Envelopes + expected — not driver code |
+| Seeds | Specs, sim, agents, humans | Inputs — not the product |
+| Conjecture Scenario | Twists + envelopes | Not tied to one driver |
+| Conjecture Script | Play-back form | Usual CI golden |
 | Runner selection | **Who executes** | Explicit; file does not imply runner |
 | Driver | Act on host | Plugin under the chosen runner |
 | Observed trajectory | Evidence | One run under one profile |
 | Verifier | Pass/fail | Shared kinds; independent of runner |
+| pytest / CI | Process host only | Not the verifier |
 
-### Ecosystem (seeds, description, runners)
+### Ecosystem (same stack)
 
-```text
-  specs / agents / humans / optional path seeds
-                    │
-                    ▼
-         Scenario / trajectory DESCRIPTION
-                    │
-         ┌──────────┴──────────┐
-         ▼                     ▼
-   CP play-back form     other plans (later)
-   (ConjectureScript)    (e.g. UI)
-         │                     │
-         ▼                     ▼
-   CP runner              other runners
-   (run_script)           (e.g. Playwright)
-         │                     │
-         └──────────┬──────────┘
-                    ▼
-              Driver → application
-                    │
-           observed trajectory
-                    │
-                 VERIFIER
-                    │
-             pytest / CI (process host)
-```
+Same diagram as pipeline above. Pieces map as:
 
 | Piece | Pattern |
 |---|---|
-| Path seeds | Feed **description** authoring; still need expected envelopes |
+| Path seeds | Feed Scenario/Script authoring; still need expected envelopes |
 | Coding agents | Author description or ConjectureScript; use prompt seed |
 | CP runner | Default **who runs** control-plane goldens today |
 | Playwright / HTTP / LangGraph / Temporal | Drivers (and later alternate runners) |
@@ -1078,7 +1068,7 @@ Short face: [README — Contribute · Verdict](../README.md#contribute--verdict-
 
 ### Where open-source contributions can go
 
-MIT: **use, fork, ship** IR + verifier + thin runner. PRs stay **portable**.
+MIT: **use, fork, ship** Scenario language + Script + verifier + thin runner(s). PRs stay **portable**.
 
 | Area | Examples | Why |
 |---|---|---|
@@ -1130,7 +1120,7 @@ OSS and commercial **do not block each other**.
 | Outcome-specific contracts | Landing A ⇒ invariant set A |
 | Temporal verifier pack | eventually / never / until / at-most-once |
 | Path-seed bridge, not sim core | External exploration may seed; Conjecture gates law |
-| Driver plugins | Same IR over in-process / HTTP / Playwright |
+| Driver plugins | Same Scenario/Script envelopes over in-process / HTTP / Playwright / orchestrators |
 | Failure shrinking (later) | Minimal multi-turn counterexample |
 | Contract hold-rates (later) | N-run *invariant hold*, not preference |
 | Verdict-shaped ops | Multi-tenant history, RBAC, webhooks, fleets |

@@ -14,16 +14,20 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 | **GitHub** | [github.com/walidnegm/conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner) |
 | **Import** | `conjecture_behaviour_runner` |
 | **Implementation spec** | [`docs/SPEC.md`](docs/SPEC.md) — **CBR-SPEC** (normative) |
+| **Agent coder guide** | [`AGENTS.md`](AGENTS.md) — integrate host + author goldens |
+| **Prompt seed** | [`prompts/conjecture_script_author.seed.md`](prompts/conjecture_script_author.seed.md) |
 | **License** | MIT · **Status** | Alpha **0.1.2** |
 
 ### How to read the docs
 
 | Doc | Type | Role |
 |-----|------|------|
-| **This README** | Project face | Why, green bar, script language, quickstart |
-| **[CBR-SPEC](docs/SPEC.md)** | **Specification** | Normative claim, architecture, IR fields, ecosystem, roadmap |
+| **This README** | Project face | Why, E2E demo, script language, quickstart |
+| **[CBR-SPEC](docs/SPEC.md)** | **Specification** | Normative claim, architecture, IR, ecosystem |
+| **[AGENTS.md](AGENTS.md)** | Agent coder contract | Host adapter checklist, golden rules, workflow |
+| **[Prompt seed](prompts/conjecture_script_author.seed.md)** | LLM/coding-agent prompt | Emit valid `ConjectureScript` JSON with expected state |
 
-On conflict: **SPEC wins** for contracts; update the README.
+On conflict: **SPEC wins** for contracts; **AGENTS.md** for agent workflow; update the README.
 
 ---
 

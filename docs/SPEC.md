@@ -9,7 +9,9 @@
 | **Version** | **0.1.2** (alpha) — claim + implementation surface aligned with code |
 | **Status** | **Active** — authoritative for IR, runner, verifier, scope; foundations ship |
 | **Audience** | Integrators, contributors, agent authors of goldens |
-| **Companion face** | [README](../README.md) — project face (green bar, script language, quickstart) |
+| **Companion face** | [README](../README.md) — project face (green bar, E2E, script language) |
+| **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
+| **Prompt seed** | [prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) |
 | **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.2** |
 | **One-liner (locked)** | Contract testing for the conversational control plane — behavioral envelopes over authoritative state under pinned or replayed cognition |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |

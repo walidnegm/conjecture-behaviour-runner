@@ -177,10 +177,29 @@ def control_plane_golden_scripts() -> list[ConjectureScript]:
         },
     )
 
+    from conjecture_behaviour_runner.script import ScriptScope
+
+    sole_continue_scope = ScriptScope(
+        in_scope=(
+            "multi-turn sole-continue on a pinned entity",
+            "stub/freeze cognition labels for task_intent",
+            "authenticated host session with ledger projection",
+        ),
+        out_of_scope=(
+            "free live model quality scoring",
+            "UI click paths without a control-plane adapter",
+        ),
+        expected_refusal=(
+            "re-start assessment mid sole-continue without explicit new_task",
+            "entity re-resolve from ambient last_read while blocks_resolve",
+        ),
+    )
+
     g1 = ConjectureScript(
         script_id="sole_continue_owns_the_turn",
         description="a continue turn on a pinned cost_out stream stays owned; no re-resolve",
         conversation_id="conv_g1",
+        scope=sole_continue_scope,
         turns=[
             DialogueTurn(
                 user_text="cost out the onboarding workflow",

@@ -1,0 +1,79 @@
+{
+  "script_id": "sole_continue_owns_the_turn",
+  "description": "Continue mid cost-out: exclusive owner, pin, and blocks_resolve hold",
+  "conversation_id": "conv_sole_continue_demo",
+  "tags": ["control-plane", "sole-continue", "example"],
+  "scope": {
+    "in_scope": [
+      "multi-turn sole-continue on a pinned entity",
+      "stub/freeze cognition labels for task_intent",
+      "authenticated host session with ledger projection"
+    ],
+    "out_of_scope": [
+      "free live model quality scoring",
+      "UI click paths without a control-plane adapter"
+    ],
+    "expected_refusal": [
+      "re-start assessment mid sole-continue without explicit new_task",
+      "entity re-resolve from ambient last_read while blocks_resolve"
+    ]
+  },
+  "initial_context": {},
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "cost out the onboarding workflow",
+      "pin": {
+        "task_intent": "continue"
+      },
+      "effects": [
+        {
+          "op": "begin_task",
+          "payload": {
+            "agent": "cost",
+            "kind": "cost_out",
+            "phase": "sizing",
+            "pins": {
+              "workflow_id": "wf_1"
+            }
+          }
+        }
+      ],
+      "invariants": [
+        {
+          "kind": "exclusive_owner",
+          "expected": "cost_out"
+        }
+      ],
+      "allowed_outcomes": []
+    },
+    {
+      "actor": "user",
+      "user_text": "make the volume 10k",
+      "pin": {
+        "task_intent": "continue"
+      },
+      "effects": [],
+      "invariants": [
+        {
+          "kind": "exclusive_owner",
+          "expected": "cost_out"
+        },
+        {
+          "kind": "active_kind",
+          "expected": "cost_out"
+        },
+        {
+          "kind": "pin_present",
+          "expected": "workflow_id"
+        },
+        {
+          "kind": "extra_true",
+          "expected": "blocks_resolve",
+          "reason": "pinned continue phase must not re-resolve"
+        }
+      ],
+      "allowed_outcomes": ["continue_owned"]
+    }
+  ]
+}

@@ -28,6 +28,10 @@ from conjecture_behaviour_runner.script import (
     InvariantSpec,
     LedgerEffect,
     RunResult,
+    ScriptScope,
+    load_script_json,
+    load_script_yaml,
+    script_from_dict,
 )
 
 __version__ = "0.1.0"
@@ -44,8 +48,12 @@ __all__ = [
     "LlmMode",
     "NullControlPlaneAdapter",
     "RunResult",
+    "ScriptScope",
     "TurnObservation",
     "check_standard_invariant",
+    "load_script_json",
+    "load_script_yaml",
     "run_script",
+    "script_from_dict",
     "__version__",
 ]

@@ -83,6 +83,7 @@ def run_script(
         turn_results.append(
             {
                 "index": i,
+                "actor": turn.actor,
                 "user_text": turn.user_text,
                 "observation": {
                     "exclusive_owner": obs.exclusive_owner,
@@ -95,15 +96,20 @@ def run_script(
         )
         failures.extend(turn_failures)
 
+    artifact: dict[str, Any] = {
+        "conversation_id": script.conversation_id,
+        "description": script.description,
+        "tags": list(script.tags),
+        "final_context_keys": sorted(context.keys()),
+    }
+    if script.scope is not None:
+        artifact["scope"] = script.scope.to_dict()
+
     return RunResult(
         script_id=script.script_id,
         passed=not failures,
         failures=failures,
         turn_results=turn_results,
         llm_mode=llm_mode.value,
-        artifact={
-            "conversation_id": script.conversation_id,
-            "description": script.description,
-            "final_context_keys": sorted(context.keys()),
-        },
+        artifact=artifact,
     )

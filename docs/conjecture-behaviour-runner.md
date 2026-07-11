@@ -285,6 +285,29 @@ Implemented in `script.py` / `pins.py` / `protocol.py`.
 | `turns` | `DialogueTurn[]` | Ordered steps (length ≥ 1 for real goldens) |
 | `initial_context` | `dict` | Host projection seed (ledger-like facts) **before** turn 1 |
 | `tags` | `str[]` | Optional corpus labels (`sole_continue`, `detour`, …) |
+| `scope` | `ScriptScope?` | **Mini-ODD** — claimed input boundary for this script class |
+
+#### `ScriptScope` (mini-ODD on the script)
+
+Same plain language as experimental Scenario `Scope` / SOTIF-style ODD. Slice 0
+treats scope as **metadata on the claim** (included in `RunResult.artifact`);
+automated probe generation from scope is a later slice.
+
+| Field | Role |
+|-------|------|
+| `in_scope` | Conditions / inputs the system **should** handle for this class |
+| `out_of_scope` | Unsupported — refuse or degrade gracefully |
+| `expected_refusal` | Probes that must be **rejected** (illegal restart, hijack, …) |
+
+```python
+from conjecture_behaviour_runner import ScriptScope, ConjectureScript, DialogueTurn
+
+scope = ScriptScope(
+    in_scope=["multi-turn sole-continue on a pinned entity"],
+    out_of_scope=["free live model quality scoring"],
+    expected_refusal=["entity re-resolve while blocks_resolve"],
+)
+```
 
 #### `DialogueTurn` (one step)
 
@@ -398,7 +421,130 @@ For each turn, roughly:
 5. Record turn result; abort or continue per runner policy  
 6. Carry `context` into the next turn  
 
-Result: `RunResult` (`passed`, `failures[]`, `turn_results[]`, optional `artifact`).
+Result: `RunResult` (`passed`, `failures[]`, `turn_results[]`, `artifact` including
+`scope` and `tags` when set).
+
+### Mid-flight state machine (reference domain)
+
+Reference scenario class: **multi-turn turn ownership** (sole-continue, detour,
+pin continuity). Not the whole project ODD — the first sealable class.
+
+```mermaid
+stateDiagram-v2
+  [*] --> FrontDoor: idle / no active stream
+
+  FrontDoor --> MidFlight: new_task + pin entity\n(exclusive_owner = specialist)
+  MidFlight --> MidFlight: continue\n(owner holds, pin holds,\nblocks_resolve = true)
+  MidFlight --> FrontDoor: detour / supersede\n(owner_not specialist,\nblocks_resolve = false)
+  MidFlight --> Terminal: complete / cancel / timeout\n(system actor — later)
+  FrontDoor --> FrontDoor: discovery / refuse OOS
+  Terminal --> [*]
+
+  note right of MidFlight
+    Illegal: re-start as greenfield
+    Illegal: re-resolve from ambient last_read
+    Pin identity must survive
+  end note
+```
+
+ASCII (always renderable):
+
+```text
+                    ┌─────────────┐
+         idle       │ front_door  │◄── detour supersedes
+                    └──────┬──────┘     (blocks_resolve false)
+                           │ new_task + pin
+                           ▼
+                    ┌─────────────┐
+         continue   │ mid-flight  │──► continue (owner + pin + blocks_resolve)
+         loop       │  specialist │
+                    └──────┬──────┘
+                           │ complete / cancel (system — later)
+                           ▼
+                    ┌─────────────┐
+                    │  terminal   │
+                    └─────────────┘
+
+  Mid-flight must NOT: re-start assessment · drop pin · ambient last_read hijack
+```
+
+Map to script patterns:
+
+| Transition | Script pattern | Typical invariants after step |
+|------------|----------------|-------------------------------|
+| Front door → mid-flight | Setup turn + `begin_task` / effects | `exclusive_owner` = specialist |
+| Mid-flight → mid-flight | Sole-continue | owner + `pin_*` + `extra_true` `blocks_resolve` |
+| Mid-flight → front door | Detour | `owner_not` specialist, often `extra_false` `blocks_resolve` |
+| Ambient must not steal pin | Pin-beats-ambient | `pin_equals` + preferred id extras |
+
+### Full sole-continue golden (JSON / YAML)
+
+Canonical examples in the repo (same content):
+
+- [`examples/sole_continue_golden.json`](../examples/sole_continue_golden.json)
+- [`examples/sole_continue_golden.yaml`](../examples/sole_continue_golden.yaml)
+
+Load without hard-coding Python:
+
+```python
+from conjecture_behaviour_runner import load_script_json, run_script, LlmMode
+# YAML: load_script_yaml(...) needs pip install ...[scenarios]
+
+script = load_script_json("examples/sole_continue_golden.json")
+# result = run_script(script, adapter=your_adapter, llm_mode=LlmMode.STUB)
+assert script.scope is not None
+assert script.scope.in_scope
+assert len(script.turns) == 2
+```
+
+Abbreviated JSON shape:
+
+```json
+{
+  "script_id": "sole_continue_owns_the_turn",
+  "description": "Continue mid cost-out: owner, pin, blocks_resolve",
+  "conversation_id": "conv_sole_continue_demo",
+  "tags": ["control-plane", "sole-continue"],
+  "scope": {
+    "in_scope": ["multi-turn sole-continue on a pinned entity"],
+    "out_of_scope": ["free live model quality scoring"],
+    "expected_refusal": [
+      "entity re-resolve from ambient last_read while blocks_resolve"
+    ]
+  },
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "cost out the onboarding workflow",
+      "pin": { "task_intent": "continue" },
+      "effects": [{
+        "op": "begin_task",
+        "payload": {
+          "kind": "cost_out",
+          "pins": { "workflow_id": "wf_1" }
+        }
+      }],
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "cost_out" }
+      ]
+    },
+    {
+      "actor": "user",
+      "user_text": "make the volume 10k",
+      "pin": { "task_intent": "continue" },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "cost_out" },
+        { "kind": "pin_present", "expected": "workflow_id" },
+        { "kind": "extra_true", "expected": "blocks_resolve" }
+      ],
+      "allowed_outcomes": ["continue_owned"]
+    }
+  ]
+}
+```
+
+Play back with `ControlPlaneStreamAdapter` (`[control-plane]` extra) or any host
+adapter that implements `begin_task` + the standard observation fields.
 
 ---
 
@@ -412,11 +558,15 @@ from conjecture_behaviour_runner import (
     InvariantSpec,
     LedgerEffect,
     ConjectureScript,
+    ScriptScope,
     ControlPlaneAdapter,   # Protocol
     NullControlPlaneAdapter,
     BaseControlPlaneAdapter,
     check_standard_invariant,
     run_script,
+    script_from_dict,
+    load_script_json,
+    load_script_yaml,      # needs [scenarios] / PyYAML
 )
 ```
 

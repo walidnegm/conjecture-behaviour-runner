@@ -63,7 +63,9 @@ def run_script(
             user_text=turn.user_text,
             pin=pin,
         )
-        context = dict(obs.context or context)
+        # None = no context update; {} = explicit clear; dict = replace projection.
+        if obs.context is not None:
+            context = dict(obs.context)
 
         turn_failures: list[str] = []
         for inv in turn.invariants:
@@ -73,8 +75,16 @@ def run_script(
             if msg:
                 turn_failures.append(f"turn[{i}] {inv.kind}: {msg}")
 
-        if turn.allowed_outcomes and obs.observed_outcome is not None:
-            if obs.observed_outcome not in turn.allowed_outcomes:
+        # Declared allowed_outcomes require a concrete observed_outcome (no vacuous pass).
+        if turn.allowed_outcomes:
+            if obs.observed_outcome is None:
+                turn_failures.append(
+                    f"turn[{i}] allowed_outcomes declared "
+                    f"{list(turn.allowed_outcomes)!r} but observed_outcome is None "
+                    f"(adapters must report an outcome, or include an explicit "
+                    f"allowed terminal such as 'no_outcome' if that is legal)"
+                )
+            elif obs.observed_outcome not in turn.allowed_outcomes:
                 turn_failures.append(
                     f"turn[{i}] outcome {obs.observed_outcome!r} not in "
                     f"allowed_outcomes={list(turn.allowed_outcomes)!r}"

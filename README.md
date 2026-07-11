@@ -1,65 +1,64 @@
 # Conjecture Behaviour Runner
 
-**Behaviour-based evaluation for agentic, multi-turn systems** —  
-**invariants and allowed outcomes**, not “the assistant said this exact sentence.”
+**Contract testing for the conversational control plane** —  
+**behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**,  
+under **pinned or replayed cognition**.
 
-Built by [Bot0.ai](https://bot0.ai).
+Not “one golden sentence.” Not a new universal testing paradigm.  
+The wedge: **authoritative control-plane conformance under probabilistic cognition.**
 
-Vibe-coded and auto-coded programs **don’t fail like classical apps**. They accrete
-**unknown pathways**. Chat and agents make that worse across turns. **Conjecture** is
-a harness for pinning what **must stay true** when you **cannot inventory every path
-in advance**.
-
-| What accrues in vibe / auto-coded systems | Why classical tests miss it |
-|-------------------------------------------|------------------------------|
-| **Probabilistic specs** (“make it handle handoff”) | Paths appear that no ticket named |
-| **Half-scoped features** | Code reaches states the Epic never closed |
-| **Dynamic / shifting scope** | Requirements move while code is still generating |
-| **Changing requirements** week to week | String goldens rot or get rewritten to “pass” |
-| **Code nobody deliberately designed** | Unknown branches, dual writers, silent fallthroughs |
-| **Chat + multi-turn agents on top** | Failures = wrong *owner*, lost *pin*, illegal *outcome* — not typos |
-
-| What Conjecture pins instead | Meaning |
-|------------------------------|---------|
-| **Required invariants** | Must hold after the turn regardless of wording |
-| **Allowed outcomes** | Envelope of legal landings — not one golden sentence |
-| **Optional distribution** | Rates over N runs when cognition is live (later slices) |
+Built by [Bot0.ai](https://bot0.ai). MIT open source.
 
 | | |
 |---|---|
 | **GitHub** | [github.com/walidnegm/conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner) |
 | **Import** | `conjecture_behaviour_runner` |
-| **CLI** | `conjecture` |
-| **License** | MIT · **Status** | Alpha — Slice 0 shipping |
+| **Public contract (spec)** | [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) |
+| **License** | MIT · **Status** | Alpha — Slice 0 |
 
-> **Project:** Conjecture Behaviour Runner (“Conjecture”) — MIT open-source package.  
-> **Slice 0 (now):** multi-turn **control-plane** invariants (stub/freeze cognition) + optional
-> [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) goldens.  
-> **Later slices:** path-faithful chat drivers, scenario YAML + UI surfaces, corpus generation,
-> distribution monitoring over live cognition.  
-> **Design is not skinned down** because the first phase is simpler — we still build out
-> ODD/scope, modalities, drivers, and distribution.
+### The valuable idea (what we actually claim)
 
-### Where this sits (not LLM-feedback labs, not Playwright)
+Probabilistic multi-turn systems should be tested against a **behavioral envelope**:
 
-Conjecture is closer to **scenario construction in autonomous driving** (e.g. **CARLA** /
-SOTIF-style ODD work) than to **LLM feedback / model-quality eval platforms** or browser E2E tools.
+| Ingredient | Role |
+|------------|------|
+| **Cognition pins** | Separate probabilistic *interpretation* from deterministic *execution* checks |
+| **Allowed outcomes** | Multiple conversational landings can be correct |
+| **Invariants** | What must remain true over **authoritative state** regardless of wording or path |
+| **Focus** | Ownership, active work identity, routing, terminals, ledger integrity — failures answer-quality metrics often miss |
 
-We deliberately stay out of “score LLM replies / train models from simulated users.” That
-space already exists. This project pins **host-system behaviour contracts** when code and
-multi-turn ownership are incomplete.
+Individually none of that is new. The combination applied to **control-plane conformance
+with frozen/sampled cognition** is the defensible framing.
 
-| Approach | What it optimizes for | How Conjecture differs |
-|----------|----------------------|-------------------------|
-| **Playwright / Cypress-style E2E** | Deterministic UI: click → wait → assert fixed text/DOM | UI can be *one driver later*. This project is **behaviour contracts** (outcomes + invariants), not click-assert-text as the definition of “pass.” |
-| **LLM feedback / model-eval labs** (rubrics, preference data, synthetic users, RL signal, leaderboards) | Score or improve the **model** | **Out of project scope.** We do not ship “was the answer good?” as the primary verdict. We check **who may own the turn, what must stay pinned, which landings are legal** on the *host*. |
-| **CARLA-style scenario building** | Scenarios + edge cases under an **ODD**; ground truth from the world / maps / sensors; generate stress and out-of-domain probes | **Closest analogy.** Declare the claimed domain (ODD/scope), author scenarios from **ground truth** (code contracts, real traffic, explorer), generate **edge conditions**, pin **what must hold** when the world is nondeterministic. |
-| **Conjecture (this package)** | Multi-turn **behaviour envelopes** for agentic apps built under vibe/auto coding | Scenario + trajectory + optional edge generation from ground-truth collection; first sealable surface is control-plane mid-flow contracts. |
+> **Slice 0 (honest):** hand-authored multi-turn scripts + pin-driven cognition + host
+> adapter observing projected state. Reference goldens exercise **pure control-plane
+> contracts** (injected pins/effects). That is a **unit-level** vertical — useful, not yet
+> path-faithful chat through a deployed app. See [Slice 0 honesty](#slice-0-honesty)
+> and the [public contract](docs/conjecture-behaviour-runner.md).
 
-**In short:** Playwright automates the browser. LLM-feedback platforms evaluate **model quality**.  
-Conjecture is for **scenario- and edge-driven behaviour contracts** on systems whose path set
-is incomplete — the same *kind of problem* AV stacks face with ODD and edge cases, applied
-to agentic **application** control flow.
+### Positioning (compose with existing tools — do not replace them)
+
+```text
+  Conjecture scenario + oracle (behavioral envelope)
+             ↓
+  Driver: Playwright / HTTP / SSE / WebSocket / in-process / …
+             ↓
+  Real application + Observer (ledger, tools, events)
+```
+
+| Related work | What it is | How Conjecture relates |
+|--------------|------------|-------------------------|
+| **Playwright** | Full execution substrate (assertions, fixtures, traces, isolation, …) | **Driver candidate**, not a straw-man “fixed DOM text” tool. We do **not** rebuild Playwright’s runner. |
+| **Cucumber / Gherkin** | Readable scenarios bound to **arbitrary** step code (DB, API, state — not only strings) | Scenario *language* + bindings. Conjecture is specialized **agent/control-plane semantics**; a Cucumber integration is possible later, not a claim that Cucumber = exact output. |
+| **Hypothesis stateful** | Action sequences + preconditions + invariants + **shrinking** to minimal fail | **Closest methodological analogue.** Slice 0 is hand-authored transitions; generation + shrink is roadmap, not claimed done. |
+| **Eval platforms** (LangSmith, Braintrust, DeepEval, Promptfoo, Inspect, Phoenix, …) | Multi-turn sims, traces, tool paths, custom scorers — often **score observed trajectories** | We narrow to: **all acceptable trajectories preserve explicit authoritative-state contracts** (ownership, pins, terminals). Overlap exists; “they only score text” is outdated. |
+| **Collinear-class sim labs** | Simulated users/worlds, multi-turn data, verifiers, rubrics | Stronger on **simulation & data**. Our wedge today: **deterministic conformance of app control plane** when cognition is pinned/replayed — not “unrelated.” |
+| **CARLA / Scenic** | Real scenario runtime in a simulated world + generators | **Aspiration** for generation/ODD later — **not** what ships today (no world model, scheduler, minimizer). |
+
+**Tight one-liners we prefer:**
+
+- *Stateful conformance testing for probabilistic workflows.*  
+- *Contract testing for the conversational control plane.*
 
 ### Scripts are multi-actor (not “user only”)
 
@@ -85,32 +84,44 @@ The experimental scenario model already names actors: `user` · `agent` · `syst
 3. **Later — agent-to-agent.** Multi-agent handoffs and completion chains under the same
    invariant envelope — still **host contracts**, not model-feedback scoring.
 
-Same idea the whole way: **behaviour envelopes**, not “grade this LLM reply.”
+Same idea the whole way: **behavioral envelopes over authoritative state**.
 
 ---
 
 ## Why this project exists
 
-### The software under test is not a closed machine
+Vibe/auto-coded agentic apps accrete **unknown pathways**. Production breaks as wrong
+**owner**, lost **pin**, illegal **restart**, dual writers — while the reply still “looks fine.”
+Answer-quality and many trajectory *scores* can stay green.
 
-The table above is the core claim. In short: **prose tests score wording; production
-breaks in behaviour.** String equality and one-shot snapshots answer the wrong question.
+Conjecture aims to verify: **every acceptable path still preserves explicit
+authoritative-state contracts** (with cognition pinned, frozen, or later sampled).
 
-### What evaluation must pin instead
+### Target architecture (four extension points)
 
-String match and one-shot snapshots miss **control flow, state identity, and legal
-landings** — even when the wording looks fine. So evaluation pins:
+| Point | Role | Slice 0 |
+|-------|------|---------|
+| **Driver** | Act on the real system (HTTP, SSE, Playwright, in-process, …) | In-process **adapter** only |
+| **Observer** | Collect authoritative evidence (ledger, tools, events, ownership) | `TurnObservation` from adapter |
+| **Cognition provider** | stub / freeze-replay / record / local / cloud | **Pins on the turn** (modes mostly labels until providers land) |
+| **Oracle** | Allowed outcomes + invariants (+ later temporal / distributional) | Standard invariant kinds + outcome membership |
 
-1. **Required invariants** — what must still be true after the turn  
-2. **Allowed outcomes** — envelope of legal landings (not one golden string)  
-3. **Optionally distribution** — rates over N runs when cognition is live  
+### Slice 0 honesty
 
-That is the full **behaviour-runner** design (scenario + trajectory + modes +
-generation + monitoring). **Conjecture is that project.** Slice 0 is the first sealable
-vertical — not a redefinition as “browser click-assert-text” or “one app’s unit tests.”
+| Green today means | Does **not** yet mean |
+|-------------------|------------------------|
+| Given **injected** pin + ledger effects, pure control-plane rules hold | User NL was classified by the real app |
+| Adapter projects owner/pins/extras correctly under those inputs | Path-faithful chat/SSE through production |
+| Multi-turn **script API** works with fail-closed checks | Full scenario IR → runner → trajectory → report pipeline |
 
-**Slice 0 is simpler. The full design is not.** We still build out ODD/scope,
-modalities, UI drivers, corpus generation, and N-run distribution.
+**Arrange / Act / Observe / Assert** is the intended shape. Slice 0 goldens often
+**arrange** mid-flight state via `LedgerEffect` and **supply** cognition via pin —
+useful contract unit tests; the natural-language text is partly **documentary** until
+a real Driver path lands.
+
+**Next credibility milestone** (see public contract): drive a real example app,
+freeze real cognition, observe real ledger mutations, catch three deliberate bugs,
+deterministic CI replay.
 
 ### Behaviour-driven testing and ODD (methodology we keep)
 
@@ -142,8 +153,8 @@ It is **metadata on the claim**, not a single test case.
 
 ### Where scenarios and use-cases come from (important distinctions)
 
-Scenarios are not only “someone wrote a Playwright test.” They are **seeded from
-different ground truths**. Mixing them without labels confuses trust and triage.
+Scenarios are **seeded from different ground truths**. Mixing them without labels
+confuses trust and triage.
 
 | Source | What you read / write | What you get | Build status |
 |--------|----------------------|--------------|--------------|
@@ -271,14 +282,18 @@ Implemented in `BaseControlPlaneAdapter` / `check_standard_invariant`. Unknown k
 | **`exclusive_owner`** | Who is driving this turn? Must be exactly this owner | `"cost_out"`, `"front_door"` |
 | **`owner_not`** | Must **not** still be owned by this (e.g. after a detour stole) | `"cost_out"` |
 | **`active_kind`** / **`kind_equals`** | Active task/kind label equals this | `"cost_out"` |
-| **`pin_present`** | An identity pin is still bound | `"workflow_id"` |
-| **`pin_absent`** | This pin is empty / missing | `"project_id"` |
-| **`pin_equals`** | Bound identity is still **this** value (not ambient last_read) | `{"key": "workflow_id", "value": "wf_1"}` |
+| **`pin_present`** | Pin key has a **usable** bound value (not missing/null/empty/`False`) | `"workflow_id"` |
+| **`pin_absent`** | Pin missing or null | `"project_id"` |
+| **`pin_key_missing`** | Key not in the pins map at all | `"project_id"` |
+| **`pin_equals`** | Bound identity is still **this** value (strict `==`) | `{"key": "workflow_id", "value": "wf_1"}` |
 | **`observed_outcome`** | Adapter-reported outcome code | host-defined string |
-| **`extra_true`** | Host flag in observation extras is true | `"blocks_resolve"` |
-| **`extra_false`** | Host flag is false | `"blocks_resolve"` |
+| **`extra_true`** / **`extra_false`** | Key **present** and value is strictly `True` / `False` (missing ≠ false) | `"blocks_resolve"` |
+| **`extra_missing`** | Key not in extras | `"foo"` |
 | **`extra_equals`** | Host extra equals a value | `{"key": "preferred_workflow_id", "value": "wf_1"}` |
 | **`always_true`** | Smoke only (null adapter) | — |
+
+If a turn declares **`allowed_outcomes`**, the adapter **must** set `observed_outcome`
+(no vacuous pass when outcome is `None`).
 
 **Three load-bearing examples:**
 
@@ -427,11 +442,11 @@ More: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md)
 
 ## Explicit non-goals
 
-- Replacing every unit test with multi-turn scripts  
+- Replacing Playwright, pytest, or Cucumber as general runners  
+- Rebuilding sim/world platforms (Collinear-class) as the core mission  
 - Live LLM on every PR by default  
-- Browser as the *only* truth for ownership bugs (UI is a later *driver*, not the project definition)  
-- Phrase laundry lists as “understanding” (cognition stays label-based; scripts pin outcomes)  
-- Competing as an LLM-feedback / model-quality scoring platform  
+- Claiming CARLA-class generation/runtime **today**  
+- Phrase laundry lists as “understanding” (cognition stays label-based / pinned)  
 
 ---
 
@@ -441,11 +456,12 @@ More: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md)
 
 | Horizon | Intent |
 |---------|--------|
-| **Full design** | Behaviour runner: scenarios, trajectories, drivers, generation, distribution |
-| **Slice 0** | Control-plane multi-turn invariants + portable package + CCP goldens |
-| **Next** | Path-faithful chat driver · scenario/UI surface · corpus · N-run distribution |
+| **Defensible wedge** | Control-plane conformance under pinned/replayed cognition |
+| **Slice 0** | Script API · standard invariants · CCP reference goldens (contract unit path) |
+| **Next milestone** | Path-faithful vertical: real app · freeze cognition · real ledger · catch planted bugs · CI replay |
+| **Later** | Cognition providers · Driver/Observer split · temporal oracles · generation/shrink · richer runner CLI |
 
-Contributions welcome — scripts, invariants, adapters, and docs that stay portable
+Contributions welcome — scripts, invariants, adapters, drivers, and docs that stay portable
 (host-private goldens stay in *your* app repo).
 
 ---

@@ -14,12 +14,19 @@ from conjecture_behaviour_runner.script import InvariantSpec, LedgerEffect
 
 @dataclass
 class TurnObservation:
-    """What the harness saw after applying a turn (host-filled)."""
+    """What the harness saw after applying a turn (host-filled).
+
+    ``context`` semantics for the harness:
+    - ``None`` — do not change the carried context
+    - ``{}`` — explicit clear / reset
+    - non-empty mapping — replace the carried context projection
+    """
 
     exclusive_owner: Optional[str] = None
     active_kind: Optional[str] = None
     pins: dict[str, Any] = field(default_factory=dict)
-    context: dict[str, Any] = field(default_factory=dict)
+    # Default None = no context update (not "empty dict means keep prior").
+    context: Optional[dict[str, Any]] = None
     observed_outcome: Optional[str] = None
     extras: dict[str, Any] = field(default_factory=dict)
 
@@ -82,7 +89,7 @@ class NullControlPlaneAdapter:
             exclusive_owner=None,
             active_kind=None,
             pins={},
-            context=dict(context),
+            context=dict(context),  # carry projection forward
             observed_outcome="null_adapter",
             extras={"user_text": user_text, "pin": pin.to_dict() if pin else None},
         )

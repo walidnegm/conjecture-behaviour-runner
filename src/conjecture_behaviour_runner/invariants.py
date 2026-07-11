@@ -25,13 +25,15 @@ STANDARD_INVARIANT_KINDS: tuple[str, ...] = (
     "owner_not",         # observation.exclusive_owner != expected (str)
     "active_kind",       # observation.active_kind == expected (str)
     "kind_equals",       # alias of active_kind
-    "pin_present",       # expected=key: observation.pins[key] is truthy
-    "pin_absent",        # expected=key: observation.pins[key] is missing/empty
-    "pin_equals",        # expected={key,value} or [key,value]
+    "pin_present",       # key present with a non-null, non-empty value
+    "pin_absent",        # key missing or null
+    "pin_equals",        # expected={key,value} or [key,value] — strict ==
+    "pin_key_missing",   # key not in pins mapping
     "observed_outcome",  # observation.observed_outcome == expected (str)
     "extra_equals",      # expected={key,value}: observation.extras[key] == value
-    "extra_true",        # expected=key: bool(observation.extras[key]) is True
-    "extra_false",       # expected=key: bool(observation.extras[key]) is False
+    "extra_true",        # key present and value is True (not mere truthiness)
+    "extra_false",       # key present and value is False (missing fails)
+    "extra_missing",     # key not in extras
 )
 
 
@@ -51,6 +53,23 @@ def _key_value(expected: Any) -> tuple[Any, Any]:
     raise ValueError(
         f"expected a (key, value) pair or {{'key','value'}} mapping, got {expected!r}"
     )
+
+
+def _pin_presence(pins: Mapping[str, Any], key: Any) -> str:
+    """Classify pin map membership for contract checks.
+
+    Returns one of: missing | present_null | present_empty | present_false | present_value
+    """
+    if key not in pins:
+        return "missing"
+    val = pins[key]
+    if val is None:
+        return "present_null"
+    if val is False:
+        return "present_false"
+    if val == "" or val == 0:
+        return "present_empty"
+    return "present_value"
 
 
 def check_standard_invariant(
@@ -84,19 +103,35 @@ def check_standard_invariant(
 
     if kind == "pin_present":
         key = _key(exp)
-        if observation.pins.get(key):
+        state = _pin_presence(observation.pins, key)
+        if state == "present_value":
             return None
-        return f"pin {key!r} absent/empty (pins={dict(observation.pins)!r})"
+        return (
+            f"pin {key!r} not a usable bound value (state={state}, "
+            f"pins={dict(observation.pins)!r})"
+        )
 
     if kind == "pin_absent":
         key = _key(exp)
-        if not observation.pins.get(key):
+        state = _pin_presence(observation.pins, key)
+        if state in ("missing", "present_null"):
             return None
-        return f"pin {key!r} present but expected absent (={observation.pins.get(key)!r})"
+        return (
+            f"pin {key!r} expected absent/null but state={state} "
+            f"(={observation.pins.get(key)!r})"
+        )
+
+    if kind == "pin_key_missing":
+        key = _key(exp)
+        if key not in observation.pins:
+            return None
+        return f"pin key {key!r} present but expected missing"
 
     if kind == "pin_equals":
         key, val = _key_value(exp)
-        got = observation.pins.get(key)
+        if key not in observation.pins:
+            return f"pin {key!r} missing (cannot equal {val!r})"
+        got = observation.pins[key]
         if got == val:
             return None
         return f"pin {key!r}={got!r} != expected {val!r}"
@@ -108,22 +143,36 @@ def check_standard_invariant(
 
     if kind == "extra_equals":
         key, val = _key_value(exp)
-        got = observation.extras.get(key)
+        if key not in observation.extras:
+            return f"extra {key!r} missing (cannot equal {val!r})"
+        got = observation.extras[key]
         if got == val:
             return None
         return f"extra {key!r}={got!r} != expected {val!r}"
 
     if kind == "extra_true":
         key = _key(exp)
-        if bool(observation.extras.get(key)):
+        if key not in observation.extras:
+            return f"extra {key!r} missing (expected True)"
+        got = observation.extras[key]
+        if got is True:
             return None
-        return f"extra {key!r} not truthy (={observation.extras.get(key)!r})"
+        return f"extra {key!r} is {got!r}, expected True (strict, not truthy)"
 
     if kind == "extra_false":
         key = _key(exp)
-        if not bool(observation.extras.get(key)):
+        if key not in observation.extras:
+            return f"extra {key!r} missing (expected False — missing ≠ false)"
+        got = observation.extras[key]
+        if got is False:
             return None
-        return f"extra {key!r} truthy but expected false (={observation.extras.get(key)!r})"
+        return f"extra {key!r} is {got!r}, expected False (strict, not falsy)"
+
+    if kind == "extra_missing":
+        key = _key(exp)
+        if key not in observation.extras:
+            return None
+        return f"extra {key!r} present but expected missing (={observation.extras[key]!r})"
 
     return (
         f"unknown invariant kind={kind!r} — standard kinds: "

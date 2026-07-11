@@ -1,47 +1,74 @@
-# Conjecture Behaviour Runner — public contract
+# Conjecture Behaviour Runner — public contract (spec)
 
 | Field | Value |
 |---|---|
-| **Status** | Alpha (0.1) — **full design** stated; **Slice 0** portable surface shipping |
-| **One-liner** | Behaviour-based evaluation for agentic multi-turn systems — **invariants and allowed outcomes**, not string equality |
-| **Why it exists** | Vibe-coded / auto-coded systems accrete **unknown pathways** (probabilistic specs, weak or dynamic scope, changing requirements). You cannot inventory every path; you pin **behaviour contracts** that must hold when paths appear. |
-| **Slice 0 (now)** | Multi-turn **control-plane** invariant testing (stub/freeze cognition) + optional CCP goldens |
+| **Document role** | **Public contract / design spec** for the open-source project (not a commercial product brief) |
+| **Status** | Alpha (0.1) — design stated; Slice 0 ships a **narrow** vertical |
+| **Defensible one-liner** | **Contract testing for the conversational control plane** — behavioral envelopes over authoritative state under pinned/replayed cognition |
+| **Alternate** | Stateful conformance testing for probabilistic workflows |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Companion (reference domain)** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
 
-This document is the **public contract**. It states the full **project design** first; Slice 0 is the first implementation cut, not a redefinition of the project as “only CCP tests.”
+This document is the **spec**. The [README](../README.md) is the short public face.  
+Claims below distinguish **what is true today** from **aspiration**.
 
 ---
 
-## 1. Problem (behaviour, not strings)
+## 1. Problem and claim
 
-LLM and agentic systems — especially those grown by generation and iteration — fail in
-**behaviour space**, not wording space.
+### What is genuinely valuable
 
-| What goes wrong | Why string / snapshot checks miss it |
+Probabilistic conversational systems should be tested against a **behavioral envelope** —
+**permitted outcomes** plus **invariants over authoritative state** — not against one exact
+sentence or one ideal trajectory.
+
+| Ingredient | Role |
+|---|---|
+| **Cognition pins** | Separate probabilistic semantic interpretation from deterministic execution testing |
+| **Allowed outcomes** | Multiple conversational landings can be correct |
+| **Invariants** | Must remain true regardless of wording or path |
+| **Authoritative focus** | Ownership, active work identity, routing, terminals, ledger integrity |
+
+None of those ingredients is novel alone. The defensible combination is:
+
+> **Authoritative control-plane conformance under probabilistic cognition.**
+
+Not “a completely new testing paradigm.”
+
+### Failure modes that string / pure quality scores miss
+
+| What goes wrong | Why wording checks miss it |
 |---|---|
 | **Wrong control flow** mid-task | Reply still “looks fine” |
 | **Identity or state lost** across turns | No fixed sentence fails |
 | **Illegal landing** (restart, wrong mode, silent degrade) | Snapshot of one turn still green |
-| **Unknown pathway** after generated code | No test ever named that branch |
-| **Scope drift** (feature reaches unmapped states) | Goldens updated to match, contracts not |
+| **Dual writers / steals** | Trajectory “score” can still be high |
 
-Exact reply text and frozen screenshots answer a different question. They do not pin
-**who may act**, **what must stay bound**, or **which outcomes are legal**.
+### Slice 0 honesty (critical)
 
-Evaluation must pin:
+Reference goldens largely:
 
-1. **Required invariants** (always true after a turn)  
-2. **Allowed outcomes** (envelope of legal behaviours)  
-3. Optionally **distribution** (outcome rates over N runs when cognition is live)  
+1. **Inject** a cognition pin  
+2. **Inject** ledger effects (`begin_task`, pins, ambient)  
+3. Run **pure** control-plane projection functions  
+4. Assert owner / pin / extras  
 
-That is the load-bearing idea of the **behaviour runner**. Conjecture is that **project**.
-Slice 0 implements a first vertical on multi-turn control-flow contracts (stub/freeze
-cognition) — not a claim that the project *is only* one domain’s unit tests.
+That establishes:
 
-The **objective is not skinned down** because the first phase is simpler. We still
-build out ODD/scope, generation modalities, trajectories, UI drivers, and
-distribution. Slice 0 is a thin vertical through a larger programme.
+> Given the state transition I injected and the classification I supplied, does the
+> contract function return the expected owner / pin / blocks_resolve?
+
+It does **not** yet establish:
+
+> When a user sends this message to the **deployed application**, does classify → route →
+> mutate → tools → respond while preserving the contract?
+
+So Slice 0 is a **valuable unit-level contract harness**. NL on the turn is partly
+**documentary** until a real **Driver** path exists. `LedgerEffect` should be used for
+**arrange / environment** (and external stimuli), not as a substitute for the system’s
+own Act side effects long-term.
+
+**Arrange → Act → Observe → Assert** is the target run shape.
 
 ---
 
@@ -67,21 +94,34 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 | **Scenario** | One goal-directed route with contracts filled |
 | **Trajectory** | One observed run of a scenario under one profile |
 
-### Analogy: CARLA / AV scenarios — not Playwright, not LLM-feedback labs
+### Related work (compose; do not straw-man)
 
-Conjecture is methodologically closer to **scenario construction for autonomous
-systems** (e.g. CARLA scenario runner, SOTIF edge-case work) than to:
+| Related | Relation to Conjecture |
+|---|---|
+| **Playwright** | Complete execution substrate. Conjecture sits **above** it as oracle semantics; Playwright can be **a Driver** (fixtures, traces, isolation). Do not rebuild Playwright. |
+| **Cucumber** | Readable scenarios + step defs that can assert **any** state. Not “exact string only.” Conjecture is specialized agent/control-plane oracles; integration is possible. |
+| **Hypothesis stateful** | Closest **method** analogue: actions → transitions → invariants → **shrink**. Without generation/shrink, Slice 0 is a **hand-authored** transition API. |
+| **Eval platforms** (LangSmith, Braintrust, DeepEval, Promptfoo, Inspect, Phoenix, …) | Already multi-turn / trajectory / tools. Differentiation is **narrower**: verify **authoritative-state contracts** for all acceptable trajectories — not “they only score the model.” |
+| **Collinear-class** | Overlap grows with explorers, ODD, N-run distributions. Honest today: they lean **sim/data**; we lean **app control-plane conformance with pinned cognition**. |
+| **CARLA / Scenic** | Useful **aspiration** for scenario generation under constraints. Premature as a claim for current code (no world runtime, scheduler, minimizer). |
 
-- **Playwright-class E2E** — click → assert fixed UI text (UI may later be *a driver*, not the project definition);
-- **LLM feedback / model-eval platforms** — score reply quality, preference data, synthetic users,
-  RL signal, leaderboards. **Out of this project’s scope.** Our primary verdict is
-  **host behaviour contracts** (ownership, pins, legal landings, honest terminals), not
-  “was the model’s answer good?”
+### Canonical pipeline (target — partial today)
 
-Like AV scenario work: declare an **ODD**, collect **ground truth** (maps/sensors ↔ here:
-code contracts, session traffic, explorer), build **scenarios**, generate **edge conditions**,
-and pin **invariants / allowed outcomes** when the world is nondeterministic. Edge generation
-from ground-truth collection is a later slice; Slice 0 seals the first contracts mid-flow.
+```text
+Scenario source → validated Scenario IR → ExecutionPlan
+       → Runner (Driver + CognitionProvider + Observer)
+       → Trajectory → Oracle results → Report
+```
+
+| Layer today | Status |
+|---|---|
+| `ConjectureScript` / `run_script` / `RunResult` | **Stable Slice 0** |
+| Experimental `Scenario` / `Trajectory` / waits / evidence | **Schema + models** — not fully joined to the runner |
+| Cognition modes enum | **Labels**; full provider (resolve/record/replay + model identity) not shipped |
+| CLI | **Demo** — not a discovery/report/shard test runner yet |
+
+Free-form experimental preconditions/postconditions as **strings** are **descriptions** until a
+typed predicate registry or callables exist — do not treat them as executable truth.
 
 ### Scripts are multi-actor (user → agent → agent-to-agent)
 
@@ -171,62 +211,74 @@ adversarial generation remain **to build**.
 
 ---
 
-## 2. Project architecture (full runner)
+## 2. Project architecture
 
-```text
-                    ┌──────────────────────────────────────┐
-                    │   Conjecture Behaviour Runner         │
-                    │   Scripts · scenarios · trajectories  │
-                    │   Cognition modes · drivers · corpus  │
-                    └──────────────────────────────────────┘
-           ┌────────────────┬─────────────────┬──────────────────┐
-           ▼                ▼                 ▼                  ▼
-     Slice 0 (now)    Slice 1             Slice 2            Slice 3+
-     Control-plane    Path-faithful       Scenario YAML      Generation:
-     multi-turn       chat / SSE          + optional UI      code seed,
-     invariants       driver              surface driver     explorer,
-     (stub/freeze)                        (e.g. Playwright)  adversarial /
-                                                             OOD · N-run
-                                                             distribution
+### Four extension points (product boundary)
+
+| Extension | Responsibility | Examples |
+|---|---|---|
+| **Driver** | Act on the actual system | HTTP, SSE, WebSocket, Playwright, in-process, Temporal, LangGraph |
+| **Observer** | Authoritative evidence | messages, routing, tool I/O, ledger, ownership, terminals, DB, events |
+| **Cognition provider** | Probabilistic interpretation | stub, freeze/replay, record, local, cloud, shadow compare |
+| **Oracle** | Evaluate envelopes | step asserts, trajectory/temporal invariants, allowed outcomes, later distributions |
+
+Slice 0 collapses Driver+Observer into `ControlPlaneAdapter` and Cognition into turn pins.
+
+### Target cognition provider (not fully implemented)
+
+```python
+class CognitionProvider(Protocol):
+    def resolve(self, turn, state) -> CognitionDecision: ...
+    def record(self, decision, evidence) -> FreezeArtifact: ...
+    def replay(self, freeze_key) -> CognitionDecision: ...
 ```
 
-| Layer | Owns |
-|---|---|
-| **Script / scenario** | Multi-turn steps, pins, expected contracts, allowed outcomes |
-| **Cognition mode** | How labels are obtained: `stub` · `freeze` · `record` · `local` · `cloud` |
-| **Driver** | How a step is applied (adapter today; later chat/SSE; later UI) |
-| **Trajectory** | Evidence of one run under one profile (distribution later) |
-| **Corpus** | Goldens humans own; later bootstrap and adversarial generation |
+Artifacts should carry model identity, prompt/version hashes, schema version, seed/temperature
+where applicable, raw + parsed output, validation evidence. **Mode labels alone ≠ mode system.**
 
-**Scripts assert host contracts** (control plane, ledger, or other adapter-projected state). They do not invent a second domain model out of thin air — but the **host is not required to be CCP**. CCP is the reference binding for Slice 0.
+### Delivery slices (revised priorities)
 
----
-
-## 3. Slice plan
-
-| Slice | What |
-|---|---|
-| **0 (now)** | Portable script model (**user-centric** first), pin-driven harness, adapter protocol, invariant library, optional CCP stream adapter + 3 goldens |
-| **1** | Path-faithful host chat / SSE driver; **agent-initiated + completion** turns (no new human message) |
-| **2** | Scenario YAML + multi-actor steps (`user` · `agent` · `system`); optional UI harness as *one* surface driver |
-| **3** | **Agent-to-agent** handoff scripts + corpus generation (code seed, styles, detours, adversarial / OOD) |
-| **4** | Distribution monitoring when cognition is live |
-
-Not in project scope: **LLM feedback scoring** / preference datasets / model leaderboards.
-
-Deterministic “click → assert fixed text” UI tests can remain outside this framework; UI is an optional **driver** for behaviour contracts, not the project definition.
-
----
-
-## 4. Cognition modes
-
-| Mode | Cognition | Proves |
+| Slice | What | Priority note |
 |---|---|---|
-| `stub` (default) | Pin on the turn | Behaviour contracts under fixed labels — CI-safe |
-| `freeze` / `record` | Recorded pin JSON | Replay / capture |
-| `local` / `cloud` | Host routes a real bounded classifier | Enum parity + same invariants |
+| **0 (now)** | Script model, pin-driven harness, standard invariants, optional CCP goldens | Contract **unit** path |
+| **1 (credibility)** | Path-faithful vertical: real app interface → freeze cognition → real ledger → trajectory report → planted bugs red → CI replay | **Do this before** more schema expansion |
+| **2** | Driver/Observer split; Playwright/HTTP as drivers; CognitionProvider interface | Composability |
+| **3** | Join experimental Scenario IR → ExecutionPlan → Runner → Trajectory | End architecture drift |
+| **4** | Temporal oracles; outcome-specific invariant sets; generation + shrink (Hypothesis-class) | Differentiation depth |
+| **5** | ODD-driven corpus / explorer / N-run distributions | Only after 1–3 are real |
 
-The portable core is **pin-driven**. It does not call your LLM factory; hosts supply pins or a richer driver.
+Not the mission: replace general runners or become a sim-data platform.
+
+### What would make the repo materially credible
+
+One uncompromising vertical:
+
+1. Start a **real** example application  
+2. Send **actual** NL messages through its public interface  
+3. **Record or freeze** real cognition decisions  
+4. Observe **real** authoritative ledger mutations  
+5. Evaluate **cross-turn** invariants  
+6. Produce structured **trajectory + failure report**  
+7. Plant **three** application bugs and prove Conjecture catches them  
+8. Run under **pytest + CI** with deterministic replay  
+
+Compelling demo line:
+
+> “The wording changed, the model changed, and the route varied — but the conversation
+> never created two active owners, never mutated completed work, and always returned to
+> the suspended task.”
+
+---
+
+## 4. Cognition modes (honest status)
+
+| Mode | Intended meaning | Slice 0 reality |
+|---|---|---|
+| `stub` | Pin on the turn | **Implemented** path — pin-driven |
+| `freeze` / `record` | Replay / capture freeze artifacts | Labels + `freeze_key` field; full provider not shipped |
+| `local` / `cloud` | Host-routed real classifier | Fail-closed without host-supplied pins; no built-in model lifecycle |
+
+The portable core is **pin-driven**. It does not call an LLM factory.
 
 ---
 
@@ -367,14 +419,26 @@ Invariants read **only** the observation (plus kind rules). Unknown kinds **fail
 | `exclusive_owner` | After this step, owner is still (or now) X |
 | `owner_not` | Owner must not remain X (e.g. detour superseded) |
 | `active_kind` / `kind_equals` | Active kind matches |
-| `pin_present` / `pin_absent` | Identity pin bound or cleared |
-| `pin_equals` | **Same** entity as earlier step — continuity |
-| `extra_true` / `extra_false` | Host flag (e.g. `blocks_resolve` mid sole-continue) |
+| `pin_present` | Key has a **usable** bound value (not missing / null / empty / `False`) |
+| `pin_absent` | Missing or null |
+| `pin_key_missing` | Key not in the pins map |
+| `pin_equals` | **Same** entity as earlier step — strict `==` |
+| `extra_true` / `extra_false` | Key **present** and value is strictly `True` / `False` (**missing ≠ false**) |
+| `extra_missing` | Key not in extras |
 | `extra_equals` | Host extra equals value |
 | `observed_outcome` | Adapter outcome code |
 | `always_true` | Smoke only |
 
 Full list: `STANDARD_INVARIANT_KINDS` in `invariants.py`.
+
+**Oracle gaps (roadmap):** temporal (`always` / `eventually` / `until` / `never before`),
+exactly-once side effects, outcome-**specific** invariant sets (outcome A ⇒ {A1,A2}),
+idempotency keys. Flat global invariant lists cannot express all branching behaviour.
+
+**Harness contracts (sealed):**
+
+- If `allowed_outcomes` is non-empty, `observed_outcome` is **required** (no vacuous green).  
+- `TurnObservation.context`: `None` = no update; `{}` = explicit clear; mapping = replace.
 
 ### Multi-turn script patterns (authoring guidance)
 
@@ -589,11 +653,13 @@ Requires `pip install conjecture-behaviour-runner[control-plane]`.
 
 ## 6. Explicit non-goals
 
-- Replacing all unit tests with multi-turn scripts  
+- Replacing Playwright, pytest, or Cucumber as general-purpose runners  
+- Rebuilding sim/world platforms as the core mission  
+- Claiming CARLA-class generation/runtime **today**  
 - Live LLM on every PR by default  
-- Browser as the *only* truth for ownership / mid-flow bugs  
-- Phrase laundry lists as scenario generators (cognition stays label-based; scripts pin outcomes and owners)  
-- Claiming Conjecture *is* the Conversation Control Plane (it **proves** contracts; CCP **is** one contract surface)
+- Phrase laundry lists as cognition  
+- Claiming Conjecture *is* the Conversation Control Plane (it **proves** contracts; CCP is one surface)  
+- Claiming Slice 0 goldens are path-faithful production proofs  
 
 ---
 
@@ -603,8 +669,11 @@ MIT. Alpha.
 
 | Horizon | Intent |
 |---|---|
-| **Full design** | Behaviour runner: scenarios, trajectories, drivers, generation, distribution |
-| **Slice 0** | Control-plane multi-turn invariants + portable package + CCP goldens |
-| **Next** | Path-faithful chat · scenario/UI surface · corpus · N-run distribution |
+| **Wedge** | Control-plane conformance under pinned/replayed cognition |
+| **Slice 0** | Script + invariants + optional CCP contract unit goldens |
+| **Next** | Path-faithful vertical + planted-bug proof + CI freeze/replay |
+| **Then** | Driver/Observer/CognitionProvider, Scenario→Trajectory join, temporal oracles, shrink |
 
 Host adapters and host-private goldens stay in host repos; this package keeps a portable, leak-free surface.
+
+**Document name:** *public contract (spec)* — file `docs/conjecture-behaviour-runner.md`.

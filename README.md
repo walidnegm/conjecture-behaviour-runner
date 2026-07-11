@@ -108,7 +108,17 @@ python examples/e2e_multi_turn.py
 | Bug: continue drops `workflow_id` | **FAIL** | Lost identity pin |
 | Bug: continue wipes the task | **FAIL** | Illegal restart mid-flight |
 
-That is the product in one screen: **multi-turn path + expected state + our runner/verifier**.
+That is one **runner** (CP `run_script`) playing a **ConjectureScript** (play-back form)
+against a Driver (`handle`). The same envelopes can later be described in full
+**Scenario** language and run by other runners — **who runs it** stays explicit.
+
+---
+
+## Script language note
+
+Section below documents the **CP play-back form** (`ConjectureScript`) used by today’s
+runner and E2E. The **generalized trajectory description** (actors, waits, nondeterminism
+envelopes, profiles) lives in `experimental/Scenario` + `schema.json` — see CBR-SPEC.
 
 ---
 

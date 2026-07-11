@@ -142,13 +142,33 @@ Trajectory: `eventually_exclusive_owner` · `never_exclusive_owner` · `pin_stab
 
 ---
 
-## 4. Agent coder workflow (recommended)
+## 4. Agent-written artifacts *are* the test case
+
+**Design fact:** what an agent (or human following the same schema) **writes into
+`ConjectureScript` / Scenario description is more likely to *be* the golden** than
+any free-form chat about “we should test sole-continue.”
+
+| Agent writes… | Role |
+|---------------|------|
+| Valid IR + **expected** kinds/outcomes | **The test case** (merge-gate input) |
+| Long NL “test plan” prose | Not executable — not the test |
+| Path-only JSON, empty invariants | Sketch only — not a CI gate |
+
+So agent-coding integration is not “help write docs about tests.” It is **emit the
+artifact the runner already knows how to run.** The prompt seed exists so the agent
+defaults to that artifact shape.
+
+**Still human/product-owned:** *which* laws (owners, pins, refusals). Agents must not
+invent product rules; they **encode** stated rules into IR. If the law is unknown, ask.
+
+## 5. Agent coder workflow (recommended)
 
 ```text
 1. Read CBR-SPEC §0 (claim) + this AGENTS.md
 2. Read host control-plane / ledger / graph state (what is authoritative)
 3. Pick scenario class + expected laws (product rules, not model vibes)
 4. Use prompts/conjecture_script_author.seed.md to draft ConjectureScript JSON
+   → that JSON *is* the test case once validated
 5. Validate: load_script_json / script_from_dict (fail closed on bad shape)
 6. Implement or extend host adapter observe_turn (Act → TurnObservation)
 7. run_script STUB or FREEZE; assert RunResult.passed
@@ -157,11 +177,11 @@ Trajectory: `eventually_exclusive_owner` · `never_exclusive_owner` · `pin_stab
 ```
 
 **Do not:** generate long NL transcripts with empty invariants.  
-**Do:** short probe + expected state at critical moments.
+**Do:** short probe + expected state at critical moments — **that file is the test.**
 
 ---
 
-## 5. CLI cheatsheet
+## 6. CLI cheatsheet
 
 ```bash
 pip install -e ".[dev]"
@@ -174,7 +194,7 @@ Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
 
 ---
 
-## 6. Files to open first
+## 7. Files to open first
 
 | Path | Why |
 |------|-----|
@@ -187,7 +207,7 @@ Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
 
 ---
 
-## 7. Out of scope for agent patches
+## 8. Out of scope for agent patches
 
 - Vendor sim/eval platforms as core  
 - Keyword routing on free-text user meaning  

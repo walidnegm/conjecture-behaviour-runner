@@ -137,6 +137,11 @@ A CI golden is a **probe + expected result**, not a hypothesis sketch:
 
 Authoring (human or agent) must emit expected contracts against the schema.
 
+**Agent-written IR is the test case.** A coding agent following
+`prompts/conjecture_script_author.seed.md` should produce the golden file the runner
+executes — not a prose plan that still needs hand translation. Product laws remain
+human-owned; the agent **encodes** them into description/play-back IR.
+
 ### What “green” means
 
 | Green means | Green does **not** mean |

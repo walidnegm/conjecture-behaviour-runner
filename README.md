@@ -14,8 +14,8 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 | **GitHub** | [github.com/walidnegm/conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner) |
 | **Import** | `conjecture_behaviour_runner` |
 | **Implementation spec** | [`docs/SPEC.md`](docs/SPEC.md) — **CBR-SPEC** (normative) |
-| **Agent coder guide** | [`AGENTS.md`](AGENTS.md) — integrate host + author goldens |
-| **Prompt seed** | [`prompts/conjecture_script_author.seed.md`](prompts/conjecture_script_author.seed.md) |
+| **Agent coder guide** | [`AGENTS.md`](AGENTS.md) — integrate host; agent output **is** the golden |
+| **Prompt seed** | [`prompts/conjecture_script_author.seed.md`](prompts/conjecture_script_author.seed.md) — emit runnable IR, not a test plan |
 | **License** | MIT · **Status** | Alpha **0.1.2** |
 
 ### How to read the docs

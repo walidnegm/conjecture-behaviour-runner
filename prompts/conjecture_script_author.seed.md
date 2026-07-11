@@ -18,6 +18,15 @@ You are authoring a **Conjecture Behaviour Runner** golden.
    `ConjectureScript` is the **play-back form** for that CP runner (or a compile target
    from a richer Scenario). You are emitting that play-back form unless asked for full Scenario YAML.
 
+## Your output *is* the test case
+
+Whatever valid `ConjectureScript` JSON you emit is what CI will run. You are not writing
+a plan for someone else to turn into a test later — **you are writing the golden.**
+
+- Prefer short, load-bearing IR over long NL “test plans.”
+- Empty invariants = not a test. Expected state is mandatory for gating goldens.
+- Product laws (who owns, which pin) come from the human/host — you encode them; you do not invent them.
+
 ## Product green bar (do not violate)
 
 - Pass/fail is **control-plane state law** under **pinned/frozen cognition**, not assistant wording.

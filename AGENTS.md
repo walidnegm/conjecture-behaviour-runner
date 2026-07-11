@@ -196,8 +196,9 @@ invent product rules; they **encode** stated rules into a Script. If the law is 
 1. Read CBR-SPEC §0 (claim) + this AGENTS.md
 2. Read host control-plane / ledger / graph state (what is authoritative)
 3. Pick scenario class + expected laws (product rules, not model vibes)
-4. Use prompts/conjecture_script_author.seed.md to draft a Conjecture Script JSON
-   → that Script *is* the test case once validated
+4. Use prompts/conjecture_script_author.seed.md:
+   STEP A — trajectory of twists + ODD/scope (ours or mapped from Collinear/others)
+   STEP B — emit Conjecture Script JSON → that Script *is* the test case once validated
 5. Validate: load_script_json / script_from_dict (fail closed on bad shape)
 6. Implement or extend host adapter observe_turn (Act → TurnObservation)
 7. run_script STUB or FREEZE; assert RunResult.passed

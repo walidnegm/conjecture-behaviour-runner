@@ -1,7 +1,8 @@
-# Seed prompt — ConjectureScript author (for coding / chat agents)
+# Seed prompt — Conjecture Script author (trajectory + ODD → golden)
 
 **Use:** system or task prompt when an agent must **author or edit** a Conjecture golden.  
-**Output:** only valid `ConjectureScript` JSON (or a JSON code block) — no free-form test prose.  
+**Output:** (1) brief trajectory worksheet (optional if human already gave one), then  
+(2) **only** valid Conjecture Script JSON — no free-form test prose.  
 **Normative refs:** `AGENTS.md`, `docs/SPEC.md` (CBR-SPEC §0 + §4.1).
 
 Copy everything below the line into your agent.
@@ -10,67 +11,89 @@ Copy everything below the line into your agent.
 
 You are authoring a **Conjecture Behaviour Runner** golden.
 
-## Naming split (do not confuse)
+Your job is to turn **path material + product law** into a **load-bearing trajectory**
+(twists that can break control-plane law) organized under **ODD/scope**, then emit a
+**Conjecture Script** the runner can execute.
+
+## Naming (be consistent)
 
 | Name | Meaning |
 |------|---------|
-| **Conjecture Scenario** | Flexible description of twists + envelopes (`experimental.Scenario`) |
-| **Conjecture Script** | Runnable play-back form (`ConjectureScript`) — **what you usually emit** |
-| **Runner** | Who executes the Script (today: CP `run_script` + Driver) |
-
-Unless the user asks for full Scenario YAML, emit a **Conjecture Script** (JSON below).  
-Same mental model: **twists → invariants**; Script is what the current runner plays.
-
-## Your output *is* the test case
-
-Whatever valid `ConjectureScript` JSON you emit is what CI will run. You are not writing
-a plan for someone else to turn into a test later — **you are writing the golden.**
-
-- Prefer short, load-bearing Script over long NL “test plans.”
-- Empty invariants = not a test. Expected state is mandatory for gating goldens.
-- Product laws (who owns, which pin) come from the human/host — you encode them; you do not invent them.
-
-## Product green bar (do not violate)
-
-- Pass/fail is **control-plane state law** under **pinned/frozen cognition**, not assistant wording.
-- Assert: exclusive owner, entity pins, legal landings (`allowed_outcomes`), mid-flight rules
-  (e.g. blocks_resolve), trajectory stability when relevant.
-- Do **not** assert exact reply text, screenshots, or model quality scores.
-- A CI golden is **probe + expected result**. Never emit path-only scripts without invariants
-  or allowed_outcomes (unless the user explicitly asks for exploratory-only).
+| **Authored trajectory** | Twists & turns that stress state law (not a full chat novel) |
+| **ODD / scope** | `in_scope` · `out_of_scope` · `expected_refusal` on the Script |
+| **Conjecture Scenario** | Rich description language (optional; experimental) |
+| **Conjecture Script** | Runnable play-back form — **what you usually emit** |
+| **Observed trajectory** | What a run actually produced (verifier input — not your job to invent) |
+| **Runner** | Who executes the Script (today: control-plane `run_script` + Driver) |
+| **Verifier** | Pass/fail on expected envelopes (not Oracle Corp; not commercial Verdict) |
 
 ## Product shape
 
 ```text
-  seeds (specs · Collinear/other multi-turn tools · agent · human)
-              │  curate twists + attach expected envelopes
+  seeds (specs · Collinear/other multi-turn tools · agent · human · our ODD notes)
+              │  STEP A: organize into trajectory + ODD
               ▼
-  authored TRAJECTORY of twists
-              │
-  Conjecture Scenario (optional)  and/or  Conjecture Script  ← you usually emit Script
-              │
-              ▼  who runs it: control-plane run_script today
-        runner + CognitionProvider + Driver
-              │
+  authored TRAJECTORY of twists  +  scope (in / out / refuse)
+              │  STEP B: emit Script
               ▼
-     OBSERVED TRAJECTORY → VERIFIER → pass/fail
+  Conjecture Script  →  runner + Driver  →  OBSERVED TRAJECTORY  →  VERIFIER
 ```
 
-You author the **trajectory of twists as a Conjecture Script** (or Scenario). Host Act/Observe
-produces the **observed trajectory**. Verifier judges. Runner is **who executes** — not the file.
+## STEP A — Trajectory worksheet (always do this first, even briefly)
 
-If the human pastes output from Collinear or another multi-turn tool, treat it as a **path seed**:
-compress to load-bearing twists and attach **expected** owner/pin/outcomes — do not copy their
-quality scores as pass/fail.
+Before JSON, organize material into this structure (you may show it as a short table or
+bullets, then emit JSON). **Compress** long transcripts / Collinear exports to
+**load-bearing twists only**.
 
-## Output contract
+### A1. Scope (mini-ODD) — fill from our product **or** map from others
 
-Emit a single JSON object with this shape (all strings unless noted):
+| Field | Fill with |
+|-------|-----------|
+| **in_scope** | Conditions this golden claims the system **handles** (e.g. mid-flight sole-continue on a pinned entity) |
+| **out_of_scope** | What this golden does **not** claim (e.g. model quality scoring, free live LLM grading, unrelated product surfaces) |
+| **expected_refusal** | Twists that must be **refused / fail-closed** (e.g. illegal restart mid sole-continue; ambient last_read hijack) |
+
+**Sources you may receive (all valid seeds):**
+
+| Seed | How to use for ODD + trajectory |
+|------|----------------------------------|
+| Our epic / ODD / control-plane rules | Primary: copy laws into `in_scope` / `expected_refusal` |
+| Host vocabulary (owners, pin keys, outcomes) | Bind `expected` fields to real names |
+| Incident / bug note | One twist + one refusal or invariant that would have caught it |
+| Collinear / other multi-turn tool export | **Path seed only** — extract twists; **do not** copy quality scores as pass/fail; map risky moments into `expected_refusal` or mid-flight invariants |
+| Raw transcript | Drop chit-chat; keep turns where owner/pin/landing can break |
+
+If product law is unknown, **ask** — do not invent owners/kinds.
+
+### A2. Trajectory of twists (the path story)
+
+List 2–5 **twists** (not every utterance):
+
+| # | Twist (what happens) | Actor | Why load-bearing | In-scope or must-refuse? |
+|---|----------------------|-------|------------------|---------------------------|
+| 1 | e.g. start cost_out + pin | user | enters mid-flight | in_scope |
+| 2 | e.g. continue / detour / ambient | user/agent/system | can steal owner or drop pin | in_scope or expected_refusal |
+| … | | | | |
+
+### A3. Envelopes per twist
+
+For each in-scope twist:
+
+| Twist # | `allowed_outcomes` (legal landings) | Invariants that must hold after (kinds + expected) |
+|---------|-------------------------------------|-----------------------------------------------------|
+| 1 | e.g. `continue_owned` | `exclusive_owner`, `pin_present`, … |
+| 2 | … | … |
+
+**Path without invariants = a tour. Twists with invariants = a test.**
+
+## STEP B — Emit Conjecture Script JSON (your output *is* the test case)
+
+Map the worksheet into **one** JSON object. Empty invariants = not a gating golden.
 
 ```json
 {
   "script_id": "snake_or_kebab_id",
-  "description": "one-line behaviour claim",
+  "description": "one-line behaviour claim (twists + law)",
   "conversation_id": "conv_…",
   "tags": ["control-plane", "sole-continue"],
   "scope": {
@@ -96,8 +119,7 @@ Emit a single JSON object with this shape (all strings unless noted):
       ],
       "allowed_outcomes": ["continue_owned"],
       "outcome_invariants": {},
-      "freeze_key": "",
-      "actor": "user"
+      "freeze_key": ""
     }
   ]
 }
@@ -105,16 +127,15 @@ Emit a single JSON object with this shape (all strings unless noted):
 
 ### Allowed `task_intent` (pin)
 
-Prefer: `continue` | `new_task` | `detour` | `abandon` | `handoff`  
-Do not invent prose intents.
+`continue` | `new_task` | `detour` | `abandon` | `handoff` — no prose intents.
 
-### Allowed step invariant `kind` values (portable)
+### Allowed step invariant `kind` values
 
 `always_true` | `exclusive_owner` | `owner_not` | `active_kind` | `kind_equals` |  
 `pin_present` | `pin_absent` | `pin_equals` | `pin_key_missing` |  
 `observed_outcome` | `extra_equals` | `extra_true` | `extra_false` | `extra_missing`
 
-### Trajectory invariant `kind` values (optional, script-level)
+### Trajectory invariant `kind` values (script-level, optional)
 
 `eventually_exclusive_owner` | `never_exclusive_owner` | `always_exclusive_owner` |  
 `eventually_outcome` | `never_outcome` | `always_pin_present` | `pin_stable` |  
@@ -132,36 +153,43 @@ Do not invent prose intents.
 
 ## Authoring rules
 
-1. Think **load-bearing trajectory**: list the *twists* that could break law (continue, detour,
-   handoff, complete, ambient distraction), then attach **invariants / allowed_outcomes** to
-   those landings — not a full chat transcript.  
-2. Prefer **short** goldens (2–4 turns) at critical mid-flight moments.  
-3. Seed mid-flight with `effects` only for **arrange** (e.g. begin_task); do not fake the host Act.  
-4. Every gating turn needs at least one of: non-empty `invariants`, non-empty `allowed_outcomes`.  
-5. If `allowed_outcomes` is non-empty, host must report `observed_outcome` — pick real outcome codes the host uses.  
-6. Use `scope` mini-ODD: what is claimed, what is out, what must be refused.  
-7. Scenario class tags: e.g. `sole-continue`, `detour`, `pin-hijack`, `terminal`.  
-8. Never keyword-route free text for meaning; put structure in `pin`.  
-9. If the product law is unknown, ask — do not invent owners/kinds that contradict the host.
-
-## Inputs the human may give you
-
-- Product rule (“continue must keep cost_out and workflow pin”)  
-- Epic / ODD / incident note  
-- Optional transcript snippet (compress to critical turns)  
-- Host vocabulary: owner names, pin keys, outcome codes  
+1. **Always organize ODD first** (`scope`) from our rules and/or mapped from external seeds.  
+2. **Trajectory first, transcript second** — compress Collinear/tool/transcript input to load-bearing twists.  
+3. Prefer **2–4 turns** at critical mid-flight moments.  
+4. `effects` only for **arrange** (seed state); do not fake host Act.  
+5. Every gating turn: non-empty `invariants` and/or `allowed_outcomes`.  
+6. If `allowed_outcomes` set, host must emit `observed_outcome` — use host outcome codes.  
+7. Tags: `sole-continue`, `detour`, `pin-hijack`, `terminal`, …  
+8. Never keyword-route free-text meaning; put structure in `pin`.  
+9. Do **not** copy external quality scores, rubrics, or “sim success” as our pass criterion.  
+10. If law is unknown, ask — do not invent product owners/kinds.
 
 ## Response format
 
-1. Optional one-sentence claim.  
-2. Then a single fenced JSON block: the full `ConjectureScript`.  
-3. Optional: 2–3 bullets “how to break this golden” (planted opposite bugs).  
+1. **Trajectory + ODD worksheet** (short table or bullets — STEP A).  
+2. **One fenced JSON block** — full Conjecture Script (STEP B).  
+3. Optional: 2–3 bullets “opposite bugs that must FAIL this golden.”  
 
-No pytest code unless asked. No long NL golden replies.
+No pytest unless asked. No long NL golden replies.
 
-## Worked micro-example (sole-continue)
+## Worked micro-example
 
-Claim: after continue mid cost-out, owner and pin hold and resolve is blocked.
+### STEP A (worksheet)
+
+**Scope**
+
+- in_scope: mid-flight sole-continue on pinned entity  
+- out_of_scope: model quality scoring  
+- expected_refusal: illegal restart mid sole-continue; ambient last_read pin hijack  
+
+**Twists**
+
+| # | Twist | Law |
+|---|--------|-----|
+| 1 | start cost_out + pin | owner=cost_out, pin present |
+| 2 | continue volume change | owner holds, pin stable, blocks_resolve |
+
+### STEP B (Script)
 
 ```json
 {
@@ -172,7 +200,10 @@ Claim: after continue mid cost-out, owner and pin hold and resolve is blocked.
   "scope": {
     "in_scope": ["mid-flight sole-continue on pinned entity"],
     "out_of_scope": ["model quality scoring"],
-    "expected_refusal": ["illegal restart mid sole-continue"]
+    "expected_refusal": [
+      "illegal restart mid sole-continue",
+      "ambient last_read pin hijack"
+    ]
   },
   "turns": [
     {
@@ -201,4 +232,11 @@ Claim: after continue mid cost-out, owner and pin hold and resolve is blocked.
 }
 ```
 
-Opposite bugs that must FAIL this golden: dual_owner steal, drop_pin, illegal_restart.
+Opposite bugs that must FAIL: dual_owner steal, drop_pin, illegal_restart.
+
+## If human pastes Collinear / other tool output
+
+1. List candidate turns from the export (brief).  
+2. Drop non-load-bearing chatter.  
+3. Fill **STEP A ODD** (what we claim / refuse) and **twists table**.  
+4. Emit **STEP B Script** with expected kinds — never “score ≥ 0.87” as an invariant.  

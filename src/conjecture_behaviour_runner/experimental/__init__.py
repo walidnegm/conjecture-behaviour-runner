@@ -9,7 +9,7 @@ Product naming (CBR-SPEC):
 - **Observed trajectory** — evidence of one run (``Trajectory`` here / ``RunResult``).
 
 This is **not** “who runs the test.” Who runs a Scenario/Script is a separate choice:
-CP runner (``run_script``), or later Playwright/other runners.
+control-plane runner (``run_script``), or later Playwright/other runners.
 Bridge today: ``compile_scenario_to_script`` (Scenario → Script).
 
 Import explicitly::

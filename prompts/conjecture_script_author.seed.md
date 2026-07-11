@@ -27,7 +27,9 @@ Your job is to turn **path material + product law** into a **load-bearing trajec
 | **Runner** | Who executes the Script (today: control-plane `run_script` + Driver) |
 | **Verifier** | Pass/fail on expected envelopes (not Oracle Corp; not commercial Verdict) |
 
-## Product shape
+## Product shape (canonical stack — authoring view)
+
+Same stack as README / CBR-SPEC / AGENTS.md; this prompt focuses on STEP A → STEP B:
 
 ```text
   seeds (specs · Collinear/other multi-turn tools · agent · human · our ODD notes)
@@ -36,7 +38,7 @@ Your job is to turn **path material + product law** into a **load-bearing trajec
   authored TRAJECTORY of twists  +  scope (in / out / refuse)
               │  STEP B: emit Script
               ▼
-  Conjecture Script  →  runner + Driver  →  OBSERVED TRAJECTORY  →  VERIFIER
+  Conjecture Script  →  control-plane runner + Driver  →  OBSERVED TRAJECTORY  →  VERIFIER
 ```
 
 ## STEP A — Trajectory worksheet (always do this first, even briefly)

@@ -58,12 +58,11 @@ Normative: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
   seeds (specs · Collinear/other multi-turn tools · agent · human)
               │  curate + attach expected envelopes
               ▼
-  authored TRAJECTORY of twists  (what could break law)
+  authored TRAJECTORY of twists  (load-bearing path story)
               │
               ▼  described as
-  Conjecture Scenario  (flexible language)  and/or  Conjecture Script  (play-back form)
-              │
-              ▼  who runs it? (explicit — file does not run itself)
+  Conjecture Scenario  and/or  Conjecture Script
+              │  who runs it? (explicit — file does not run itself)
      ┌────────┴────────┐
      ▼                 ▼
   control-plane    other runners
@@ -75,7 +74,7 @@ Normative: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
               ▼
        Real application
               │
-     OBSERVED TRAJECTORY  →  VERIFIER  →  pass/fail
+     OBSERVED TRAJECTORY → VERIFIER → pass/fail
               │
        pytest / CI only *hosts* the run
 ```
@@ -100,7 +99,7 @@ A **multi-turn agentic conversation** against our in-repo mini control plane
 ```text
   seeds / author ──► Conjecture Script (this E2E golden)
                             │
-                            ▼  CP runner (run_script)
+                            ▼  control-plane runner (run_script)
               Driver: MiniChatApp.handle() ──► observation
                             │
                             ▼
@@ -127,7 +126,7 @@ python examples/e2e_multi_turn.py
 | Bug: continue drops `workflow_id` | **FAIL** | Lost identity pin |
 | Bug: continue wipes the task | **FAIL** | Illegal restart mid-flight |
 
-That is one **runner** (CP `run_script`) playing a **ConjectureScript** (play-back form)
+That is one **runner** (control-plane `run_script`) playing a **ConjectureScript** (play-back form)
 against a Driver (`handle`). The same envelopes can later be described in full
 **Scenario** language and run by other runners — **who runs it** stays explicit.
 
@@ -175,7 +174,7 @@ a novel of every chat line.
 Path without invariants = a tour. **Twists with invariants = a test.**
 
 **Conjecture Scenario** = full flexible language (`experimental/Scenario` + `schema.json`).  
-**Conjecture Script** = CP play-back form for today’s runner (`ConjectureScript` below).  
+**Conjecture Script** = control-plane play-back form for today’s runner (`ConjectureScript` below).  
 Same twists→invariants idea; Script is what most goldens are today.
 
 A **Script** is multi-turn steps + pins + **expected contracts**. The **runner** you choose
@@ -275,17 +274,12 @@ path-faithful: `conjecture path-faithful --prove-bugs`.
 
 ## How a run works
 
+Execution detail of the [canonical stack](#finalized-claim) (control-plane runner path today):
+
 ```text
-  seeds (specs · sim · agent · human)
-              │
-              ▼
-  Conjecture Scenario  (optional rich description)
-              │  or author Script directly
-              ▼
   Conjecture Script    (turns · pins · expected contracts)
-              │
-              ▼  who runs it: CP runner today
-        run_script(...)
+              │  who runs it: control-plane runner (run_script)
+              ▼
     CognitionProvider: stub | freeze | record
               │
               ▼  Driver plugin
@@ -296,7 +290,7 @@ path-faithful: `conjecture path-faithful --prove-bugs`.
      VERIFIER (step + outcome + trajectory invariants)
               │
               ▼
-     observed trajectory (RunResult) · JSON/JUnit
+     OBSERVED TRAJECTORY (RunResult) · JSON/JUnit
               │
        pytest / CI only *hosts* the run
 ```

@@ -14,7 +14,7 @@
 |-------|-----------------|----------|
 | **Conjecture Scenario** | `experimental.Scenario`, `schema.json` | Describe twists & turns + envelopes (not tied to one driver) |
 | **Conjecture Script** | `ConjectureScript`, `DialogueTurn`, `InvariantSpec` | Runnable play-back form with **expected state** (usual CI golden) |
-| **Runner (who executes)** | `run_script(...)`, CLI `conjecture run` | Choose this CP runner (or later another); supply Driver + cognition |
+| **Runner (who executes)** | `run_script(...)`, CLI `conjecture run` | Choose this control-plane runner (or later another); supply Driver + cognition |
 | **Verifier** | standard + temporal kinds | Declare `kind` + `expected`; never free-form pass rules |
 | **Host binding** | `ControlPlaneAdapter` / `BaseControlPlaneAdapter` | Map **your** ledger/graph/workflow → `TurnObservation` |
 | **Observed trajectory** | `RunResult` / experimental `Trajectory` | Evidence of one run — **output**, not input |
@@ -27,16 +27,19 @@
   seeds (specs · Collinear/other multi-turn tools · agent · human)
               │  curate + attach expected envelopes
               ▼
-  authored TRAJECTORY of twists
+  authored TRAJECTORY of twists  (load-bearing path story)
               │
+              ▼  described as
   Conjecture Scenario  and/or  Conjecture Script
-              │  who runs it? (explicit)
+              │  who runs it? (explicit — file does not run itself)
      ┌────────┴────────┐
      ▼                 ▼
   control-plane    other runners
   runner           (roadmap)
+  (run_script)
      └────────┬────────┘
-              │ Driver plugin …
+              │ Driver plugin (HTTP · Playwright · LangGraph ·
+              │               Temporal · Crew · in-process · …)
               ▼
        Real application
               │

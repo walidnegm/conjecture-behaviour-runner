@@ -59,10 +59,10 @@ play-back driver. Put it back:
 |---|---|---|---|
 | **Authored trajectory** | The load-bearing **twists & turns** story (what could break law) | Carried inside Scenario / Script | Concept **stable**; authoring depth varies |
 | **Conjecture Scenario** | Flexible **description language** for that trajectory + envelopes | `experimental.Scenario` (+ `schema.json`) | **Early** — models exist; not full multi-runner platform |
-| **Conjecture Script** | **Runnable play-back** of a trajectory for a chosen runner | `ConjectureScript` (**stable** for CP runner) | **Most mature** path we ship |
+| **Conjecture Script** | **Runnable play-back** of a trajectory for a chosen runner | `ConjectureScript` (**stable** for control-plane runner) | **Most mature** path we ship |
 | **Observed trajectory** | Evidence of **one** execution under one profile | `Trajectory` / `RunResult` | Partial (RunResult solid; rich Trajectory experimental) |
 | **Runner** | **Who executes** the Script | Control-plane: `run_script`; others roadmap | One runner mature; multi-runner **not** |
-| **Verifier** | Expected envelopes vs **observed trajectory** | `invariants.py`, `temporal.py` | Solid for CP kinds; domain plugins open |
+| **Verifier** | Expected envelopes vs **observed trajectory** | `invariants.py`, `temporal.py` | Solid for control-plane kinds; domain plugins open |
 
 ```text
   seeds (specs · Collinear/other multi-turn tools · agent · human)
@@ -138,7 +138,7 @@ Their green bar (quality scores, sim success) is **not** our green bar. Our gate
 ```text
   seeds → Conjecture Scenario → Conjecture Script
                                       │
-                                      ▼  CP runner (or other)
+                                      ▼  control-plane runner (or other)
                             Driver plugin ← LangGraph / Crew / Temporal / …
                                       │  (orchestrator is host + Driver surface)
                                       ▼
@@ -301,10 +301,13 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 
 ### Canonical pipeline (target — partial today)
 
+Same stack as §0 (abbreviated execution view):
+
 ```text
-  seeds → Conjecture Scenario → Conjecture Script
+  seeds → authored TRAJECTORY
+       → Conjecture Scenario and/or Conjecture Script
        → Runner (who runs it) + Driver + CognitionProvider
-       → observed trajectory → Verifier → Report
+       → OBSERVED TRAJECTORY → Verifier → Report
 ```
 
 | Layer today (0.1.2) | Status |
@@ -418,8 +421,8 @@ Without a **generalized description language**, you only have a one-off driver A
 | Layer | Owns | Ships today (0.1.2) |
 |---|---|---|
 | **Description language** | Flexible trajectory input (`Scenario`, scope, nondeterminism, waits, evidence) | `experimental/scenario_models.py`, `schema.json` |
-| **Play-back form** | CP-oriented compile target (`ConjectureScript`) | `script.py`, JSON/YAML load |
-| **Runner(s)** | **Who executes** the trajectory via a Driver | **CP runner:** `run_script` + CLI; others roadmap |
+| **Play-back form** | control-plane-oriented compile target (`ConjectureScript`) | `script.py`, JSON/YAML load |
+| **Runner(s)** | **Who executes** the trajectory via a Driver | **control-plane runner:** `run_script` + CLI; others roadmap |
 | **Verifier** | Pass/fail on envelopes vs observation | `invariants.py`, `temporal.py` |
 | **Observed trajectory** | Evidence of one run | `RunResult`; `experimental/trajectory.py` |
 
@@ -427,16 +430,19 @@ Without a **generalized description language**, you only have a one-off driver A
   seeds (specs · Collinear/other multi-turn tools · agent · human)
               │  curate + attach expected envelopes
               ▼
-  authored TRAJECTORY of twists
+  authored TRAJECTORY of twists  (load-bearing path story)
               │
+              ▼  described as
   Conjecture Scenario  and/or  Conjecture Script
-              │  who runs it? (explicit)
+              │  who runs it? (explicit — file does not run itself)
      ┌────────┴────────┐
      ▼                 ▼
   control-plane    other runners
   runner           (roadmap)
+  (run_script)
      └────────┬────────┘
-              │ Driver plugin …
+              │ Driver plugin (HTTP · Playwright · LangGraph ·
+              │               Temporal · Crew · in-process · …)
               ▼
        Real application
               │
@@ -446,6 +452,7 @@ Without a **generalized description language**, you only have a one-off driver A
 ```
 
 **Who runs the trajectory?** Explicit choice of runner + Driver — not implied by the file alone.
+(Same stack as §0 and §2.1.)
 
 | Piece | Role |
 |---|---|
@@ -522,17 +529,18 @@ not a feature bake-off against named sim/eval vendors.
 ### Pipeline (normative)
 
 ```text
-  seeds (specs · sim · agent · human)
+  seeds (specs · Collinear/other multi-turn tools · agent · human)
+              │  curate + attach expected envelopes
+              ▼
+  authored TRAJECTORY of twists  (load-bearing path story)
               │
-              ▼
-  Conjecture Scenario   (description: twists → envelopes)
-              │  author Script, or compile Scenario → Script
-              ▼
-  Conjecture Script     (play-back form for a runner)
-              │  who runs it? (explicit)
+              ▼  described as
+  Conjecture Scenario  and/or  Conjecture Script
+              │  who runs it? (explicit — file does not run itself)
      ┌────────┴────────┐
      ▼                 ▼
-  CP runner      other runners (roadmap)
+  control-plane    other runners
+  runner           (roadmap)
   (run_script)
      └────────┬────────┘
               │ Driver plugin (HTTP · Playwright · LangGraph ·
@@ -540,7 +548,7 @@ not a feature bake-off against named sim/eval vendors.
               ▼
        Real application
               │
-     observed trajectory → VERIFIER → pass/fail
+     OBSERVED TRAJECTORY → VERIFIER → pass/fail
               │
        pytest / CI only *hosts* the run
 ```
@@ -564,7 +572,7 @@ Same diagram as pipeline above. Pieces map as:
 |---|---|
 | Path seeds | Feed Scenario/Script authoring; still need expected envelopes |
 | Coding agents | Author description or ConjectureScript; use prompt seed |
-| CP runner | Default **who runs** control-plane goldens today |
+| control-plane runner | Default **who runs** control-plane goldens today |
 | Playwright / HTTP / LangGraph / Temporal | Drivers (and later alternate runners) |
 | Trajectory scorers | Parallel scores; **not** our merge gate |
 
@@ -826,18 +834,18 @@ when the stimulus is not a human chat line.
 
 ### Description language vs play-back form vs who runs it
 
-| | **Scenario** (description language) | **ConjectureScript** (play-back form) | **Runner** (who executes) |
-|--|-------------------------------------|----------------------------------------|---------------------------|
-| Job | Flexible trajectory **description** | Thin form for CP mid-flight play-back | Applies steps via a Driver |
+| | **Conjecture Scenario** (description language) | **Conjecture Script** (play-back form) | **Runner** (who executes) |
+|--|-----------------------------------------------|----------------------------------------|---------------------------|
+| Job | Flexible trajectory **description** | Thin form for control-plane mid-flight play-back | Applies steps via a Driver |
 | Contains | actors, steps, scope, nondeterminism envelopes, waits, evidence, profiles | turns, pins, effects, expected kinds | cognition + adapter loop |
-| Status | `experimental/` + `schema.json` | **Stable 0.1.x** | `run_script` + CLI today; other runners later |
+| Status | `experimental/` + `schema.json` | **Stable 0.1.x** (`ConjectureScript`) | `run_script` + CLI today; other runners later |
 | Who writes it | Humans, agents, path seeds | Author directly **or** compile from Scenario | Host/CI invokes |
 
 **Observed trajectory** (`experimental.trajectory.Trajectory` or `RunResult`) is **output**
 of a run — not the input description.
 
-`compile_scenario_to_script` is the bridge: description → CP play-back form →
-**Conjecture CP runner**. Other runners may consume Scenario without going through
+`compile_scenario_to_script` is the bridge: description → control-plane play-back form →
+**Conjecture control-plane runner**. Other runners may consume Scenario without going through
 `ConjectureScript` (e.g. future Playwright plan).
 
 **Original load-bearing ideas (keep):**

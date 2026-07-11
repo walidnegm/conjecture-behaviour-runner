@@ -222,6 +222,126 @@ That pairing is the **reference domain**, not a claim that Conjecture *is only* 
 
 ---
 
+## Script language (what you write)
+
+A **script** is a multi-turn recipe: steps, optional cognition **pins**, and **invariants**
+(and later **allowed outcomes**). The runner plays it; the host **adapter** observes state;
+Conjecture checks the contracts. Wording of the assistant reply is **not** the pass criterion.
+
+### Building blocks
+
+| Piece | Role |
+|-------|------|
+| **`ConjectureScript`** | Named golden: `script_id`, conversation id, ordered `turns` |
+| **`DialogueTurn`** | One step: stimulus text, optional pin, effects, invariants |
+| **`CognitionPin`** | Fixed labels for this step under stub/freeze (e.g. `task_intent=continue`) — so CI does not need a live model |
+| **`InvariantSpec`** | A rule that **must hold after the turn** — independent of reply wording |
+| **`allowed_outcomes`** | Optional envelope of legal landings (more than one is fine) when cognition is live |
+
+Slice 0 is **user-centric** (`user_text` on each turn). Product scope also includes **agent**,
+**agent-to-agent**, and **system/completion** steps later (`actor` on the turn; experimental
+scenario `Actor`: `user` · `agent` · `system`).
+
+### What is an invariant?
+
+An **invariant** is a **behaviour rule that must still be true after the turn**, no matter
+how the assistant *phrased* the reply.
+
+| Not this | This |
+|----------|------|
+| “The bot must say: *Continuing your cost-out…*” | “After ‘continue’, **cost-out still owns** the turn” |
+| Screenshot of the chat bubble | “The **workflow id is still the same** one we started with” |
+
+Everyday analogy: mid-checkout you click Continue — you must **still be in checkout**, your
+**cart id must still match**, and the site must **not re-ask “which cart?”** from random
+cookies. Those are invariants; the toast copy can vary.
+
+```python
+InvariantSpec(kind="exclusive_owner", expected="cost_out")
+# After this step: exclusive owner must be cost_out — or the script fails.
+```
+
+### Standard invariant kinds (portable)
+
+Implemented in `BaseControlPlaneAdapter` / `check_standard_invariant`. Unknown kinds
+**fail closed** (never silently pass).
+
+| Kind | Plain English | Typical `expected` |
+|------|---------------|--------------------|
+| **`exclusive_owner`** | Who is driving this turn? Must be exactly this owner | `"cost_out"`, `"front_door"` |
+| **`owner_not`** | Must **not** still be owned by this (e.g. after a detour stole) | `"cost_out"` |
+| **`active_kind`** / **`kind_equals`** | Active task/kind label equals this | `"cost_out"` |
+| **`pin_present`** | An identity pin is still bound | `"workflow_id"` |
+| **`pin_absent`** | This pin is empty / missing | `"project_id"` |
+| **`pin_equals`** | Bound identity is still **this** value (not ambient last_read) | `{"key": "workflow_id", "value": "wf_1"}` |
+| **`observed_outcome`** | Adapter-reported outcome code | host-defined string |
+| **`extra_true`** | Host flag in observation extras is true | `"blocks_resolve"` |
+| **`extra_false`** | Host flag is false | `"blocks_resolve"` |
+| **`extra_equals`** | Host extra equals a value | `{"key": "preferred_workflow_id", "value": "wf_1"}` |
+| **`always_true`** | Smoke only (null adapter) | — |
+
+**Three load-bearing examples:**
+
+1. **`exclusive_owner`** — *Who is driving?*  
+   User is mid cost-out and says “continue.” Must still be `cost_out`, not glossary or a new task.
+
+2. **`pin_equals`** — *Same thing as before?*  
+   Workflow pin must stay `wf_1`. Ambient “last read” must not silently swap the entity.
+
+3. **`extra_true` / `blocks_resolve`** — *Don’t re-resolve mid-flight*  
+   Sole-continue has sealed identity: do not re-run entity resolve from ambient context.  
+   Detour / front-door flows often use **`extra_false`** so resolve is allowed again.
+
+### Mini story (all three)
+
+**Script idea:** open cost-out on `wf_1` → user says “continue”.
+
+| After the turn… | Invariant | Fail means |
+|-----------------|-----------|------------|
+| Cost-out still owns the thread | `exclusive_owner` → `cost_out` | Front door / detour / new task stole the turn |
+| Still the same workflow | `pin_equals` → `workflow_id = wf_1` | Pin dropped or swapped |
+| Resolve sealed mid-flight | `extra_true` → `blocks_resolve` | Entity resolve ran again |
+
+```python
+from conjecture_behaviour_runner import (
+    CognitionPin, DialogueTurn, InvariantSpec, ConjectureScript,
+)
+
+script = ConjectureScript(
+    script_id="cost_out_continue_keeps_owner_and_pin",
+    description="Continue mid cost-out: owner, pin, and blocks_resolve hold",
+    conversation_id="conv_demo",
+    turns=[
+        DialogueTurn(
+            user_text="cost out the onboarding workflow",
+            pin=CognitionPin(task_intent="new_task", read_kind="cost_out"),
+            invariants=[
+                InvariantSpec(kind="exclusive_owner", expected="cost_out"),
+            ],
+        ),
+        DialogueTurn(
+            user_text="continue",
+            pin=CognitionPin(task_intent="continue"),
+            invariants=[
+                InvariantSpec(kind="exclusive_owner", expected="cost_out"),
+                InvariantSpec(kind="active_kind", expected="cost_out"),
+                InvariantSpec(kind="pin_present", expected="workflow_id"),
+                InvariantSpec(kind="extra_true", expected="blocks_resolve"),
+            ],
+        ),
+    ],
+)
+```
+
+Real end-to-end goldens (with the control-plane adapter) live in
+`contrib.control_plane` and `examples/control_plane_goldens.py` — sole-continue owns,
+detour supersedes, pin beats ambient last_read.
+
+Adapters map **your** host state into a `TurnObservation` (`exclusive_owner`, `pins`,
+`extras`, …). The script language stays the same; only the adapter binding changes.
+
+---
+
 ## Quickstart
 
 ```bash

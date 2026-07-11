@@ -230,6 +230,18 @@ The portable core is **pin-driven**. It does not call your LLM factory; hosts su
 
 ---
 
+## 4.1 Script language (invariants)
+
+A **script** is turns + optional pins + **invariants** (rules that must hold after each
+step, independent of reply wording). Plain-language table and mini-story live in the
+[README — Script language](../README.md#script-language-what-you-write).
+
+Load-bearing kinds: `exclusive_owner` (who drives), `pin_equals` / `pin_present` (same
+entity), `extra_true` e.g. `blocks_resolve` (no mid-flight re-resolve). Full list:
+`STANDARD_INVARIANT_KINDS` in `invariants.py`.
+
+---
+
 ## 5. Public API (0.1 / Slice 0)
 
 ```python

@@ -1,0 +1,66 @@
+{
+  "_comment": "OBSERVED TRAJECTORY — FAIL case: planted dual_owner bug. Reply could still look fine; exclusive_owner is front_door → verifier fails.",
+  "kind": "observed_trajectory",
+  "script_id": "trajectory_e2e_sole_continue",
+  "passed": false,
+  "failures": [
+    "turn[1] exclusive_owner: exclusive_owner='front_door' != expected 'cost_out'"
+  ],
+  "llm_mode": "stub",
+  "artifact": {
+    "conversation_id": "conv_traj_e2e",
+    "observations": [
+      {
+        "exclusive_owner": "cost_out",
+        "active_kind": "cost_out",
+        "pins": {
+          "workflow_id": "wf_1"
+        },
+        "observed_outcome": "continue_owned",
+        "extras": {
+          "blocks_resolve": true
+        }
+      },
+      {
+        "exclusive_owner": "front_door",
+        "active_kind": "cost_out",
+        "pins": {
+          "workflow_id": "wf_1"
+        },
+        "observed_outcome": "continue_owned",
+        "extras": {
+          "blocks_resolve": true
+        }
+      }
+    ]
+  },
+  "turn_results": [
+    {
+      "index": 0,
+      "user_text": "cost out the onboarding workflow",
+      "invariants_held": ["exclusive_owner", "pin_present"],
+      "invariants_violated": [],
+      "failures": []
+    },
+    {
+      "index": 1,
+      "user_text": "make the volume 10k",
+      "observation": {
+        "exclusive_owner": "front_door",
+        "active_kind": "cost_out",
+        "pins": {
+          "workflow_id": "wf_1"
+        },
+        "observed_outcome": "continue_owned",
+        "extras": {
+          "blocks_resolve": true
+        }
+      },
+      "invariants_held": ["pin_equals", "extra_true"],
+      "invariants_violated": ["exclusive_owner"],
+      "failures": [
+        "turn[1] exclusive_owner: exclusive_owner='front_door' != expected 'cost_out'"
+      ]
+    }
+  ]
+}

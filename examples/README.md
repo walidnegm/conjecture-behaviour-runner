@@ -24,9 +24,15 @@ python examples/e2e_multi_turn.py
 | File | What |
 |------|------|
 | **`e2e_multi_turn.py`** | E2E: conversation → MiniChatApp Act → verifier PASS/FAIL |
+| **`trajectory_authored_sole_continue.json`** | **Authored trajectory** as Conjecture Script (twists + expected envelopes) |
+| **`trajectory_observed_pass.json`** | **Observed trajectory** after a healthy run (PASS) |
+| **`trajectory_observed_fail_dual_owner.json`** | Observed trajectory when continue steals owner (FAIL) |
 | `minimal_script.py` | Null-adapter smoke (`always_true`) |
 | `control_plane_goldens.py` | Control-plane adapter goldens (`pip install -e ".[control-plane]"`) |
-| `sole_continue_golden.json` / `.yaml` | Portable sole-continue **Conjecture Script** |
+| `sole_continue_golden.json` / `.yaml` | Portable sole-continue **Conjecture Script** (adapter-oriented effects) |
+
+**Authored vs observed:** you write Script JSON (path + expected). The runner emits
+observed JSON (`RunResult` / observations). FAIL = expected ⊭ observation.
 
 Host-private goldens stay in your application repository.
 

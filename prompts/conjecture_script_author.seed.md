@@ -92,6 +92,10 @@ For each in-scope twist:
 
 Map the worksheet into **one** JSON object. Empty invariants = not a gating golden.
 
+**Reference shapes in-repo:** `examples/trajectory_authored_sole_continue.json` (authored
+trajectory as Script) · `examples/trajectory_observed_pass.json` (what a PASS run looks
+like — you do **not** invent this; the runner produces it).
+
 ```json
 {
   "script_id": "snake_or_kebab_id",

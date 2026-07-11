@@ -1,0 +1,102 @@
+{
+  "_comment": "OBSERVED TRAJECTORY — evidence of ONE run under one profile (healthy path). Produced by the runner/verifier; not what you author. Shape matches RunResult.to_dict() + artifact.observations (path-faithful mini-app, bug=null).",
+  "kind": "observed_trajectory",
+  "script_id": "trajectory_e2e_sole_continue",
+  "passed": true,
+  "failures": [],
+  "llm_mode": "stub",
+  "artifact": {
+    "conversation_id": "conv_traj_e2e",
+    "description": "Authored trajectory: open cost_out on wf_1 → continue…",
+    "tags": ["trajectory", "sole-continue", "e2e", "example"],
+    "observations": [
+      {
+        "exclusive_owner": "cost_out",
+        "active_kind": "cost_out",
+        "pins": {
+          "workflow_id": "wf_1"
+        },
+        "observed_outcome": "continue_owned",
+        "extras": {
+          "blocks_resolve": true,
+          "preferred_workflow_id": "wf_1"
+        }
+      },
+      {
+        "exclusive_owner": "cost_out",
+        "active_kind": "cost_out",
+        "pins": {
+          "workflow_id": "wf_1"
+        },
+        "observed_outcome": "continue_owned",
+        "extras": {
+          "blocks_resolve": true,
+          "preferred_workflow_id": "wf_1"
+        }
+      }
+    ]
+  },
+  "turn_results": [
+    {
+      "index": 0,
+      "actor": "user",
+      "user_text": "cost out the onboarding workflow",
+      "cognition": {
+        "pin": {
+          "task_intent": "new_task",
+          "read_kind": "cost_out"
+        },
+        "source": "stub"
+      },
+      "observation": {
+        "exclusive_owner": "cost_out",
+        "active_kind": "cost_out",
+        "pins": {
+          "workflow_id": "wf_1"
+        },
+        "observed_outcome": "continue_owned",
+        "extras": {
+          "blocks_resolve": true,
+          "preferred_workflow_id": "wf_1"
+        }
+      },
+      "invariants_held": [
+        "exclusive_owner",
+        "pin_present"
+      ],
+      "invariants_violated": [],
+      "failures": []
+    },
+    {
+      "index": 1,
+      "actor": "user",
+      "user_text": "make the volume 10k",
+      "cognition": {
+        "pin": {
+          "task_intent": "continue"
+        },
+        "source": "stub"
+      },
+      "observation": {
+        "exclusive_owner": "cost_out",
+        "active_kind": "cost_out",
+        "pins": {
+          "workflow_id": "wf_1"
+        },
+        "observed_outcome": "continue_owned",
+        "extras": {
+          "blocks_resolve": true,
+          "preferred_workflow_id": "wf_1"
+        }
+      },
+      "invariants_held": [
+        "exclusive_owner",
+        "pin_equals",
+        "extra_true",
+        "active_kind"
+      ],
+      "invariants_violated": [],
+      "failures": []
+    }
+  ]
+}

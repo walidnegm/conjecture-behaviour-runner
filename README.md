@@ -180,6 +180,95 @@ Same twists→invariants idea; Script is what most goldens are today.
 A **Script** is multi-turn steps + pins + **expected contracts**. The **runner** you choose
 plays it; the host **adapter** observes; the **verifier** judges.
 
+### Trajectory as JSON (authored vs observed)
+
+There is no separate mystery format for “the trajectory.” In practice:
+
+| Side | JSON you look at | Role |
+|------|------------------|------|
+| **Authored trajectory** | **Conjecture Script** file | Twists (`turns`) + expected envelopes (`invariants`, `allowed_outcomes`, `trajectory_invariants`) — **the golden** |
+| **Observed trajectory** | **`RunResult.to_dict()`** after a run | Evidence: per-turn `observation` + what held/violated — **verifier input** |
+
+**Full files (E2E sole-continue path):**
+
+| File | What |
+|------|------|
+| [`examples/trajectory_authored_sole_continue.json`](examples/trajectory_authored_sole_continue.json) | Authored path: enter cost_out → continue volume; same golden as the E2E table |
+| [`examples/trajectory_observed_pass.json`](examples/trajectory_observed_pass.json) | Observed trajectory when healthy (PASS) |
+| [`examples/trajectory_observed_fail_dual_owner.json`](examples/trajectory_observed_fail_dual_owner.json) | Observed when continue steals to front_door (FAIL) |
+
+Authored (abbreviated — see file for full `scope` + `trajectory_invariants`):
+
+```json
+{
+  "script_id": "trajectory_e2e_sole_continue",
+  "description": "open cost_out on wf_1 → continue; owner + pin + blocks_resolve",
+  "conversation_id": "conv_traj_e2e",
+  "trajectory_invariants": [
+    { "kind": "pin_stable", "expected": "workflow_id" },
+    { "kind": "eventually_exclusive_owner", "expected": "cost_out" }
+  ],
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "cost out the onboarding workflow",
+      "pin": { "task_intent": "new_task", "read_kind": "cost_out" },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "cost_out" },
+        { "kind": "pin_present", "expected": "workflow_id" }
+      ],
+      "allowed_outcomes": ["continue_owned"]
+    },
+    {
+      "actor": "user",
+      "user_text": "make the volume 10k",
+      "pin": { "task_intent": "continue" },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "cost_out" },
+        { "kind": "pin_equals", "expected": { "key": "workflow_id", "value": "wf_1" } },
+        { "kind": "extra_true", "expected": "blocks_resolve" }
+      ],
+      "allowed_outcomes": ["continue_owned"]
+    }
+  ]
+}
+```
+
+Observed after turn 2 on the dual-owner bug (why that row is **FAIL**):
+
+```json
+{
+  "passed": false,
+  "failures": [
+    "turn[1] exclusive_owner: exclusive_owner='front_door' != expected 'cost_out'"
+  ],
+  "turn_results": [
+    {
+      "index": 1,
+      "user_text": "make the volume 10k",
+      "observation": {
+        "exclusive_owner": "front_door",
+        "pins": { "workflow_id": "wf_1" },
+        "observed_outcome": "continue_owned",
+        "extras": { "blocks_resolve": true }
+      },
+      "invariants_violated": ["exclusive_owner"]
+    }
+  ]
+}
+```
+
+Load and run the authored file:
+
+```bash
+python -c "
+from conjecture_behaviour_runner import load_script_json, run_script, LlmMode
+from conjecture_behaviour_runner.path_faithful import MiniAppAdapter, MiniChatApp
+s = load_script_json('examples/trajectory_authored_sole_continue.json')
+print(run_script(s, adapter=MiniAppAdapter(MiniChatApp()), llm_mode=LlmMode.STUB).passed)
+"
+```
+
 ### Building blocks
 
 | Piece | Role |

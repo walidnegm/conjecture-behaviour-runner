@@ -808,6 +808,45 @@ of a run — not the input description.
 - Trajectory-as-evidence across N runs under a profile  
 - Separation of **description** from **who runs it**
 
+### The load-bearing trajectory script (twists → invariants)
+
+This is the mental model we want authors (and agents) to keep:
+
+```text
+  Twists and turns  =  the multi-turn *path* (who acts, what stimulus, mid-flight moments)
+           │
+           ▼  at critical landings
+  Invariants / allowed outcomes  =  what must still be true of authoritative state
+           │
+           ▼
+  Verifier checks those — wording free to vary
+```
+
+| Part of the script | Answers |
+|--------------------|---------|
+| **Trajectory of turns** | What twists could happen? (continue, detour, handoff, complete, ambient distraction…) |
+| **Envelopes on those turns** | What legal landings exist after a twist? (`allowed_outcomes`) |
+| **Invariants on those turns** | What state law must hold *no matter which* legal landing? |
+| **Scope** | Which twists are in-domain vs must refuse |
+
+You do **not** need every chat utterance. You need the **load-bearing twists** — the ones
+where control-plane law can break (steal owner, drop pin, illegal restart). The trajectory
+*describes* those twists; invariants *bind* them.
+
+Example (compressed path, not a full transcript):
+
+```text
+  [enter cost_out + pin wf_1]
+       → twist: user "continue"
+       → invariant: owner=cost_out, pin=wf_1, blocks_resolve
+       → twist: user detour "what is a scorecard?"
+       → invariant: owner≠cost_out (or front_door), blocks_resolve false
+```
+
+That is the **load-bearing trajectory script**: twists that stress the system + invariants
+they must not violate. Play-back form (`ConjectureScript`) and runners are how we *execute*
+that idea; they are not a different product story.
+
 ### Run loop (harness contract)
 
 For each turn, roughly:

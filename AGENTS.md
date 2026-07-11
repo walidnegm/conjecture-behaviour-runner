@@ -94,12 +94,17 @@ Reference path-faithful demo: `path_faithful.MiniAppAdapter` + `examples/e2e_mul
 
 ## 3. Author a golden (human or agent)
 
+**Load-bearing trajectory script:** describe the **twists and turns** that can stress the
+control plane, then bind **invariants / allowed outcomes** at those landings.
+
 1. Name the **scenario class** (sole-continue, detour, handoff, terminal) — not a full 30-turn transcript.  
-2. Seed mid-flight if needed (`effects` / `initial_context`).  
-3. One critical user/system act (the twist under test).  
-4. Declare **expected**: `invariants`, optional `allowed_outcomes`, optional `trajectory_invariants`.  
+2. List load-bearing **twists** (continue, detour, ambient, complete…) — that *is* the path story.  
+3. Seed mid-flight if needed (`effects` / `initial_context`).  
+4. For each critical twist, declare **expected**: `invariants`, optional `allowed_outcomes`, optional trajectory rules.  
 5. Prefer **freeze** pins for CI (`CognitionPin` / freeze store).  
-6. Prove the golden fails if law breaks (plant opposite bug once).
+6. Prove the golden fails if law breaks (plant opposite bug once).  
+
+Path without invariants = a tour. Twists **with** invariants = a test.
 
 ### Minimal IR shape
 

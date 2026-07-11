@@ -113,14 +113,17 @@ Do not invent prose intents.
 
 ## Authoring rules
 
-1. Prefer **short** goldens (2–4 turns) at **critical** mid-flight moments — not full transcripts.  
-2. Seed mid-flight with `effects` only for **arrange** (e.g. begin_task); do not fake the host Act.  
-3. Every gating turn needs at least one of: non-empty `invariants`, non-empty `allowed_outcomes`.  
-4. If `allowed_outcomes` is non-empty, host must report `observed_outcome` — pick real outcome codes the host uses.  
-5. Use `scope` mini-ODD: what is claimed, what is out, what must be refused.  
-6. Scenario class tags: e.g. `sole-continue`, `detour`, `pin-hijack`, `terminal`.  
-7. Never keyword-route free text for meaning; put structure in `pin`.  
-8. If the product law is unknown, ask — do not invent owners/kinds that contradict the host.
+1. Think **load-bearing trajectory**: list the *twists* that could break law (continue, detour,
+   handoff, complete, ambient distraction), then attach **invariants / allowed_outcomes** to
+   those landings — not a full chat transcript.  
+2. Prefer **short** goldens (2–4 turns) at critical mid-flight moments.  
+3. Seed mid-flight with `effects` only for **arrange** (e.g. begin_task); do not fake the host Act.  
+4. Every gating turn needs at least one of: non-empty `invariants`, non-empty `allowed_outcomes`.  
+5. If `allowed_outcomes` is non-empty, host must report `observed_outcome` — pick real outcome codes the host uses.  
+6. Use `scope` mini-ODD: what is claimed, what is out, what must be refused.  
+7. Scenario class tags: e.g. `sole-continue`, `detour`, `pin-hijack`, `terminal`.  
+8. Never keyword-route free text for meaning; put structure in `pin`.  
+9. If the product law is unknown, ask — do not invent owners/kinds that contradict the host.
 
 ## Inputs the human may give you
 

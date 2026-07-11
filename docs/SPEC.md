@@ -63,17 +63,27 @@ Two product nouns — do not collapse them:
 | **Verifier** | Judges envelopes vs observation | `invariants.py`, `temporal.py` |
 
 ```text
-  Conjecture Scenario  (description of twists → envelopes)
-         │
-         ├── author Script directly, or compile Scenario → Script
-         ▼
-  Conjecture Script   (play-back form for a runner)
-         │
-         ▼  WHO RUNS IT (explicit)
-  Runner + Driver ──► app / graph / browser / workflow
-         │
-         ▼
-  Observed trajectory ──► Verifier ──► pass/fail
+  seeds (specs · sim · agent · human)
+              │
+              ▼
+  Conjecture Scenario   (description: twists → envelopes)
+              │  author Script, or compile Scenario → Script
+              ▼
+  Conjecture Script     (play-back form for a runner)
+              │  who runs it? (explicit)
+     ┌────────┴────────┐
+     ▼                 ▼
+  CP runner      other runners (roadmap)
+  (run_script)
+     └────────┬────────┘
+              │ Driver plugin (HTTP · Playwright · LangGraph ·
+              │               Temporal · Crew · in-process · …)
+              ▼
+       Real application
+              │
+     observed trajectory → VERIFIER → pass/fail
+              │
+       pytest / CI only *hosts* the run
 ```
 
 | | **Conjecture Scenario** | **Conjecture Script** |
@@ -93,13 +103,15 @@ Two product nouns — do not collapse them:
 **Compose — do not replace.** Engines orchestrate; Conjecture gates law.
 
 ```text
-  LangGraph / CrewAI / Temporal / custom FSM / …
-              │  owns graph, agents, workflows, activities
-              ▼
-     Driver + Observer adapter  ──►  Conjecture runner + verifier
-              │                              ▲
-              ▼                              │
-        app / tools / ledger          freeze + expected contracts
+  seeds → Conjecture Scenario → Conjecture Script
+                                      │
+                                      ▼  CP runner (or other)
+                            Driver plugin ← LangGraph / Crew / Temporal / …
+                                      │  (orchestrator is host + Driver surface)
+                                      ▼
+                               Real application
+                                      │
+                            observed trajectory → VERIFIER
 ```
 
 | Engine | Typical fit |
@@ -379,30 +391,37 @@ Without a **generalized description language**, you only have a one-off driver A
 | **Observed trajectory** | Evidence of one run | `RunResult`; `experimental/trajectory.py` |
 
 ```text
-   authors / seeds
-        │
-        ▼
-   Scenario / trajectory DESCRIPTION  (generalized language)
-        │
-        ├── compile ──► ConjectureScript ──► CP runner (run_script) ──┐
-        │                                                              │
-        └── (later) UI / other plans ──► Playwright / other runners ──┤
-                                                                       ▼
-                                                              Driver → app
-                                                                       │
-                                                              observed trajectory
-                                                                       │
-                                                              VERIFIER (shared)
+  seeds (specs · sim · agent · human)
+              │
+              ▼
+  Conjecture Scenario   (description: twists → envelopes)
+              │  author Script, or compile Scenario → Script
+              ▼
+  Conjecture Script     (play-back form for a runner)
+              │  who runs it? (explicit)
+     ┌────────┴────────┐
+     ▼                 ▼
+  CP runner      other runners (roadmap)
+  (run_script)
+     └────────┬────────┘
+              │ Driver plugin (HTTP · Playwright · LangGraph ·
+              │               Temporal · Crew · in-process · …)
+              ▼
+       Real application
+              │
+     observed trajectory → VERIFIER → pass/fail
+              │
+       pytest / CI only *hosts* the run
 ```
 
-**Who runs the trajectory?** Explicit choice of runner + Driver — not implied by the file alone.
+**Who runs the trajectory?** Explicit choice of runner + Driver — not implied by Scenario/Script alone.
 
 | Piece | Role |
 |---|---|
-| Specs, agents, humans, path seeds | Author **description** (+ expected envelopes) |
-| CP runner / future UI runners | **Who runs** it |
+| Specs, agents, humans, path seeds | Author **Conjecture Scenario** and/or **Script** (+ expected envelopes) |
+| CP runner / future UI runners | **Who runs** the Script |
 | Playwright / HTTP / LangGraph / Temporal | **Driver** under a runner |
-| pytest / CI | Process host |
+| pytest / CI | Process host only |
 | Verifier | Shared judge — independent of which runner drove Act |
 
 ### Four extension points (product boundary)
@@ -1091,7 +1110,8 @@ goldens in this repo; do not reimplement Playwright, sim worlds, or eval platfor
 | License | MIT stays MIT | Proprietary **around/beside** core — not silent relicense of PRs |
 
 ```text
-  Community PRs ──► Conjecture MIT (IR · verifier · drivers · freeze)
+  Community PRs ──► Conjecture MIT
+                    (Scenario · Script · runners · verifier · freeze · drivers)
                          ├── embed in any CI / product
                          └── Verdict (optional): hosted · UI · SSO · managed freeze · SLA
 ```

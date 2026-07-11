@@ -49,21 +49,30 @@ We differentiate by **what we assert** (the green bar), not by vendor bake-offs.
 Normative: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
 
 ```text
-  Conjecture Scenario  (twists → allowed outcomes + invariants)
+  seeds (specs · sim · agent · human)
+              │
+              ▼
+  Conjecture Scenario   (description: twists → envelopes)
               │  author Script, or compile Scenario → Script
               ▼
-  Conjecture Script    (play-back form)
+  Conjecture Script     (play-back form for a runner)
               │  who runs it? (explicit)
      ┌────────┴────────┐
      ▼                 ▼
-  CP runner      other runners
-  (run_script)   (roadmap)
+  CP runner      other runners (roadmap)
+  (run_script)
      └────────┬────────┘
+              │ Driver plugin (HTTP · Playwright · LangGraph ·
+              │               Temporal · Crew · in-process · …)
               ▼
-         Driver → app → observed trajectory → VERIFIER → CI
+       Real application
+              │
+     observed trajectory → VERIFIER → pass/fail
+              │
+       pytest / CI only *hosts* the run
 ```
 
-**Always core:** Scenario/Script envelopes + at least one runner + verifier.  
+**Always core:** Scenario + Script envelopes + at least one runner + verifier.  
 **Never core:** user-sim worlds, quality scoreboards, “the file runs itself.”
 
 ---
@@ -81,12 +90,13 @@ A **multi-turn agentic conversation** against our in-repo mini control plane
 | 2 | `make the volume 10k` | `continue` | still `cost_out` · same pin · `blocks_resolve` |
 
 ```text
-  User messages ──► MiniChatApp.handle() ──► ledger observation
+  seeds / author ──► Conjecture Script (this E2E golden)
+                            │
+                            ▼  CP runner (run_script)
+              Driver: MiniChatApp.handle() ──► observation
                             │
                             ▼
-               Conjecture IR + runner + verifier
-                            │
-               PASS only if expected state holds
+                       VERIFIER ──► PASS/FAIL
 ```
 
 ### Run it
@@ -258,21 +268,29 @@ path-faithful: `conjecture path-faithful --prove-bugs`.
 ## How a run works
 
 ```text
-  ConjectureScript (turns · pins · expected contracts)
+  seeds (specs · sim · agent · human)
               │
               ▼
+  Conjecture Scenario  (optional rich description)
+              │  or author Script directly
+              ▼
+  Conjecture Script    (turns · pins · expected contracts)
+              │
+              ▼  who runs it: CP runner today
         run_script(...)
     CognitionProvider: stub | freeze | record
               │
-              ▼
-     Host adapter (Driver + Observer)
-    apply_effect (arrange) · observe_turn (Act→Observe)
+              ▼  Driver plugin
+     Host adapter (observe_turn / handle / graph.invoke / …)
+    apply_effect (arrange) · Act → Observe → TurnObservation
               │
               ▼
-     Verifier: step + outcome + trajectory invariants
+     VERIFIER (step + outcome + trajectory invariants)
               │
               ▼
-     RunResult · JSON/JUnit · CI exit code
+     observed trajectory (RunResult) · JSON/JUnit
+              │
+       pytest / CI only *hosts* the run
 ```
 
 Adapters map **your** host (ledger, graph state, workflow status) into `TurnObservation`.

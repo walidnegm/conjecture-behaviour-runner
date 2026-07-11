@@ -24,16 +24,31 @@
 **Green bar:** owner, pins, legal landings, mid-flight law under pin/freeze — **not** reply wording.
 
 ```text
-  Conjecture Scenario  ──compile?──►  Conjecture Script  ──►  Runner  ──►  Driver
-   (twists + envelopes)              (play-back form)      (who runs)     (Act)
-                                                                              │
-                                                                    observed trajectory
-                                                                              │
-                                                                          VERIFIER
+  seeds (specs · sim · agent · human)
+              │
+              ▼
+  Conjecture Scenario   (description: twists → envelopes)
+              │  author Script, or compile Scenario → Script
+              ▼
+  Conjecture Script     (play-back form for a runner)
+              │  who runs it? (explicit)
+     ┌────────┴────────┐
+     ▼                 ▼
+  CP runner      other runners (roadmap)
+  (run_script)
+     └────────┬────────┘
+              │ Driver plugin (HTTP · Playwright · LangGraph ·
+              │               Temporal · Crew · in-process · …)
+              ▼
+       Real application
+              │
+     observed trajectory → VERIFIER → pass/fail
+              │
+       pytest / CI only *hosts* the run
 ```
 
 Without a **runner + verifier**, Scenario/Script files are inert.  
-Without **Scenario language**, you only have an ad-hoc driver test.
+Without **Conjecture Scenario** language, you only have an ad-hoc driver test.
 
 ---
 

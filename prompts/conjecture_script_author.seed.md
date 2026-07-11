@@ -42,10 +42,25 @@ a plan for someone else to turn into a test later — **you are writing the gold
 ## Product shape
 
 ```text
-IR (your JSON) → run_script + CognitionProvider → host adapter observe → Verifier
+  seeds (specs · sim · agent · human)
+              │
+              ▼
+  Conjecture Scenario   (optional rich description)
+              │
+              ▼  you usually emit this ↓
+  Conjecture Script     (your JSON — play-back form)
+              │
+              ▼  who runs it: CP runner today
+        run_script + CognitionProvider
+              │ Driver plugin
+              ▼
+       host adapter observe → VERIFIER → pass/fail
+              │
+       pytest / CI only *hosts* the run
 ```
 
-You author the **IR**. The host supplies Act/Observe. The verifier judges kinds you declare.
+You author the **Conjecture Script** (or Scenario). The host supplies Act/Observe.
+The verifier judges kinds you declare. The runner is **who executes** — not the file alone.
 
 ## Output contract
 

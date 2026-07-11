@@ -50,10 +50,10 @@ def main() -> int:
     )
     print(f"   passed={healthy.passed}  failures={healthy.failures}")
 
-    print("4) Same Script against dual_owner bug (must FAIL)")
+    print("4) Same Script against owner_steal bug (must FAIL)")
     stolen = run_script(
         script,
-        adapter=MiniAppAdapter(MiniChatApp(bug="dual_owner")),
+        adapter=MiniAppAdapter(MiniChatApp(bug="owner_steal")),
         llm_mode=LlmMode.STUB,
     )
     print(f"   passed={stolen.passed}  failures={stolen.failures}")
@@ -62,7 +62,7 @@ def main() -> int:
         "scenario_id": scenario.scenario_id,
         "compiled_script_id": script.script_id,
         "healthy_pass": healthy.passed,
-        "dual_owner_caught": not stolen.passed,
+        "owner_steal_caught": not stolen.passed,
         "helpful": healthy.passed and not stolen.passed,
     }
     print()

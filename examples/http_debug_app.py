@@ -16,7 +16,7 @@ Serves MiniChatApp over POST /chat with a portable ``debug`` observation envelop
 
 Run (leave terminal open)::
 
-  python examples/http_debug_app.py --port 8766 --bug dual_owner
+  python examples/http_debug_app.py --port 8766 --bug owner_steal
 
 Then in another shell::
 
@@ -109,7 +109,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--port", type=int, default=8766)
     p.add_argument(
         "--bug",
-        choices=["dual_owner", "drop_pin", "illegal_restart"],
+        choices=["owner_steal", "dual_owner", "drop_pin", "illegal_restart"],
         default=None,
         help="Plant a control-plane bug in the host",
     )

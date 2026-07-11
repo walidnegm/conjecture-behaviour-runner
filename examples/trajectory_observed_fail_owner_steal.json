@@ -1,5 +1,5 @@
 {
-  "_comment": "OBSERVED TRAJECTORY — FAIL case: planted dual_owner bug. Reply could still look fine; exclusive_owner is front_door → verifier fails.",
+  "_comment": "OBSERVED TRAJECTORY — FAIL case: planted owner_steal bug. Reply could still look fine; exclusive_owner is front_door → verifier fails.",
   "kind": "observed_trajectory",
   "script_id": "trajectory_e2e_sole_continue",
   "passed": false,

@@ -3,7 +3,7 @@
 This is the credibility shape:
   Arrange (optional seed) → Act (app.handle message) → Observe → Assert
 
-Planted bugs prove Conjecture catches dual-owner, dropped pin, and illegal restart.
+Planted bugs prove Conjecture catches owner steal, dropped pin, and illegal restart.
 """
 from __future__ import annotations
 
@@ -38,12 +38,16 @@ class MiniChatApp:
 
     ``bug``:
       - None — correct behaviour
-      - ``dual_owner`` — continue claims front_door while task active (steal)
+      - ``owner_steal`` — continue reports front_door while task still active
+        (wrong exclusive owner / steal — not two simultaneous owners)
+      - ``dual_owner`` — legacy alias for ``owner_steal``
       - ``drop_pin`` — continue clears workflow_id
       - ``illegal_restart`` — continue clears task (greenfield restart)
     """
 
     def __init__(self, *, bug: Optional[str] = None) -> None:
+        if bug == "dual_owner":
+            bug = "owner_steal"
         self.bug = bug
         self.ledger = MiniLedger()
         self.messages: list[str] = []
@@ -82,7 +86,8 @@ class MiniChatApp:
 
         # Continue mid-flight
         if self.ledger.active_kind and intent == "continue":
-            if self.bug == "dual_owner":
+            if self.bug == "owner_steal":
+                # Wrong exclusive owner while mid-flight (steal), not dual concurrent owners.
                 self.ledger.exclusive_owner = "front_door"
                 return self._obs("continue_owned", blocks_resolve=True)
             if self.bug == "drop_pin":
@@ -256,8 +261,8 @@ def sole_continue_story() -> dict[str, Any]:
         ],
         "planted_bugs": [
             {
-                "id": "dual_owner",
-                "plain": "Continue steals to front_door (dual owner)",
+                "id": "owner_steal",
+                "plain": "Continue reports front_door while task active (owner steal)",
             },
             {
                 "id": "drop_pin",
@@ -318,24 +323,28 @@ def run_path_faithful_demo(*, bug: Optional[str] = None) -> dict[str, Any]:
 def prove_planted_bugs() -> dict[str, Any]:
     """Correct app passes; each planted bug fails the same golden."""
     clean = run_path_faithful_demo(bug=None)
-    dual = run_path_faithful_demo(bug="dual_owner")
+    steal = run_path_faithful_demo(bug="owner_steal")
     drop = run_path_faithful_demo(bug="drop_pin")
     restart = run_path_faithful_demo(bug="illegal_restart")
+    steal_caught = not steal["passed"]
     return {
         "clean_passes": clean["passed"],
-        "dual_owner_caught": not dual["passed"],
+        "owner_steal_caught": steal_caught,
+        # Legacy key (misnamed — was never two concurrent owners)
+        "dual_owner_caught": steal_caught,
         "drop_pin_caught": not drop["passed"],
         "illegal_restart_caught": not restart["passed"],
+        "cognition_mode": "stub_pinned",
         "helpful": (
             clean["passed"]
-            and (not dual["passed"])
+            and steal_caught
             and (not drop["passed"])
             and (not restart["passed"])
         ),
         "story": sole_continue_story(),
         "details": {
             "clean": clean,
-            "dual_owner": dual,
+            "owner_steal": steal,
             "drop_pin": drop,
             "illegal_restart": restart,
         },

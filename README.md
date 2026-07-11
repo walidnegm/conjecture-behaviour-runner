@@ -36,22 +36,22 @@ conjecture path-faithful --prove-bugs   # PASS + 3 planted FAILs
 conjecture ui --port 8765
 ```
 
-### B. HTTP/JSON Driver (proves it is not CCP-only)
+### B. External HTTP app (true portability)
 
-```bash
-# self-contained: spawns a tiny HTTP host + HttpJsonAdapter + planted bugs
-PYTHONPATH=src python examples/http_e2e.py --self-host --prove-bugs
+The strongest claim: the **system under test does not import Conjecture**.
+
+```text
+proofs/external_http_app/   ← independent SUT (no conjecture imports)
+        ↓ HTTP only
+HttpJsonAdapter + portable golden + verifier
 ```
 
-Or two terminals:
-
 ```bash
-python examples/http_debug_app.py --port 8766
-python examples/http_e2e.py --endpoint http://127.0.0.1:8766/chat --prove-bugs
+PYTHONPATH=src python proofs/run_external_http_proof.py --prove-bugs
 ```
 
-Same sole-continue golden, **real HTTP process**, portable `debug.owner` / `debug.pins`
-envelope. Any FinTech (or other) app that returns that JSON shape can use the same adapter.
+That spawns four independent HTTP processes (healthy + `owner_steal` / `drop_pin` /
+`illegal_restart`) and proves the same contracts under **pinned cognition** (`LlmMode.STUB`).
 
 ---
 
@@ -127,7 +127,7 @@ Local browser UI (`conjecture ui`) is a **demo viewer**, not a second product.
 | Run | Result | Break |
 |-----|--------|--------|
 | Healthy | **PASS** | — |
-| Dual owner | **FAIL** | Steal to front door |
+| Owner steal | **FAIL** | Continue reports `front_door` while task active |
 | Drop pin | **FAIL** | Lost `workflow_id` |
 | Illegal restart | **FAIL** | Task wiped mid-flight |
 

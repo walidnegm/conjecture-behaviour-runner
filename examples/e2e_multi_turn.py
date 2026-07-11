@@ -64,7 +64,7 @@ def run_conversation(*, bug: str | None, label: str) -> bool:
     print(f"  pins            = {app.ledger.pins!r}")
     print()
     if result.passed:
-        print("RESULT: PASS — control-plane contracts held under freeze.")
+        print("RESULT: PASS — control-plane contracts held under pinned cognition (STUB).")
     else:
         print("RESULT: FAIL — verifier caught a contract break:")
         for f in result.failures:
@@ -78,8 +78,8 @@ def main() -> int:
 
     clean_ok = run_conversation(bug=None, label="1) Healthy mid-flight continue")
     dual_fail = not run_conversation(
-        bug="dual_owner",
-        label="2) Planted bug: dual_owner (continue steals to front_door)",
+        bug="owner_steal",
+        label="2) Planted bug: owner_steal (continue reports front_door while task active)",
     )
     drop_fail = not run_conversation(
         bug="drop_pin",
@@ -93,7 +93,7 @@ def main() -> int:
     _banner("Summary")
     summary = {
         "healthy_passes": clean_ok,
-        "dual_owner_caught": dual_fail,
+        "owner_steal_caught": dual_fail,
         "drop_pin_caught": drop_fail,
         "illegal_restart_caught": restart_fail,
         "helpful": clean_ok and dual_fail and drop_fail and restart_fail,
@@ -103,7 +103,7 @@ def main() -> int:
     if summary["helpful"]:
         print(
             "Conjecture is helpful here: wording could vary, but illegal ownership,\n"
-            "lost identity, and silent restarts fail the same golden under freeze."
+            "lost identity, and silent restarts fail the same golden under pinned cognition."
         )
         return 0
     print("Unexpected: clean should pass and each planted bug should fail.")

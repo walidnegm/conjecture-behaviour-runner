@@ -14,7 +14,7 @@ from conjecture_behaviour_runner import LlmMode, run_script
 def test_prove_planted_bugs_helpful() -> None:
     report = prove_planted_bugs()
     assert report["clean_passes"] is True
-    assert report["dual_owner_caught"] is True
+    assert report["owner_steal_caught"] is True
     assert report["drop_pin_caught"] is True
     assert report["illegal_restart_caught"] is True
     assert report.get("helpful") is True
@@ -27,8 +27,8 @@ def test_healthy_demo_passes() -> None:
     assert len(out.get("turns") or []) == 2
 
 
-def test_dual_owner_fails() -> None:
-    out = run_path_faithful_demo(bug="dual_owner")
+def test_owner_steal_fails() -> None:
+    out = run_path_faithful_demo(bug="owner_steal")
     assert out["passed"] is False
     assert any("exclusive_owner" in f for f in out["failures"])
 

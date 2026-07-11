@@ -243,7 +243,7 @@ No pytest unless asked. No long NL golden replies.
 }
 ```
 
-Opposite bugs that must FAIL: dual_owner steal, drop_pin, illegal_restart.
+Opposite bugs that must FAIL: owner_steal, drop_pin, illegal_restart.
 
 ## If human pastes Collinear / other tool output
 

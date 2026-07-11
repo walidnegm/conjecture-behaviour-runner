@@ -48,7 +48,7 @@ def _wait(port: int, timeout: float = 5.0) -> None:
 
 def test_http_json_healthy_and_planted_bugs() -> None:
     ports = (18880, 18881, 18882, 18883)
-    bugs = (None, "dual_owner", "drop_pin", "illegal_restart")
+    bugs = (None, "owner_steal", "drop_pin", "illegal_restart")
     procs = []
     try:
         for port, bug in zip(ports, bugs):

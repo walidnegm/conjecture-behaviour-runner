@@ -56,7 +56,7 @@ def _cmd_path_faithful(args: argparse.Namespace) -> int:
         print(json.dumps(report, indent=2))
         ok = (
             report["clean_passes"]
-            and report["dual_owner_caught"]
+            and report.get("owner_steal_caught", report.get("dual_owner_caught"))
             and report["drop_pin_caught"]
             and report["illegal_restart_caught"]
         )
@@ -165,7 +165,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_run.add_argument(
         "--bug",
         default=None,
-        help="path-faithful only: dual_owner|drop_pin|illegal_restart",
+        help="path-faithful only: owner_steal|drop_pin|illegal_restart",
     )
     p_run.set_defaults(func=_cmd_run)
 
@@ -175,8 +175,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     p_pf.add_argument(
         "--bug",
-        choices=["dual_owner", "drop_pin", "illegal_restart"],
+        choices=["owner_steal", "dual_owner", "drop_pin", "illegal_restart"],
         default=None,
+        help="dual_owner is a legacy alias for owner_steal",
     )
     p_pf.add_argument(
         "--prove-bugs",

@@ -104,31 +104,31 @@ def prove_over_http(endpoint_template_port: int | None = None) -> dict:
         # Use high ports to avoid clashing with conjecture ui (8765)
         base = 18770
         clean_ep = spawn(base, None)
-        dual_ep = spawn(base + 1, "dual_owner")
+        steal_ep = spawn(base + 1, "owner_steal")
         drop_ep = spawn(base + 2, "drop_pin")
         restart_ep = spawn(base + 3, "illegal_restart")
 
         clean = run_against(clean_ep)
-        dual = run_against(dual_ep)
+        steal = run_against(steal_ep)
         drop = run_against(drop_ep)
         restart = run_against(restart_ep)
 
         report = {
             "clean_passes": clean["passed"],
-            "dual_owner_caught": not dual["passed"],
+            "owner_steal_caught": not steal["passed"],
             "drop_pin_caught": not drop["passed"],
             "illegal_restart_caught": not restart["passed"],
             "transport": "http_json",
             "details": {
                 "clean": clean,
-                "dual_owner": dual,
+                "owner_steal": steal,
                 "drop_pin": drop,
                 "illegal_restart": restart,
             },
         }
         report["helpful"] = (
             report["clean_passes"]
-            and report["dual_owner_caught"]
+            and report["owner_steal_caught"]
             and report["drop_pin_caught"]
             and report["illegal_restart_caught"]
         )

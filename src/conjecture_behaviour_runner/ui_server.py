@@ -212,7 +212,7 @@ function renderProve(data) {
   badge(document.getElementById('proveBadge'), !!data.helpful);
   const items = [
     ['clean_passes', 'Healthy PASS'],
-    ['dual_owner_caught', 'Dual owner → FAIL'],
+    ['owner_steal_caught', 'Owner steal → FAIL'],
     ['drop_pin_caught', 'Drop pin → FAIL'],
     ['illegal_restart_caught', 'Illegal restart → FAIL'],
   ];

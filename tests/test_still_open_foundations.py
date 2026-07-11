@@ -113,7 +113,7 @@ class PathFaithfulTests(unittest.TestCase):
     def test_clean_and_planted_bugs(self) -> None:
         report = prove_planted_bugs()
         self.assertTrue(report["clean_passes"], report)
-        self.assertTrue(report["dual_owner_caught"], report)
+        self.assertTrue(report["owner_steal_caught"], report)
         self.assertTrue(report["drop_pin_caught"], report)
         self.assertTrue(report["illegal_restart_caught"], report)
 

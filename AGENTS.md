@@ -2,26 +2,33 @@
 
 **Audience:** coding agents (and humans) integrating a host app or authoring goldens.  
 **Normative product claim:** [docs/SPEC.md](docs/SPEC.md) (**CBR-SPEC**).  
-**Prompt seed (copy into your agent):** [prompts/conjecture_script_author.seed.md](prompts/conjecture_script_author.seed.md).
+**Face demo:** [examples/e2e_multi_turn.py](examples/e2e_multi_turn.py) — path-faithful `handle()` + planted bugs.  
+**Prompt seed:** [prompts/conjecture_script_author.seed.md](prompts/conjecture_script_author.seed.md).
+
+**Claim (face):** freeze-safe **state-law** regression (owner · pin · terminal/mid-flight) under
+pinned cognition — red bar even when the reply looks fine. **Not** a prose/quality grader.
+
+**Inspiration / apt hosts:** [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
+and apps **isomorphic** to that format (single-writer ownership, entity pins, sole-continue /
+terminal discipline). Transactional multi-turn systems — not pure creative chat.
 
 ---
 
 ## 0. What you are integrating
 
-**Do not confuse description language with who runs it.**
+Day-to-day surface: **golden (Script) · run · verifier**. Richer names are architecture.
 
 | Piece | Package surface | Your job |
 |-------|-----------------|----------|
-| **Conjecture Scenario** | `experimental.Scenario`, `schema.json` | Describe twists & turns + envelopes (not tied to one driver). Example: `examples/scenario_sole_continue.yaml` |
-| **Conjecture Script** | `ConjectureScript`, `DialogueTurn`, `InvariantSpec` | Runnable play-back form with **expected state** (usual CI golden) |
-| **Runner (who executes)** | `run_script(...)`, CLI `conjecture run` | Choose this control-plane runner (or later another); supply Driver + cognition |
-| **Verifier** | standard + temporal kinds | Declare `kind` + `expected`; never free-form pass rules |
-| **Host binding** | `ControlPlaneAdapter` / `BaseControlPlaneAdapter` | Map **your** ledger/graph/workflow → `TurnObservation` |
-| **Observed trajectory** | `RunResult` / experimental `Trajectory` | Evidence of one run — **output**, not input |
+| **Conjecture Script** (usual golden) | `ConjectureScript`, `DialogueTurn`, `InvariantSpec` | Turns + **expected state** — this *is* the test case |
+| **Runner** | `run_script(...)`, CLI `conjecture run` | Supply Driver + cognition (stub/freeze) |
+| **Verifier** | standard + temporal kinds | `kind` + `expected`; never free-form prose rules |
+| **Host binding** | `ControlPlaneAdapter` / `BaseControlPlaneAdapter` | Map **your** ledger/graph → `TurnObservation` (Act path preferred) |
+| **Conjecture Scenario** (optional) | `experimental.Scenario` | Rich description; compile → Script. Example: `examples/scenario_sole_continue.yaml` |
+| **Observed trajectory** | `RunResult` | Evidence of one run — **output** |
 
-**Mnemonic:** Scenario *describes*; Script *runs* (for a chosen runner).
-
-**Green bar:** owner, pins, legal landings, mid-flight law under pin/freeze — **not** reply wording.
+**Green bar:** owner, pins, legal landings, mid-flight law under pin/freeze — **not** reply wording.  
+**Trap:** do not author goldens that assert adjectives / style.
 
 ```text
   seeds (specs · Collinear/other multi-turn tools · agent · human)
@@ -70,7 +77,8 @@ Without a **runner + verifier**, Scenario/Script files are inert.
 4. **Fail closed.** Unknown invariant kinds fail. `allowed_outcomes` set ⇒ `observed_outcome` must be set.  
 5. **No phrase laundry lists** to decide what the user meant — pins carry structured labels.  
 6. **Do not reimplement** Playwright, sim worlds, or eval scoreboards inside this package. Drivers are plugins.  
-7. **Naming:** pass/fail engine is **Verifier** (not Oracle Corp). Commercial product may be **Verdict** — separate.
+7. **Naming:** pass/fail engine is **Verifier** (not Oracle Corp). Commercial product may be **Verdict** — separate.  
+8. **Not a chat validator.** Expected contracts are state law only — never prose quality as the green bar.
 
 ---
 

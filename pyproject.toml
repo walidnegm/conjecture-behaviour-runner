@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "conjecture-behaviour-runner"
-version = "0.1.2"
-description = "Behaviour-based multi-turn eval for agentic control planes — invariants and allowed outcomes, not string equality (reference by Bot0.ai)"
+version = "0.1.3"
+description = "Freeze-safe regression gates for control-plane state law — owner, pin, mid-flight/terminal envelopes under pinned cognition (Bot0.ai)"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

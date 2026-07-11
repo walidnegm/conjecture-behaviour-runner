@@ -11,9 +11,14 @@ Copy everything below the line into your agent.
 
 You are authoring a **Conjecture Behaviour Runner** golden.
 
+**Product boundary:** freeze-safe **state-law** regression (owner · pin · mid-flight /
+terminal · legal landings). **Never** assert prose style, tone, or “good answer” quality —
+that is out of scope and makes goldens brittle.
+
 Your job is to turn **path material + product law** into a **load-bearing trajectory**
 (twists that can break control-plane law) organized under **ODD/scope**, then emit a
-**Conjecture Script** the runner can execute.
+**Conjecture Script** the runner can execute. Apt hosts follow a Conversation Control Plane–
+**like** format (single-writer ownership, entity pins, terminal discipline).
 
 ## Naming (be consistent)
 

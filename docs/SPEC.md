@@ -6,16 +6,16 @@
 | **Document ID** | `CBR-SPEC` |
 | **Canonical path** | [`docs/SPEC.md`](./SPEC.md) |
 | **Title** | Conjecture Behaviour Runner Specification |
-| **Version** | **0.1.2** (alpha) — claim + implementation surface aligned with code |
-| **Status** | **Active** — authoritative for Scenario/Script, runner, verifier, scope; foundations ship |
+| **Version** | **0.1.3** (alpha) — claim tightened to demonstrated path-faithful value prop |
+| **Status** | **Active** — authoritative for claim, Script/verifier contracts, scope |
 | **Audience** | Integrators, contributors, agent authors of goldens |
-| **Companion face** | [README](../README.md) — project face (green bar, E2E, script language) |
+| **Companion face** | [README](../README.md) — **lead with planted-bug demo**; use cases; trap line |
 | **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
 | **Prompt seed** | [prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) — trajectory + ODD → Script |
-| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.2** |
-| **One-liner (locked)** | Contract testing for the conversational control plane — behavioral envelopes over authoritative state under pinned or replayed cognition |
+| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.3** |
+| **One-liner (locked)** | Freeze-safe regression gates for control-plane state law — owner · pin · mid-flight/terminal envelopes under pinned cognition; red bar even when the reply looks fine |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
-| **Reference domain** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
+| **Inspiration / primary pattern** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) — hosts isomorphic to that format are the apt application |
 
 **What “Specification” means here:** this document is the **normative source of truth** for
 behaviour, contracts, and extension points. Code implements it; the README popularizes it.
@@ -30,25 +30,63 @@ slices implement; they do not redefine the wedge without a SPEC version bump.
 
 ### One-liner (locked)
 
-> **Contract testing for the conversational control plane** —  
-> **behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**,  
-> under **pinned or replayed cognition**.
+> **Freeze-safe regression gates for control-plane state law** —  
+> **behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**  
+> (owner · pin · mid-flight / terminal), under **pinned or replayed cognition**.  
+> The bar goes red when state breaks **even if the reply still looks fine**.
 
-Not “one golden sentence.” Not a new universal testing paradigm.  
-**Wedge:** authoritative **control-plane conformance** under probabilistic cognition.
+Not a general chat quality product. Not a new universal testing paradigm.  
+**Wedge:** deterministic **state enforcement** for multi-turn agents that have law to protect.
+
+**Pitch that wins:** we do not care if the agent uses a different adjective today; we care
+that it did not violate core legal state, drop session pins, or rewrite identity mid-flight.
+
+### Inspiration and who it is for
+
+| | |
+|--|--|
+| **Inspiration** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) — single-writer turn ownership, entity pins, sole-continue / detour / terminal discipline |
+| **First adopter** | Dogfood: CCP + Bot0-class hosts (own that) |
+| **Apt applications** | Transactional / high-stakes multi-turn agents that **model** ownership, pins, terminals (FinTech, supply chain, healthcare ops, invoice/workflow ledgers, multi-agent handoffs) |
+| **Not apt** | Pure creative chat; general Q&A with no authoritative mid-flight state; “grade my prose” |
+
+Orchestrators (LangGraph / Crew / Temporal) are **Driver surfaces** only when the host
+projects a CCP-**isomorphic** observation. They are not a free market of “any agent app.”
 
 ### What we test (and what we do not)
 
 | We test | We do **not** primarily test |
 |---|---|
-| **Control-plane law:** exclusive owner, active kind, entity pins, mid-flight vs front door, detours, terminals, blocks_resolve / no illegal restart | Model wording quality, preference scores, leaderboards |
-| **Behavioral envelopes:** legal landings + state that must hold | Single ideal trajectory only |
+| **Control-plane law:** exclusive owner, active kind, entity pins, mid-flight vs front door, detours, terminals, blocks_resolve / no illegal restart | Model wording, tone, preference scores, leaderboards |
+| **Behavioral envelopes:** legal landings + state that must hold | “The conversation was good” |
 | **Ground truth on state:** expected outcomes + invariants (required for CI goldens) | Hypothesis-only scripts with no expected result |
+| **Regression of known law** under freeze | Emergent discovery of unknown bugs under free live LLM |
 | Optional later: domain facts *if* projected into observation + verifier kinds | Built-in full domain sim / world model |
 
-**Default product scope = multi-turn control-plane contracts.**  
-The *shape* (Scenario → Script → runner → verifier over projected state) can host more,
-but we do not market “test the whole agent” until domain ground truth is first-class.
+**Critical trap:** do **not** turn Conjecture into a general-purpose chat validator.
+Prose-style asserts make the framework feel restrictive and brittle — out of scope.
+
+### Silent failure and CI determinism (why the wedge exists)
+
+| Problem | What Conjecture does |
+|---|---|
+| **Silent failure** | Text looks fine to humans / LLM evaluators while owner, pin, or terminal law is broken |
+| **Entity lock / ambient hijack** | Mid sensitive workflow, ambient turns must not drop or swap the bound id |
+| **Terminal compliance** | No illicit re-activate or mutate-after-complete |
+| **Handoff integrity** | Exclusive owner shifts without dual-writer |
+| **CI cost** | Pin/freeze cognition → cheap, repeatable gates without live LLM on every PR |
+
+### What is demonstrated vs vision
+
+| **Demonstrated today (sell this)** | **Vision (not the face claim)** |
+|---|---|
+| Path-faithful mini-app: real `handle()`, planted bugs go red | Full multi-runner Scenario platform |
+| Script + verifier + freeze/record | Generation, shrink, N-run hold-rate product |
+| CCP-shaped portable kinds + optional stream unit goldens | Turnkey “any LangGraph app” without isomorphic state |
+| Contract regression harness with shared vocabulary | Emergent bug hunting under free live multi-step cognition |
+
+Face vocabulary: **golden (Script) · run · verifier**.  
+Richer ontology (Scenario, multi-runner, seeds, Verdict) is architecture — not the 30-second pitch.
 
 ### Product naming: trajectory, Scenario, Script (locked)
 
@@ -99,18 +137,16 @@ play-back driver. Put it back:
 
 **Mnemonic:** Scenario *describes* the trajectory of twists; Script *plays* it; observed trajectory *is what happened*; Verifier *judges*.
 
-### Maturity (honest)
+### Maturity (one box — do not bury the hero)
 
-We are **not** as mature as a full multi-surface behaviour-runner platform.
+| **Do this today** | **Scaffolding** | **Vision** |
+|---|---|---|
+| Path-faithful mini-app + planted bugs | Scenario models + compile | Multi-runner play-back |
+| Script + `run_script` + verifier + freeze | Agent prompt seed | Generation / shrink / distributions |
+| CCP-shaped goldens (unit + demo) | CLI / JSON / JUnit | First-party orchestrator packages |
 
-| Mature enough to use now | Early / incomplete |
-|---|---|
-| Control-plane **Script** + `run_script` + verifier kinds | Full **Scenario** multi-runner play-back |
-| Path-faithful mini-app E2E + planted bugs | Rich observed-trajectory store / N-run distribution |
-| Freeze/record cognition for CI | First-party LangGraph/Crew/Temporal packages |
-| Compile Scenario → Script bridge (partial) | Domain ground-truth plugins |
-
-Do not market “complete trajectory platform.” Market: **control-plane contracts on multi-turn trajectories under freeze**, with a path to broader Scenario language.
+**Market today:** freeze-safe **state-law regression** for CCP-shaped multi-turn hosts, proved on a real Act path in-repo.  
+**Do not market:** complete behaviour platform, free discovery, or “any agent without owner/pin state.”
 
 ### Seeds (including Collinear and peers)
 
@@ -238,31 +274,20 @@ Not “a completely new testing paradigm.”
 | **Illegal landing** (restart, wrong mode, silent degrade) | Snapshot of one turn still green |
 | **Dual writers / steals** | Trajectory “score” can still be high |
 
-### Slice 0 honesty (critical)
+### Proof paths (critical — claim matches artifact)
 
-Reference goldens largely:
+| Path | What it proves | Role in the product story |
+|---|---|---|
+| **Path-faithful mini-app** (`handle()` + planted bugs) | On a **real Act** surface, dual-owner / drop-pin / illegal-restart go **red** while replies can look fine | **Hero / face claim** — README leads here |
+| **Injected pin + effects + pure contract goldens** (e.g. CCP stream unit goldens) | Given the transition and classification you supplied, do contract checks hold | **Unit / portable kinds** — useful scaffolding, **not** the full wedge |
+| **Production host Driver** (roadmap) | User message on the **deployed** app preserves law without faking Act via effects | Next dogfood step (e.g. monorepo chat path) |
 
-1. **Inject** a cognition pin  
-2. **Inject** ledger effects (`begin_task`, pins, ambient)  
-3. Run **pure** control-plane projection functions  
-4. Assert owner / pin / extras  
+Slice 0 therefore sells **freeze-safe state-law regression**, demonstrated on path-faithful Act,
+plus a **structured unit harness** for CCP-shaped contracts — **not** “we discover every
+emergent steal under live multi-step cognition.”
 
-That establishes:
-
-> Given the state transition I injected and the classification I supplied, does the
-> contract function return the expected owner / pin / blocks_resolve?
-
-It does **not** yet establish:
-
-> When a user sends this message to the **deployed application**, does classify → route →
-> mutate → tools → respond while preserving the contract?
-
-So Slice 0 is a **valuable unit-level contract harness**. NL on the turn is partly
-**documentary** until a real **Driver** path exists. `LedgerEffect` should be used for
-**arrange / environment** (and external stimuli), not as a substitute for the system’s
-own Act side effects long-term.
-
-**Arrange → Act → Observe → Assert** is the target run shape.
+`LedgerEffect` is for **arrange / environment**, not a long-term substitute for the system’s
+own Act side effects. **Arrange → Act → Observe → Assert** remains the target run shape.
 
 ---
 
@@ -497,7 +522,8 @@ artifact today: pin + source + freeze_key + optional evidence.
 | Slice | What | Status |
 |---|---|---|
 | **0** | Script model, pin-driven harness, standard invariants, optional CCP goldens | ✅ |
-| **0.1.1–0.1.2** | CognitionProvider + freeze; temporal + outcome-specific verifiers; compile bridge; CLI run/JUnit; path-faithful mini-app + planted bugs; **§0 claim locked** | ✅ |
+| **0.1.1–0.1.2** | CognitionProvider + freeze; temporal + outcome-specific verifiers; compile bridge; CLI run/JUnit; path-faithful mini-app + planted bugs | ✅ |
+| **0.1.3** | Claim reframe: face = path-faithful state-law gates; CCP inspiration; high-stakes use cases; trap = not chat validator; vision quarantined | ✅ docs |
 | **1 next** | HTTP/SSE/Playwright drivers; **LangGraph / Temporal / Crew adapters**; agent synthesizer **with required expected**; fail closed if golden has no expected | open |
 | **2** | Richer temporal ops; observation/domain ground truth; generation + shrink; production runner (shards, retries) | open |
 | **3** | ODD corpus / explorer / N-run **contract hold-rate** distributions | open |

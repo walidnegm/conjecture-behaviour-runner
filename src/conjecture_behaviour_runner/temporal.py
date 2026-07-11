@@ -61,18 +61,30 @@ def check_trajectory_invariant(
         return None
 
     if kind == "pin_stable":
-        # expected = pin key; value once set must not change to a different non-null
+        # expected = pin key.
+        # Once established (first non-empty), the pin must remain present with
+        # the same value on every later turn. Disappearance is a failure
+        # (wf_1 → missing → wf_1 must FAIL).
         key = exp if isinstance(exp, str) else (exp or {}).get("key") if isinstance(exp, Mapping) else None
         if not key:
             return "pin_stable: expected pin key string"
         seen = None
+        established = False
         for i, pins in enumerate(pins_list):
             val = pins.get(key) if isinstance(pins, Mapping) else None
-            if val is None or val == "":
-                continue
-            if seen is None:
+            empty = val is None or val == ""
+            if not established:
+                if empty:
+                    continue
                 seen = val
-            elif val != seen:
+                established = True
+                continue
+            if empty:
+                return (
+                    f"pin_stable: pin {key!r} missing/empty at turn[{i}] "
+                    f"after established {seen!r}"
+                )
+            if val != seen:
                 return (
                     f"pin_stable: pin {key!r} changed {seen!r} → {val!r} at turn[{i}]"
                 )

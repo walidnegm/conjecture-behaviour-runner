@@ -14,9 +14,9 @@ from conjecture_behaviour_runner import (
     InvariantSpec,
     LlmMode,
     NullControlPlaneAdapter,
-    __version__,
     run_script,
 )
+from conjecture_behaviour_runner._version import get_version
 from conjecture_behaviour_runner.discover import discover_scripts
 from conjecture_behaviour_runner.report import (
     results_to_json_report,
@@ -218,7 +218,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     args = parser.parse_args(argv)
     if args.version:
-        print(__version__)
+        print(get_version())
         return 0
     if getattr(args, "demo", False) and not args.command:
         return _cmd_demo(args)

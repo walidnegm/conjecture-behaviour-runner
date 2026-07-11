@@ -21,7 +21,8 @@ The public harness talks to a host through `ControlPlaneAdapter`
 | Binding | Status |
 |---|---|
 | **Null** (`NullControlPlaneAdapter`) | Packaging smoke — does not verify host invariants |
-| **Conversation Control Plane** (`contrib.control_plane.ControlPlaneStreamAdapter`) | **Shipped** — multi-turn stream contract (sole-continue, phase-gated resolve, pin identity), no DB. Needs `pip install conjecture-behaviour-runner[control-plane]` |
+| **HTTP/JSON** (`contrib.http_json.HttpJsonAdapter`) | **Shipped** — POST turn; map owner/pins/outcome from dotted JSON paths (stdlib) |
+| **Conversation Control Plane** (`contrib.control_plane.ControlPlaneStreamAdapter`) | **Shipped** — multi-turn stream contract; needs `pip install conjecture-behaviour-runner[control-plane]` |
 | **Path-faithful mini-app** (`path_faithful.MiniAppAdapter`) | **Shipped** — Act via `handle()`; planted bugs for E2E |
 | **Your own ledger / LangGraph / Temporal / Crew** | Subclass `BaseControlPlaneAdapter`; implement `apply_effect` + `observe_turn` |
 

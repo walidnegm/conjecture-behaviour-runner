@@ -70,10 +70,9 @@ class MiniChatApp:
             self.ledger.phase = ""
             return self._obs("detour_superseded", blocks_resolve=False)
 
-        # New task / begin
-        if intent == "new_task" or (
-            self.ledger.active_kind is None and "cost" in message.lower()
-        ):
+        # New task / begin — pin-driven only (no keyword/NL short-circuit).
+        # Matches project rule: cognition labels own meaning; code executes.
+        if intent == "new_task":
             self.ledger.active_kind = "cost_out"
             self.ledger.exclusive_owner = "cost_out"
             self.ledger.phase = "sizing"

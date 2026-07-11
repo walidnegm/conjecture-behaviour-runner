@@ -77,7 +77,7 @@ Prefer PRs that someone needs personally:
 |-------------|--------|----------|---------|------------|
 | Path-faithful mini-app | ✅ | ✅ | ✅ planted bugs | Bot0 |
 | Conversation Control Plane | ✅ optional extra | ✅ | ✅ goldens | Bot0 |
-| **HTTP / JSON** | ⬜ Planned | ⬜ Planned | ⬜ Planned | **Needed** |
+| **HTTP / JSON** | ✅ `HttpJsonAdapter` | ✅ JSON paths | ⬜ host sample | **Needed** (samples) |
 | LangGraph | ⬜ Needed | ⬜ Needed | ⬜ Needed | Needed |
 | Temporal | ⬜ Needed | ⬜ Needed | ⬜ Needed | Needed |
 | OpenAI Agents SDK | ⬜ Needed | ⬜ Needed | ⬜ Needed | Needed |

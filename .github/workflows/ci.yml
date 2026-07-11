@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Version integrity
+        run: |
+          V_PY=$(python -c "from conjecture_behaviour_runner._version import __version__; print(__version__)")
+          V_META=$(python -c "from importlib.metadata import version; print(version('conjecture-behaviour-runner'))")
+          V_CLI=$(conjecture --version)
+          test "$V_PY" = "$V_META"
+          test "$V_CLI" = "$V_META"
+          grep -q "version = \"$V_PY\"" pyproject.toml
+      - name: Unit tests
+        run: pytest tests/ -q --tb=short
+      - name: Path-faithful planted bugs (signature claim)
+        run: conjecture path-faithful --prove-bugs
+      - name: CLI demo
+        run: conjecture demo
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist/wheel
+        run: |
+          pip install build
+          python -m build
+      - name: Install wheel
+        run: |
+          pip install dist/*.whl
+          conjecture --version
+          python -c "from conjecture_behaviour_runner.path_faithful import prove_planted_bugs; assert prove_planted_bugs()['helpful']"

@@ -3,30 +3,27 @@
 **Catch the agent bugs that still look fine in chat.**
 
 Multi-turn agents fail *quietly*: the reply still sounds fine, but the system dropped
-who owns the turn, lost the locked record, or restarted finished work. Conjecture is a
-small **Script → Driver → Observation → Invariant** kit so CI goes red on **state law**,
-not on wording — with cognition **pinned/frozen** so runs stay cheap and identical.
+who owns the turn, lost the locked record, or restarted finished work. Conjecture makes
+CI go red on **state law**, not wording — with cognition **pinned/frozen** so runs stay
+cheap and identical every PR.
 
-MIT · Alpha **0.1.4** · [Bot0.ai](https://bot0.ai)
+MIT · **0.1.4** · [Bot0.ai](https://bot0.ai)
 
 ---
 
-## 30-second start
+## Install & first run
 
 ```bash
 git clone https://github.com/walidnegm/conjecture-behaviour-runner.git
 cd conjecture-behaviour-runner
 pip install -e ".[dev]"
 
-# Browser UI — story, healthy run, planted bugs
-conjecture ui
-# → http://127.0.0.1:8765
-
-# Or CLI only
-conjecture path-faithful --prove-bugs
+conjecture path-faithful --prove-bugs   # healthy PASS + 3 planted FAILs
+conjecture ui                           # browser UI → http://127.0.0.1:8765
+pytest tests/ -q
 ```
 
-### Minimal code (this is the whole public model)
+### Minimal golden (15 lines)
 
 ```python
 from conjecture_behaviour_runner import (
@@ -62,88 +59,69 @@ script = ConjectureScript(
     ],
 )
 result = run_script(
-    script,
-    adapter=MiniAppAdapter(MiniChatApp()),  # your Driver
-    llm_mode=LlmMode.STUB,
+    script, adapter=MiniAppAdapter(MiniChatApp()), llm_mode=LlmMode.STUB
 )
 assert result.passed
 ```
 
-Five concepts: **Script · Turn · Driver · Observation · Invariant**.  
-Deeper model (Scenario, ODD, multi-runner, Verdict) lives in
-[`docs/SPEC.md`](docs/SPEC.md) — **not required to contribute**.
-
----
-
-## Watch the bar turn red
-
-In-repo mini-app with a real `handle()` and three planted bugs:
+### Planted bugs (the signature claim)
 
 | Run | Result | What broke |
 |-----|--------|------------|
 | Healthy continue | **PASS** | Mid-flight owner + pin hold |
-| Dual owner | **FAIL** | Steal to front door — reply can still look fine |
+| Dual owner | **FAIL** | Steal to front door |
 | Drop pin | **FAIL** | Lost `workflow_id` |
 | Illegal restart | **FAIL** | Task wiped mid-flight |
 
-```bash
-conjecture path-faithful --prove-bugs
-# or: conjecture ui  →  “Prove planted bugs”
-```
+### Five concepts (that’s the public model)
+
+| | |
+|--|--|
+| **Script** | Multi-turn golden with expected rules |
+| **Turn** | Stimulus + optional pin + invariants |
+| **Driver** | How you Act on the app (`handle`, HTTP, …) |
+| **Observation** | Projected state after the turn |
+| **Invariant** | Rule that must hold (owner, pin, …) |
+
+Deeper architecture (Scenario, ODD, multi-runner, Verdict): [`docs/SPEC.md`](docs/SPEC.md) — **optional** for first contributions.
 
 ---
 
-## Why this is not another eval platform
+## HTTP Driver (portable hosts)
 
-LangSmith / DeepEval / Phoenix / etc. own **traces and LLM-as-judge**.  
-Nobody owns: *“the reply sounded fine but we lost the locked workflow / dual-wrote /
-restarted completed work.”*
+```python
+from conjecture_behaviour_runner.contrib.http_json import HttpJsonAdapter
 
-Use Conjecture **alongside** quality tools as the **cheap state-law CI gate** — not as a
-replacement for trajectory scoring. Best fit: high-stakes multi-turn systems with
-ownership + pins (see [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
-as inspiration). Skip pure creative chat with no authoritative mid-flight state.
+adapter = HttpJsonAdapter(
+    endpoint="http://localhost:8000/chat",
+    owner_path="debug.owner",
+    pins_path="debug.pins",
+    outcome_path="debug.outcome",
+)
+# result = run_script(script, adapter=adapter, llm_mode=LlmMode.STUB)
+```
+
+Your app returns JSON with owner/pins; Conjecture checks invariants. No Python protocol
+required to try. More: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-## Local UI (OSS)
+## Why not just LangSmith / DeepEval?
 
-```bash
-conjecture ui --port 8765
-```
-
-Stdlib HTTP server (no Flask). Shows the planned story, healthy timeline
-(must-hold vs measured), and planted-bug proof cards.
-
-*(Bot0 monorepo also has a superadmin console at `/account/admin/conjecture` for
-in-product dogfood — same idea, host-specific.)*
+Those own traces and LLM-as-judge. Conjecture owns **“reply fine, ledger wrong”** under
+freeze-safe CI. Use **alongside** quality tools — not instead.
 
 ---
 
 ## Contribute
 
-See **[CONTRIBUTING.md](CONTRIBUTING.md)** — contribution matrix, contributor-sized
-issues, and what *not* to ask first-time contributors to build.
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** (matrix, sized issues, five-minute path).
 
-**Highest-leverage next community package:** generic **HTTP/JSON Driver + Observer**
-(configure endpoint + JSON paths for owner/pins) so hosts need not implement Python
-protocols first.
-
-| Help wanted | Status |
-|-------------|--------|
-| HTTP driver / observer | Planned |
-| LangGraph · Temporal · OpenAI Agents · Playwright | Needed |
-| Example packs with planted bugs | Needed |
-
----
-
-## Docs map
-
-| Start here | Deeper |
-|------------|--------|
-| This README | [docs/SPEC.md](docs/SPEC.md) architecture |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | [AGENTS.md](AGENTS.md) host adapter notes |
-| `conjecture ui` | [examples/](examples/) |
+| Integration | Driver | Example |
+|-------------|--------|---------|
+| Path-faithful mini-app | ✅ | ✅ planted bugs |
+| HTTP/JSON | ✅ adapter | ⬜ host sample |
+| LangGraph / Temporal / Playwright | ⬜ | ⬜ |
 
 ---
 

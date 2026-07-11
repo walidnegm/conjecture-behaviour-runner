@@ -349,13 +349,35 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 
 ### Related work (compose; do not straw-man)
 
+**Why Conjecture exists (high signal, 2026):** the market is full of *eval everything*
+(LangSmith, DeepEval, Phoenix, Braintrust, Promptfoo, Galileo, Confident AI, …) —
+multi-turn traces, LLM-as-judge, tool-order scores, red-team sims. Execution shells
+(Playwright, Cucumber) and general property testing (Hypothesis) exist. There is no
+mature product lane for *conversation control-plane testing*, *ownership invariants*,
+*pin stability regression*, or *freeze-safe terminal compliance*. The unowned pain:
+
+> The reply sounded fine, but we silently lost the locked workflow / dual-wrote /
+> restarted completed work.
+
+| Aspect | Eval / obs stacks | Conjecture |
+|---|---|---|
+| Trajectories | Core (score / explore) | Evidence only |
+| LLM-as-judge | Heavy | **Not** the green bar |
+| Deterministic CI | Often live + flaky | **Pin/freeze** → identical, cheap |
+| Owner / pin / terminal law | Custom one-offs | **Portable core kinds** |
+| “Looks fine but broken” | Rare primary claim | **Hero** |
+
+**Redundancy:** use Conjecture **alongside** quality evals as the cheap state-law CI gate —
+not as a LangSmith replacement. **Not worth it** for pure creative chat / simple RAG with
+no authoritative mid-flight state. Face wording: [README — Why we build this](../README.md#why-we-build-this-not-another-eval-platform).
+
 | Related | Relation to Conjecture |
 |---|---|
-| **Playwright** | Complete execution substrate. Conjecture sits **above** it as verifier semantics; Playwright can be **a Driver** (fixtures, traces, isolation). Do not rebuild Playwright. |
-| **Cucumber** | Readable scenarios + step defs that can assert **any** state. Not “exact string only.” Conjecture is specialized agent/control-plane verifiers; integration is possible. |
+| **Playwright** | Complete execution substrate. Conjecture sits **above** it as verifier semantics; Playwright can be **a Driver**. Do not rebuild Playwright. |
+| **Cucumber** | Readable scenarios + any-state step defs. Conjecture is specialized agent/control-plane verifiers; integration possible. |
 | **Hypothesis stateful** | Closest **method** analogue: actions → transitions → invariants → **shrink**. Without generation/shrink, Slice 0 is a **hand-authored** transition API. |
-| **Eval platforms** (LangSmith, Braintrust, DeepEval, Promptfoo, Inspect, Phoenix, …) | Already multi-turn / trajectory / tools. Differentiation is **narrower**: verify **authoritative-state contracts** for all acceptable trajectories — not “they only score the model.” |
-| **Sim / eval platforms** | Different job (explore or score trajectories). We may consume path seeds; our green bar remains **state contracts under freeze**. |
+| **Eval platforms** (LangSmith, Braintrust, DeepEval, Promptfoo, Inspect, Phoenix, …) | Multi-turn / trajectory / tools. We do **not** compete on judge quality; we gate **authoritative-state contracts** under freeze. |
+| **Sim / path labs** | May **seed** paths; their scores are **not** our merge gate. |
 | **CARLA / Scenic** | Method aspiration for generation under ODD later — not claimed for current code. |
 
 ### Canonical pipeline (target — partial today)

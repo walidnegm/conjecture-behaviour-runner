@@ -145,6 +145,41 @@ the vocabulary without modeling ownership and pins.
 
 ---
 
+## Why we build this (not another eval platform)
+
+**2026 landscape (honest):** the big tools dominate *eval everything* — multi-turn
+traces, LLM-as-judge, tool-order scores, red-team sims, observability
+(LangSmith, DeepEval, Phoenix, Braintrust, Promptfoo, Galileo, Confident AI, …).
+Execution shells (Playwright, Cucumber) and general property testing (Hypothesis)
+exist. Searches for *conversation control-plane testing*, *ownership invariants*,
+*pin stability regression*, *freeze-safe terminal compliance* do **not** turn up a
+product in this lane.
+
+**Nobody owns this pain:** *the reply sounded fine, but we silently lost the locked
+workflow / dual-wrote / restarted completed work.*
+
+| Aspect | Typical eval / obs stack | Conjecture |
+|--------|--------------------------|------------|
+| Multi-turn trajectories | Full traces, goal scores | Evidence only — not the green bar |
+| LLM-as-judge / prose quality | Core product | **Out of scope** |
+| Deterministic CI | Often live model + flake | **Pin / freeze** → cheap, identical every PR |
+| State law (owner, pin, terminal) | Custom one-offs if at all | **Core** portable kinds |
+| “Looks fine but broken” | Rare primary claim | **Hero** |
+
+**Redundancy check:**
+
+- Happy with LangSmith + a few judges for “did it mostly do the right thing?” →
+  Conjecture is **alongside**, not a replacement: the **cheap CI gate** for state law.
+- Ever shipped a bug where the **chat log looked perfect** and the **ledger was wrong** →
+  that is the tool. Quality platforms catch quality; Conjecture gates **scaffolding law**.
+
+**Worth it?** For high-stakes / transactional agents with authoritative mid-flight state —
+**yes**. For pure creative chat, simple RAG, or “grade the essay” — **no** (use eval stacks).
+
+We refuse to become “yet another eval platform.” Related work detail: [CBR-SPEC](docs/SPEC.md).
+
+---
+
 ## Critical trap — do not become a chat validator
 
 | Do | Do not |

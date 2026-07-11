@@ -158,14 +158,14 @@ class ControlPlaneStreamAdapter(BaseControlPlaneAdapter):
         )
 
 
-# ── Reusable golden scripts (generic control-plane contract, not product-private) ──
+# ── Reusable golden scripts (generic control-plane contract, not host-private) ──
 
 
 def control_plane_golden_scripts() -> list[ConjectureScript]:
     """Three portable goldens proving the sole-continue contract across turns.
 
     ``cost_out`` is the public-safe example kind declared in the CCP contract
-    module itself — these are contract demonstrations, not Bot0 product goldens.
+    module itself — these are contract demonstrations, not host-app goldens.
     """
     begin_cost = LedgerEffect(
         op="begin_task",

@@ -3,7 +3,7 @@
 Entity *identity* (which workflow / project / run is in flight) is **not** a
 field on this pin. Hosts project entity ids via ``TurnObservation.pins`` after
 ledger apply — pin keys are host/control-plane defined (e.g. CCP uses
-``workflow_id``). Product-specific router flags belong in ``extras``.
+``workflow_id``). Host-specific router flags belong in ``extras``.
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ class CognitionPin:
     """Pinned classifier/router output for one turn — portable control-plane labels.
 
     Core fields are generic multi-turn control signals. Host-specific router
-    booleans and product concepts go in ``extras`` (opaque to the harness).
+    booleans and host-specific concepts go in ``extras`` (opaque to the harness).
 
     Values are **enums / flags**, not prose — code owns execution; the pin
     stands in for LLM cognition under ``LlmMode.STUB`` / ``FREEZE``.
@@ -46,11 +46,11 @@ class CognitionPin:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "CognitionPin":
-        """Build a pin; unknown / host-product keys land in ``extras``.
+        """Build a pin; unknown / host-private keys land in ``extras``.
 
         Accepts legacy Bot0 field names (``cost_estimate_request``, …) and
         folds them into ``extras`` so freezes and monorepo exports remain
-        loadable without re-baking product identity into the public type.
+        loadable without re-baking host identity into the public type.
         """
         known = {f.name for f in fields(cls)}
         payload = dict(data)

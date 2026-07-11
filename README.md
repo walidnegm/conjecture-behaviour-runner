@@ -13,7 +13,7 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 |---|---|
 | **GitHub** | [github.com/walidnegm/conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner) |
 | **Import** | `conjecture_behaviour_runner` |
-| **Public contract (spec)** | [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) — full design, IR, Collinear, contributions |
+| **Specification (`CBR-SPEC`)** | [docs/SPEC.md](docs/SPEC.md) — full design, IR, Collinear, contributions |
 | **License** | MIT · **Status** | Alpha — 0.1.1 |
 
 ### How to read the docs
@@ -21,7 +21,7 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 | Doc | Role | Length |
 |-----|------|--------|
 | **This README** | Why it exists, how to run, script language in plain English | Short face |
-| **[Public contract (spec)](docs/conjecture-behaviour-runner.md)** | Normative pipeline, architecture, field tables, Collinear, OSS/Verdict, roadmap | Full design |
+| **[Specification (`CBR-SPEC`)](docs/SPEC.md)** | Normative pipeline, architecture, field tables, Collinear, OSS/Verdict, roadmap | Full design |
 
 If the README and the spec disagree, **the spec wins** for contracts; fix the README next.
 
@@ -43,7 +43,7 @@ with frozen/sampled cognition** is the defensible framing.
 > adapter observing projected state. Reference goldens exercise **pure control-plane
 > contracts** (injected pins/effects). That is a **unit-level** vertical — useful, not yet
 > path-faithful chat through a deployed app. See [Slice 0 honesty](#slice-0-honesty)
-> and the [public contract](docs/conjecture-behaviour-runner.md).
+> and the [Specification](docs/SPEC.md).
 
 ### Positioning (compose with existing tools — do not replace them)
 
@@ -83,7 +83,7 @@ Spec / epic / ODD / incident / sim seed
 
 Same idea as agentic coding: **organic authoring → deterministic artifact → framework executes.**  
 Full stage table, ecosystem diagram, Collinear compare, tempting-features scope:  
-**[spec §2.1](docs/conjecture-behaviour-runner.md#21-pipeline-ecosystem-and-collinear)**.
+**[Specification §2.1](docs/SPEC.md#21-pipeline-ecosystem-and-collinear)**.
 
 | | Collinear-class | Conjecture |
 |--|-----------------|------------|
@@ -100,7 +100,7 @@ Full stage table, ecosystem diagram, Collinear compare, tempting-features scope:
 
 Turns may be **user**, **agent**, **agent→agent**, or **system/completion**.  
 Slice 0 API is user-centric (`user_text`); `actor` + experimental `Actor` expand later.  
-Details: [spec §1.1](docs/conjecture-behaviour-runner.md#11-behaviour-driven-testing-and-odd-full-objective).
+Details: [Specification §1.1](docs/SPEC.md#11-behaviour-driven-testing-and-odd-full-objective).
 
 ---
 
@@ -116,9 +116,9 @@ We verify **authoritative-state contracts** under pinned/frozen cognition.
 | **Cognition** | Stub + FreezeStore record/replay; local/cloud host-supplied |
 | **Oracle** | Step + outcome-specific + trajectory kinds |
 
-**Honesty:** many goldens still **inject** pin + effects (contract unit path). Path-faithful mini-app proves Act-through-`handle` + planted bugs. Full host drivers next — [spec](docs/conjecture-behaviour-runner.md).
+**Honesty:** many goldens still **inject** pin + effects (contract unit path). Path-faithful mini-app proves Act-through-`handle` + planted bugs. Full host drivers next — [Specification](docs/SPEC.md).
 
-ODD/scope, scenario seed sources, delivery slices: **[spec §1–2](docs/conjecture-behaviour-runner.md)**.
+ODD/scope, scenario seed sources, delivery slices: **[Specification §1–2](docs/SPEC.md)**.
 
 ---
 
@@ -256,7 +256,7 @@ Adapters map **your** host state into a `TurnObservation` (`exclusive_owner`, `p
 `extras`, …). The script language stays the same; only the adapter binding changes.
 
 **Formal field tables, multi-turn patterns, mini-ODD `scope`, mid-flight diagram, full golden:**  
-[docs/conjecture-behaviour-runner.md §4.1](docs/conjecture-behaviour-runner.md#41-script-structure-slice-0--multi-turn-design) ·  
+[docs/SPEC.md §4.1](docs/SPEC.md#41-script-structure-slice-0--multi-turn-design) ·  
 examples: [`sole_continue_golden.json`](examples/sole_continue_golden.json) / [`.yaml`](examples/sole_continue_golden.yaml).
 
 ---
@@ -307,7 +307,7 @@ assert run_script(
 For real checks: implement `ControlPlaneAdapter` / subclass `BaseControlPlaneAdapter`,  
 or use `contrib.control_plane.ControlPlaneStreamAdapter`.
 
-More: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) ·
+More: [docs/SPEC.md](docs/SPEC.md) ·
 [adapters/README.md](adapters/README.md) · [examples/](examples/)
 
 ---
@@ -384,7 +384,7 @@ product surfaces (studio, SSO, managed freeze, private corpus, SLA). OSS and com
 do not block each other.
 
 **Full contribution map, OSS vs Verdict table, foundational ideas:**  
-**[spec §8](docs/conjecture-behaviour-runner.md#8-contributions-verdict-and-foundational-ideas)**.
+**[Specification §8](docs/SPEC.md#8-contributions-verdict-and-foundational-ideas)**.
 
 ---
 

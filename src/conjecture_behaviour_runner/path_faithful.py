@@ -225,17 +225,19 @@ def sole_continue_story() -> dict[str, Any]:
     return {
         "title": "What this golden tests",
         "why": (
-            "We are not grading chat prose. We check whether mid-flight cost-out "
-            "keeps the right owner and locked workflow — even when a message looks "
-            "like ordinary chat."
+            "LLM proposes · code enforces. We are not grading chat prose. We check "
+            "whether the coded ledger + handoff rules still hold after Act: mid-flight "
+            "cost-out keeps the right owner and locked workflow — even when a message "
+            "looks like ordinary chat or a model would try to steal to the front door."
         ),
         "plot": (
             "User starts cost-out on a workflow, then continues with a volume change. "
             "Owner must stay cost_out and workflow_id must stay pinned."
         ),
         "what_green_means": (
-            "PASS = measured owner/pin/blocks match the rules after each turn. "
-            "FAIL = a rule broke even if a reply could still look fine."
+            "PASS = measured owner/pin/blocks match the rule-set after each turn "
+            "(enforcement held under pinned labels). "
+            "FAIL = steal, pin drop, or illegal restart — even if a reply could still look fine."
         ),
         "turns": [
             {

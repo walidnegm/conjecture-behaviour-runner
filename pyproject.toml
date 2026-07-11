@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "conjecture-behaviour-runner"
 version = "0.1.5"
-description = "Catch agent bugs that still look fine in chat — Script/Turn/Driver/Observation/Invariant for multi-turn state law under pinned cognition"
+description = "LLM proposes · code enforces — multi-turn state-law regression (owner · pin · handoff) under pinned cognition; Script/Turn/Driver/Observation/Invariant"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

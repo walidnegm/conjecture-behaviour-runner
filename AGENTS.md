@@ -8,8 +8,12 @@
 **Contributor first:** five concepts only — **Script · Turn · Driver · Observation · Invariant**.  
 See [CONTRIBUTING.md](CONTRIBUTING.md) and `conjecture ui`. Deeper claim hierarchy is CBR-SPEC §0.
 
-**Face (plain):** catch agent bugs that **still look fine in chat** — CI fails on broken
-conversation **rules** (owner / locked record / illegal restart), not on wording.
+**Face (plain):** catch agent bugs that **still look fine in chat**. Principle:
+**LLM proposes · code enforces** — CI fails when the coded **ledger + handoff**
+rule-set breaks (wrong exclusive owner, dropped pin, illegal restart / steal),
+not when wording changes. Pin/freeze the classification so checks are repeatable;
+pair with separate classifier tests for cognition drift. Ledger store is
+interchangeable (DB, LangGraph, Temporal, …) if Observation projects the rule-set.
 
 **Inspiration / apt hosts:** [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
 and apps with single-writer ownership + entity pins. Not pure creative chat.

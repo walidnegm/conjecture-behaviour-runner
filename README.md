@@ -1,7 +1,28 @@
 # Conjecture Behaviour Runner
 
-**Catch state-law breaks that still look fine in chat** — given a fixed classification
-(pin/freeze). Pair with classifier tests for cognition drift.
+**Catch state-law breaks that still look fine in chat.**
+
+In multi-turn agents, the reply can sound correct while the **conversation machine**
+underneath is wrong: the wrong specialist owns the turn, the locked record silently
+changed, or a mid-flight task was illegally restarted. Those failures are **ledger and
+handoff bugs**, not “bad writing.” Ordinary unit tests and LLM-as-judge evals usually
+miss them.
+
+The design principle is **LLM proposes · code enforces**. The model may emit
+labels—continue, detour, new task, abandon—but **deterministic code** (your rule-set)
+must decide exclusive owner, pin identity, and when ownership may yield. If that
+enforcement is soft, the model can **steal or hijack** the path and still produce a
+helpful-looking answer. Conjecture is regression for the **enforce** half: after each
+scripted turn it checks that owner · pin · handoff law still hold.
+
+CI needs a **fixed classification** (pin or freeze), not a live model roll every
+run—so the same golden fails for the same state break on every PR. That is deliberate:
+this package does **not** prove the classifier was right. Pair it with separate
+classifier tests for cognition drift; use Conjecture for “given these labels, did code
+still seal the ledger?”
+
+The ledger can live anywhere (session DB, LangGraph, Temporal, Vercel AI session, …).
+If you can project owner/pins after Act, you can import a Driver and get a **verdict**.
 
 MIT · **0.1.5** · [Bot0.ai](https://bot0.ai)
 
@@ -12,14 +33,24 @@ MIT · **0.1.5** · [Bot0.ai](https://bot0.ai)
 **Not** “did steps run in the right order?” (ordinal / unit tests).  
 **Not** “did the bot write a good sentence?” (LLM eval).
 
-**Yes:** after each user message in a multi-turn flow, is the **conversation machine**
-still legal?
+**Yes:** after each user message, do the **deterministic ledger + handoff rules** still hold —
+the coded rule-set that says who owns the turn, what is pinned, and when ownership may
+yield — even when an LLM *proposes* something that would steal or hijack if code did not
+enforce?
+
+That is the principle:
+
+> **LLM proposes · code enforces.**  
+> Conjecture regression-tests the **enforce** half under **pinned** labels so CI is
+> repeatable. If application logic is soft (fall-through to chat, keyword routing,
+> missing sole-continue), a model can fool the path; Conjecture is built to fail those
+> steals.
 
 | Check | Meaning |
 |-------|---------|
 | **Who owns this turn?** | Who is allowed to answer (e.g. cost-out vs front door) |
 | **What is locked?** | Same entity pin (workflow / claim / invoice id) |
-| **Mid-flight law** | No illegal restart, no silent pin drop, no dual write |
+| **Mid-flight / handoff law** | No illegal restart, no silent pin drop; handoff only when rules allow |
 
 ```text
 User: "cost out Keynote"
@@ -32,8 +63,9 @@ Conjecture:            ✅ still cost_out owns the turn
                        ❌ FAIL if continue stole to front door or lost the pin
 ```
 
-**One line:** regression tests for multi-turn **state law** (owner · pin · mid-flight)
-under **pinned cognition** — so CI catches *looks fine in chat, broken underneath*.
+**One line:** regression for multi-turn **state law** (owner · pin · handoff) under
+**pinned cognition** — *looks fine in chat, broken underneath* — against the principle
+that **code, not the model, owns enforcement**.
 
 ### Who “deserves to go next”?
 
@@ -48,23 +80,41 @@ If the ledger says cost-out is active and the turn is **continue**, cost-out **o
 delivery even if the user text *looks* like a glossary or scorecards question.  
 If the turn is **detour** / **abandon**, ownership **yields**.
 
-Conjecture asserts that those rules still held **after** Act. Ordinary ordinal tests
-do not model exclusive owner or pins.
+Conjecture asserts those rules still held **after** Act. Ordinary ordinal tests do not
+model exclusive owner or pins.
+
+### Where the ledger lives (does not matter)
+
+Conjecture does **not** require a specific product stack for the ledger. The durable
+state may live in:
+
+- a custom DB / JSON session blob  
+- **LangGraph** / LangChain checkpoint state  
+- **Temporal** workflow state  
+- **Vercel AI SDK** / other session stores  
+- any control plane that projects **owner · pins · outcome** after a turn  
+
+**What matters:** you have a **rule-set** (coded handoff / sole-continue / pin law) and a
+**Driver** that runs Act and returns an **Observation** Conjecture can check. Import
+your adapter (or HTTP JSON paths), pin the labels, run the script → **verdict**
+(PASS/FAIL + which invariant broke). No need to rewrite the ledger into Conjecture’s
+types beyond that projection.
 
 ---
 
 ## The pain (real, not only synthetic)
 
 In multi-turn control planes, the reply can look fine while **exclusive owner**, **entity
-pin**, or **mid-flight law** breaks. Dogfood on the Conversation Control Plane repeatedly
-hit this class (e.g. discovery/scorecards-shaped turns mid cost-out looking like a helpful
-detour while sole-continue still owned the stream). Evals score prose; they miss the ledger.
+pin**, or **handoff law** breaks — classic **steal/hijack** when the model’s proposal was
+not sealed by code. Dogfood on the Conversation Control Plane hit this class (e.g.
+discovery-shaped turns mid cost-out looking helpful while sole-continue still owned the
+stream). Evals score prose; they miss the ledger rule-set.
 
 Conjecture freezes the classification for CI, runs the real Act path (or HTTP), and fails
 the build when **state law** breaks.
 
-> **Honest scope:** this gates **execution** given a pin/freeze — not “the classifier was
-> wrong.” Test cognition separately; use Conjecture for owner/pin/terminal regression.
+> **Honest scope:** this gates **enforcement** given a pin/freeze — not “the classifier
+> was wrong.” Test cognition separately; use Conjecture for owner/pin/handoff regression.
 
 ---
 

@@ -1,6 +1,8 @@
 # Examples
 
-**Face claim:** freeze-safe **state-law** gates (owner · pin · terminal) under pin/freeze —
+**Face claim:** **LLM proposes · code enforces** — freeze-safe **state-law** gates
+(owner · pin · handoff/terminal) under pin/freeze; ledger store agnostic (DB /
+LangGraph / Temporal / …) as long as Observation projects the rule-set.
 not a chat quality product. Inspiration: [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane).
 
 ## Start here (hero)

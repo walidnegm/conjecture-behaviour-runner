@@ -65,9 +65,16 @@ def _html_page() -> bytes:
 <main>
   <h1>Conjecture local runner</h1>
   <p class="muted">
-    Catch agent bugs that still look fine in chat. This UI runs the built-in
-    path-faithful mini-app: a tiny real <code>handle()</code>, frozen cognition,
-    and state-law checks (owner · pin · mid-flight). Not a chat quality grader.
+    Catch state-law breaks that still look fine in chat. The model may
+    <em>propose</em> continue / detour / new task; your coded ledger and handoff
+    rules must <em>enforce</em> who owns the turn, which record stays locked, and
+    when ownership may yield. If that seal is soft, a label can steal or hijack
+    the path while the reply still sounds helpful. Conjecture regression-tests
+    that enforce half under a fixed classification (pin/freeze)—not whether the
+    classifier was right (test cognition separately). This UI runs the built-in
+    mini-app’s real <code>handle()</code> path. Where the ledger lives (DB,
+    LangGraph, Temporal, …) does not matter if Act projects owner and pins for a
+    verdict.
   </p>
 
   <div class="card">

@@ -13,7 +13,7 @@
 | **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
 | **Prompt seed** | [prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) — trajectory + ODD → Script |
 | **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.5** (see `_version.py`) |
-| **Claim hierarchy (locked)** | **Face (plain):** catch agent bugs that still look fine in chat · **Precise:** freeze-safe state-law gates · **Technical:** envelopes / pin-freeze · **Gloss:** CCP-shaped conformance only — see §0 |
+| **Claim hierarchy (locked)** | **Face (plain):** catch agent bugs that still look fine in chat · **Principle:** LLM proposes · code enforces (ledger/handoff rule-set) · **Precise:** freeze-safe state-law gates · **Technical:** envelopes / pin-freeze · **Gloss:** CCP-shaped conformance; ledger store agnostic — see §0 |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Inspiration / primary pattern** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) — hosts isomorphic to that format are the apt application |
 
@@ -35,9 +35,9 @@ mechanism language **supports** the face claim; it does **not** expand it into p
 
 | Layer | Plain English (user-facing) | Precise wording | Role |
 |---|---|---|---|
-| **1. Face** | **Catch the agent bugs that still look fine in chat** — CI fails when mid-conversation **rules** break (who owns the turn, which record is locked), not when wording changes | Freeze-safe regression gates for control-plane **state law** (owner · pin · mid-flight/terminal) under pinned cognition | Hero + buyer pitch |
-| **2. Technical** | Test conversation **machine rules**, not essay quality; freeze AI decision labels so PR checks are cheap and repeatable | Contract testing for the conversational control plane — behavioral envelopes (allowed outcomes + invariants) over authoritative state, under pinned or replayed cognition. Not “one golden sentence.” Not a new universal testing paradigm. | How green is defined |
-| **3. Architecture** | For apps that work like a control plane (one owner, locked records, clear finish) — not every chatbot | Authoritative control-plane conformance under probabilistic cognition — **when** the host is CCP-shaped (or isomorphic) and Act is under a real Driver | Research gloss; scoped |
+| **1. Face** | **Catch the agent bugs that still look fine in chat** — CI fails when mid-conversation **ledger + handoff rules** break (who owns the turn, which record is locked), not when wording changes. Principle: **LLM proposes · code enforces** | Freeze-safe regression gates for control-plane **state law** (owner · pin · handoff / mid-flight/terminal) under pinned cognition | Hero + buyer pitch |
+| **2. Technical** | Test conversation **machine rules**, not essay quality; freeze AI decision labels so PR checks are cheap and repeatable; catch steals when enforcement is soft | Contract testing for the conversational control plane — behavioral envelopes (allowed outcomes + invariants) over authoritative state, under pinned or replayed cognition. Not “one golden sentence.” Not a new universal testing paradigm. | How green is defined |
+| **3. Architecture** | For apps that work like a control plane (one owner, locked records, clear finish) — not every chatbot. **Ledger store is interchangeable** (DB, LangGraph, Temporal, …) if Observation projects the rule-set | Authoritative control-plane conformance under probabilistic cognition — **when** the host is CCP-shaped (or isomorphic) and Act is under a real Driver | Research gloss; scoped |
 
 #### Face (layer 1) — plain then precise
 
@@ -45,15 +45,16 @@ mechanism language **supports** the face claim; it does **not** expand it into p
 
 | | |
 |--|--|
-| **Why** | Multi-turn agents fail *quietly*: the reply can sound fine while the system lost the task owner, dropped the locked workflow/invoice, or restarted finished work. Wording scores miss that. |
-| **What** | Regression goldens that check **conversation machine rules** after each turn (owner, pin, mid-flight vs restart). |
-| **So** | **CI goes red** when those rules break — even if the prose still looks polished. AI labels are **pinned/frozen** so checks stay fast and identical every PR. |
+| **Why** | Multi-turn agents fail *quietly*: the reply can sound fine while the system lost the task owner, dropped the locked workflow/invoice, or restarted finished work — a **steal/hijack** when the model’s proposal was not sealed by code. Unit “something returned” checks and wording scores miss that class. |
+| **What** | Regression goldens that check **deterministic ledger + handoff rules** after each turn (owner, pin, mid-flight vs restart / yield). Principle: **LLM proposes · code enforces**. Conjecture gates the **enforce** half under pinned labels so a soft fall-through or missing sole-continue fails CI. |
+| **So** | **CI goes red** when those rules break — even if the prose still looks polished. Labels are **pinned/frozen** so the same golden fails the same way every PR. **Not** a classifier correctness suite: pair with separate cognition tests for drift; Conjecture answers “given these labels, did code still seal the ledger?” |
+| **Where state lives** | Irrelevant to the product claim: custom session DB, LangGraph checkpoint, Temporal, Vercel AI session, … — **import the rule-set via Driver + Observation → verdict**. |
 
 **Precise (spec short name):**
 
 > **Freeze-safe regression gates for control-plane state law** —  
-> owner · pin · mid-flight / terminal under **pinned or replayed cognition**.  
-> Red bar when state breaks **even if the reply still looks fine**.
+> owner · pin · handoff / mid-flight / terminal under **pinned or replayed cognition**.  
+> Red bar when **enforcement** breaks **even if the reply still looks fine**.
 
 #### Technical definition (layer 2 — sticky; keep under face)
 
@@ -61,17 +62,20 @@ mechanism language **supports** the face claim; it does **not** expand it into p
 > **behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**,  
 > under **pinned or replayed cognition**.  
 >  
-> Not “one golden sentence.” Not a new universal testing paradigm.
+> Not “one golden sentence.” Not a new universal testing paradigm.  
+> Principle under test: **LLM proposes · code enforces** (not “the model always routed correctly”).
 
 #### Architecture gloss (layer 3 — scope required)
 
 > Authoritative control-plane **conformance under probabilistic cognition** —  
 > for CCP-shaped hosts, as **state-law regression** under pin/freeze, proved on a real Act
-> path where available. Full live classify→route→mutate discovery is **next Driver**, not the face sell.
+> path where available. Full live classify→route→mutate discovery is **next Driver**, not the face sell.  
+> **Ledger implementation is not the product:** any store that projects isomorphic
+> Observation fields is in scope; LangGraph / Temporal / etc. are Drivers, not competitors.
 
 **Align rule:** layer 2 ⊂ layer 1. Layer 3 must not be sold without the CCP-shaped + Act scope.  
 **Pitch that wins:** we do not care about adjectives; we care that legal state, pins, and
-mid-flight law held.
+handoff law held under the coded rule-set.
 
 ### Inspiration and who it is for
 
@@ -82,8 +86,10 @@ mid-flight law held.
 | **Apt applications** | Transactional / high-stakes multi-turn agents that **model** ownership, pins, terminals (FinTech, supply chain, healthcare ops, invoice/workflow ledgers, multi-agent handoffs) |
 | **Not apt** | Pure creative chat; general Q&A with no authoritative mid-flight state; “grade my prose” |
 
-Orchestrators (LangGraph / Crew / Temporal) are **Driver surfaces** only when the host
-projects a CCP-**isomorphic** observation. They are not a free market of “any agent app.”
+Orchestrators (LangGraph / Crew / Temporal / Vercel AI session, …) are **Driver surfaces**
+only when the host projects a CCP-**isomorphic** observation from its rule-set. They are
+not a free market of “any agent app,” and Conjecture does not require rewriting the ledger
+into a Conjecture-native store.
 
 ### What we test (and what we do not)
 

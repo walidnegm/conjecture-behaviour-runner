@@ -12,7 +12,7 @@
 
 | Piece | Package surface | Your job |
 |-------|-----------------|----------|
-| **Conjecture Scenario** | `experimental.Scenario`, `schema.json` | Describe twists & turns + envelopes (not tied to one driver) |
+| **Conjecture Scenario** | `experimental.Scenario`, `schema.json` | Describe twists & turns + envelopes (not tied to one driver). Example: `examples/scenario_sole_continue.yaml` |
 | **Conjecture Script** | `ConjectureScript`, `DialogueTurn`, `InvariantSpec` | Runnable play-back form with **expected state** (usual CI golden) |
 | **Runner (who executes)** | `run_script(...)`, CLI `conjecture run` | Choose this control-plane runner (or later another); supply Driver + cognition |
 | **Verifier** | standard + temporal kinds | Declare `kind` + `expected`; never free-form pass rules |

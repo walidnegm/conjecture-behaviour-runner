@@ -1,0 +1,181 @@
+# Conjecture Scenario — flexible *description* of a load-bearing trajectory.
+#
+# Product role (CBR-SPEC):
+#   Scenario  = describe twists + envelopes (not tied to one driver)
+#   Script    = play-back form a runner executes (compile from here, or author directly)
+#   Observed  = evidence of one run
+#
+# This example = same sole-continue path as trajectory_authored_sole_continue.json,
+# written in the richer Scenario language (scope, profiles, waits, nondeterminism,
+# evidence, terminal buckets).
+#
+# Validate + compile + run (path-faithful mini-app):
+#   pip install -e ".[dev,scenarios]"
+#   python examples/scenario_compile_and_run.py
+#
+# Schema: src/conjecture_behaviour_runner/experimental/schema.json
+# Models: experimental.scenario_models.Scenario
+
+scenario_id: sole_continue_mid_flight
+scenario_class: control_plane_sole_continue
+
+scope:
+  in_scope:
+    - mid-flight sole-continue on a pinned workflow entity
+    - frozen cognition labels (task_intent pin) for CI-safe runs
+    - authenticated host with ledger / graph projection into TurnObservation
+  out_of_scope:
+    - free live model quality / preference scoring
+    - full product domain math (unless host projects it into extras)
+    - browser pixel asserts as the only green bar
+  expected_refusal:
+    - illegal restart that wipes active cost_out mid continue
+    - exclusive_owner steal to front_door while mid-flight
+    - ambient last_read re-resolve while blocks_resolve is true
+
+goal_state:
+  - cost_out_still_owns_turn
+  - workflow_pin_stable
+  - blocks_resolve_held
+
+initial_state:
+  - idle_front_door
+  - no_active_task
+
+execution_profiles:
+  - id: desktop_stub_cognition
+    device: desktop
+    viewport: { width: 1440, height: 900 }
+    network: low_latency
+    input_mode: chat_text
+    sla:
+      action_timeout_ms: 5000
+      stream_timeout_ms: 15000
+    feature_flags:
+      cognition: stub
+
+  - id: ci_freeze
+    device: desktop
+    network: low_latency
+    input_mode: chat_text
+    sla:
+      action_timeout_ms: 3000
+      stream_timeout_ms: 10000
+    feature_flags:
+      cognition: freeze
+
+# ── Trajectory of twists (steps) ──────────────────────────────────────
+steps:
+  # Twist 1 — enter mid-flight: start cost_out and bind pin
+  - id: open_cost_out
+    actor: user
+    control_point: chat_input
+    maneuver: start_sole_continue_task
+    entry_surface: /assistant
+    payload:
+      # Executable bridge → Conjecture Script (compile_scenario_to_script)
+      user_text: "cost out the onboarding workflow"
+      pin:
+        task_intent: new_task
+        read_kind: cost_out
+      allowed_outcomes: [continue_owned]
+      invariants:
+        - { kind: exclusive_owner, expected: cost_out }
+        - { kind: pin_present, expected: workflow_id }
+    preconditions:
+      - idle_or_ready_for_new_task
+    blocked_conditions:
+      - already_mid_flight_foreign_owner
+    postconditions:
+      - cost_out_owns_turn
+      - workflow_id_pinned
+    wait:
+      type: stream_wait
+      settle_condition: agent_turn_complete
+      timeout_ms: 15000
+      poll_interval_ms: 500
+    nondeterminism:
+      type: agentic
+      allowed_outcomes:
+        - continue_owned          # canonical: task started, mid-flight
+        - agent_asked_clarification  # legal alternate (if host projects it)
+      required_invariants:
+        - exclusive_owner_is_cost_out_when_continue_owned
+        - workflow_pin_present_when_continue_owned
+        - no_cross_tenant_pin
+    evidence:
+      - type: api_contract
+        path: conjecture_behaviour_runner.path_faithful.MiniChatApp.handle
+        assertion: new_task_sets_owner_and_pin
+        confidence: high
+
+  # Twist 2 — continue mid-flight: same owner + pin + no re-resolve
+  - id: continue_volume
+    actor: user
+    control_point: chat_input
+    maneuver: continue_mid_flight
+    payload:
+      user_text: "make the volume 10k"
+      pin:
+        task_intent: continue
+      allowed_outcomes: [continue_owned]
+      invariants:
+        - { kind: exclusive_owner, expected: cost_out }
+        - kind: pin_equals
+          expected:
+            key: workflow_id
+            value: wf_1
+        - { kind: extra_true, expected: blocks_resolve }
+      outcome_invariants:
+        continue_owned:
+          - { kind: active_kind, expected: cost_out }
+    preconditions:
+      - cost_out_owns_turn
+      - workflow_id_pinned
+    blocked_conditions:
+      - front_door_only
+    postconditions:
+      - cost_out_still_owns
+      - pin_unchanged
+      - blocks_resolve_true
+    wait:
+      type: stream_wait
+      settle_condition: agent_turn_complete
+      timeout_ms: 15000
+      poll_interval_ms: 500
+    nondeterminism:
+      type: agentic
+      allowed_outcomes:
+        - continue_owned
+      required_invariants:
+        - exclusive_owner_remains_cost_out
+        - workflow_pin_stable
+        - blocks_resolve_while_mid_flight
+    evidence:
+      - type: api_contract
+        path: conjecture_behaviour_runner.invariants.check_standard_invariant
+        assertion: continue_holds_owner_pin_blocks_resolve
+        confidence: high
+      - type: event_log
+        path: turn_observation.extras.blocks_resolve
+        assertion: blocks_resolve_is_true
+        confidence: medium
+
+terminal_states:
+  expected:
+    - continue_owned_with_stable_pin
+  tolerated_degraded:
+    - continue_owned_after_single_retry   # optional host policy
+  failure:
+    - state: dual_owner_steal
+      required_graceful_handling:
+        - fail_closed_to_verifier
+        - surface_owner_mismatch_in_report
+    - state: pin_dropped
+      required_graceful_handling:
+        - fail_closed_to_verifier
+        - do_not_treat_pretty_reply_as_pass
+    - state: illegal_restart_mid_flight
+      required_graceful_handling:
+        - fail_closed_to_verifier
+        - refuse_silent_greenfield_restart

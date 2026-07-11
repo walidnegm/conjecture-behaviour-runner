@@ -180,6 +180,76 @@ Same twists→invariants idea; Script is what most goldens are today.
 A **Script** is multi-turn steps + pins + **expected contracts**. The **runner** you choose
 plays it; the host **adapter** observes; the **verifier** judges.
 
+### Conjecture Scenario example (the cool description language)
+
+Scenario is **not** “Script with a different name.” It is a richer **description** of the
+trajectory: scope/ODD, execution profiles, multi-actor steps, waits, nondeterminism
+envelopes, evidence pointers, and terminal buckets. It is **not tied to one driver**.
+Today you can **validate + compile → Script → control-plane runner**.
+
+| File | What |
+|------|------|
+| [`examples/scenario_sole_continue.yaml`](examples/scenario_sole_continue.yaml) | Full sole-continue **Scenario** (YAML, comments) |
+| [`examples/scenario_sole_continue.json`](examples/scenario_sole_continue.json) | Same Scenario as JSON (schema-shaped) |
+| [`examples/scenario_compile_and_run.py`](examples/scenario_compile_and_run.py) | Load → validate → compile → PASS + dual_owner FAIL |
+
+```bash
+pip install -e ".[dev,scenarios]"
+python examples/scenario_compile_and_run.py
+```
+
+Abbreviated Scenario (see YAML for full cool bits):
+
+```yaml
+scenario_id: sole_continue_mid_flight
+scenario_class: control_plane_sole_continue
+scope:
+  in_scope: [mid-flight sole-continue on a pinned workflow]
+  expected_refusal: [illegal restart mid continue, dual-owner steal]
+goal_state: [cost_out_still_owns_turn, workflow_pin_stable]
+execution_profiles:
+  - { id: desktop_stub_cognition, device: desktop, network: low_latency }
+steps:
+  - id: open_cost_out
+    actor: user
+    control_point: chat_input
+    maneuver: start_sole_continue_task
+    wait: { type: stream_wait, settle_condition: agent_turn_complete, timeout_ms: 15000 }
+    nondeterminism:
+      type: agentic
+      allowed_outcomes: [continue_owned]
+      required_invariants: [exclusive_owner_is_cost_out_when_continue_owned]
+    payload:   # executable bridge → Script
+      user_text: "cost out the onboarding workflow"
+      pin: { task_intent: new_task, read_kind: cost_out }
+      invariants:
+        - { kind: exclusive_owner, expected: cost_out }
+  - id: continue_volume
+    actor: user
+    control_point: chat_input
+    maneuver: continue_mid_flight
+    wait: { type: stream_wait, settle_condition: agent_turn_complete, timeout_ms: 15000 }
+    nondeterminism:
+      type: agentic
+      allowed_outcomes: [continue_owned]
+    payload:
+      user_text: "make the volume 10k"
+      pin: { task_intent: continue }
+      invariants:
+        - { kind: exclusive_owner, expected: cost_out }
+        - { kind: pin_equals, expected: { key: workflow_id, value: wf_1 } }
+        - { kind: extra_true, expected: blocks_resolve }
+terminal_states:
+  expected: [continue_owned_with_stable_pin]
+  failure:
+    - state: dual_owner_steal
+      required_graceful_handling: [fail_closed_to_verifier]
+```
+
+**Maturity:** Scenario models + schema + compile bridge are **experimental**. The everyday
+CI golden is still **Script JSON**. Scenario is the language we grow into for multi-runner
+description; do not claim full multi-surface play-back yet.
+
 ### Trajectory as JSON (authored vs observed)
 
 There is no separate mystery format for “the trajectory.” In practice:
@@ -392,7 +462,7 @@ Adapters map **your** host (ledger, graph state, workflow status) into `TurnObse
 
 | Area | Status |
 |------|--------|
-| Conjecture Scenario (`experimental/Scenario`, schema) | ✅ experimental |
+| Conjecture Scenario (`experimental/Scenario`, schema, `examples/scenario_sole_continue.*`) | ✅ experimental |
 | Conjecture Script (`ConjectureScript`, scope, load JSON/YAML) | ✅ stable |
 | Runner (`run_script`, CognitionProvider, FreezeStore) | ✅ |
 | Verifier (standard + temporal + outcome-specific) | ✅ |

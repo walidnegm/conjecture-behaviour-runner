@@ -24,6 +24,8 @@ python examples/e2e_multi_turn.py
 | File | What |
 |------|------|
 | **`e2e_multi_turn.py`** | E2E: conversation → MiniChatApp Act → verifier PASS/FAIL |
+| **`scenario_sole_continue.yaml`** / **`.json`** | **Conjecture Scenario** — rich description (scope, profiles, waits, nondeterminism, evidence, terminals) |
+| **`scenario_compile_and_run.py`** | Scenario → validate → compile Script → PASS + dual_owner FAIL (`pip install -e ".[scenarios]"`) |
 | **`trajectory_authored_sole_continue.json`** | **Authored trajectory** as Conjecture Script (twists + expected envelopes) |
 | **`trajectory_observed_pass.json`** | **Observed trajectory** after a healthy run (PASS) |
 | **`trajectory_observed_fail_dual_owner.json`** | Observed trajectory when continue steals owner (FAIL) |
@@ -31,8 +33,13 @@ python examples/e2e_multi_turn.py
 | `control_plane_goldens.py` | Control-plane adapter goldens (`pip install -e ".[control-plane]"`) |
 | `sole_continue_golden.json` / `.yaml` | Portable sole-continue **Conjecture Script** (adapter-oriented effects) |
 
-**Authored vs observed:** you write Script JSON (path + expected). The runner emits
-observed JSON (`RunResult` / observations). FAIL = expected ⊭ observation.
+**Scenario vs Script vs observed:** Scenario *describes* (cool language). Script *runs*
+(play-back). Observed is *evidence* of one run. FAIL = expected ⊭ observation.
+
+```bash
+pip install -e ".[dev,scenarios]"
+python examples/scenario_compile_and_run.py
+```
 
 Host-private goldens stay in your application repository.
 

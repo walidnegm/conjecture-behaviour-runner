@@ -49,5 +49,6 @@
 - **CBR-SPEC §0** finalized claim · **§2** architecture · **§4.1** Script fields  
 - **AGENTS.md** host adapter + agent workflow  
 - **Prompt seed** STEP A (trajectory + ODD) → STEP B (Script JSON)  
+- **Examples:** [Scenario YAML](../examples/scenario_sole_continue.yaml) · [authored Script trajectory](../examples/trajectory_authored_sole_continue.json) · [observed PASS/FAIL](../examples/)  
 
 Legacy URL `conjecture-behaviour-runner.md` → [SPEC.md](./SPEC.md).

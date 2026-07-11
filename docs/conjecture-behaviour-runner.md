@@ -35,6 +35,81 @@ Evaluation must pin:
 
 That is the load-bearing idea of the **behaviour runner**. Conjecture is that product. Slice 0 implements it first on **turn-ownership / mid-flow contracts** because that is where agentic chat products fail most loudly — not because the product *is only* a control-plane unit test.
 
+The **objective is not skinned down** because the first phase is simpler. We still
+build out ODD/scope, generation modalities, trajectories, UI drivers, and
+distribution. Slice 0 is a thin vertical through a larger programme.
+
+---
+
+## 1.1 Behaviour-driven testing and ODD (full objective)
+
+### Behaviour pinning
+
+Agentic and auto-grown systems need **behaviour envelopes**, not exact reply text:
+
+1. Declare **scope** of the claim (what inputs the system says it handles).  
+2. Per step/turn: **`allowed_outcomes`** — legal landings (more than one is fine).  
+3. **`required_invariants`** — must hold no matter which allowed outcome occurred.  
+4. Run under an **execution profile** (stub cognition, live cognition, desktop/mobile, …).  
+5. Capture a **trajectory**. Across *N* trajectories of the same (scenario, profile),
+   pin **distributions** when cognition is live.
+
+Without invariants + allowed outcomes, “happy path passed” cannot be told from
+“happy path passed by accident.”
+
+| Concept | Meaning |
+|---|---|
+| **Route network** | Map of transitions in the product (grows over time) |
+| **Scenario** | One goal-directed route with contracts filled |
+| **Trajectory** | One observed run of a scenario under one profile |
+
+### ODD (Operational Design Domain)
+
+**ODD** (ISO 21448 / SOTIF lineage) = specification of the **input space the system
+claims to handle** — conditions under which intended function is in scope. It is
+**metadata on the scenario class**, not a scenario and not a probe generator.
+
+Portable scenario models use the same idea in plain language:
+
+| Field | Meaning |
+|---|---|
+| `in_scope` | Supported — handle |
+| `out_of_scope` | Unsupported — refuse / degrade gracefully |
+| `expected_refusal` | Probes that must be rejected |
+
+### ODD vs adversarial (do not conflate)
+
+| | ODD / scope | Adversarial generation |
+|---|---|---|
+| **What** | Spec of the claimed boundary | Technique that *uses* the boundary |
+| **In-scope stress** | — | “You claimed this — prove under load” |
+| **Out-of-scope** | Declared | Refusal / non-crash contracts |
+| **Layer** | Scenario-class metadata | Concrete corpus entries |
+
+Adversarial is never the sole CI green without human promote.
+
+### Four corpus modalities (build-out)
+
+| Modality | Gives |
+|---|---|
+| **Code-based** | Intended contracts (routers, prompts, regs) |
+| **User-watching** | Empirical traffic |
+| **Agent-plays-the-game** | Operational reachability on a deployed app |
+| **Adversarial** | Stress / refusal envelope from ODD |
+
+Slice 0 is mostly **code-based** control-plane contracts. Later slices re-absorb the rest.
+
+### Pipeline (still the objective)
+
+```text
+extract → curate/learn → play back → capture → diagnose → live debug
+   ^                                                         |
+   +------------------------- feedback ----------------------+
+```
+
+Slice 0 = thin vertical (script → pin-driven playback → pass/fail). Capture stores,
+curator, explorer, and formal adversarial generation remain **to build**.
+
 ---
 
 ## 2. Product architecture (full runner)

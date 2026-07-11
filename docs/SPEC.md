@@ -232,16 +232,59 @@ adversarial generation remain **to build**.
 
 ## 2. Project architecture
 
+### What Conjecture *is* (not a script format alone)
+
+Without **our runner** and **our oracle**, `ConjectureScript` would be only an open-source
+scenario schema — useful YAML, not a product. **The project is three co-equal cores:**
+
+| Core | Owns | Ships today (0.1.1) |
+|---|---|---|
+| **IR** | Portable contract language (`ConjectureScript`, scope, pins) | `script.py`, JSON/YAML load, schema surface for agents |
+| **Runner** | Execute a script under pinned/frozen cognition; drive Act/Observe | `run_script`, `CognitionProvider` + freeze store, CLI `conjecture run` |
+| **Oracle** | Verdict on authoritative state (not reply quality) | `invariants.py`, `temporal.py`, outcome-specific sets, fail-closed kinds |
+
+```text
+                    ┌──────────────────────────────────────────┐
+                    │         CONJECTURE (the product)         │
+                    │                                          │
+   seeds / authors  │   IR  ──►  RUNNER  ──►  ORACLE           │
+   ────────────────►│  script    execute     verdict           │
+                    │            + freeze    + envelope        │
+                    │            + CLI                         │
+                    └────────┬───────────────────┬─────────────┘
+                             │                   │
+                    pluggable Driver      reports / CI exit
+                    (HTTP, Playwright,    (JUnit, JSON —
+                     in-process, …)        pytest *hosts* us)
+                             │
+                             ▼
+                      Real application
+```
+
+**Ecosystem pieces do not replace the middle box.**
+
+| Piece | Role relative to Conjecture |
+|---|---|
+| Collinear / sim / coding agent / human | **Author or seed** IR — not the verdict engine |
+| Playwright / HTTP / SSE | **Driver plugin** called *by* our runner — not the product |
+| pytest / JUnit / CI | **Host process** that invokes `conjecture run` — not the oracle |
+| Eval platforms | Parallel **scores** — not a substitute for our contract oracle |
+
+If someone only publishes the schema and runs checks in ad-hoc pytest, they have a
+**format**. Conjecture’s claim requires **runner + oracle in-tree** so green means
+*our* envelope semantics.
+
 ### Four extension points (product boundary)
 
 | Extension | Responsibility | Examples |
 |---|---|---|
-| **Driver** | Act on the actual system | HTTP, SSE, WebSocket, Playwright, in-process, Temporal, LangGraph |
+| **Driver** | Act on the actual system (**plugin**; runner owns the loop) | HTTP, SSE, WebSocket, Playwright, in-process, Temporal, LangGraph |
 | **Observer** | Authoritative evidence | messages, routing, tool I/O, ledger, ownership, terminals, DB, events |
-| **Cognition provider** | Probabilistic interpretation | stub, freeze/replay, record, local, cloud, shadow compare |
-| **Oracle** | Evaluate envelopes | step asserts, trajectory/temporal invariants, allowed outcomes, later distributions |
+| **Cognition provider** | Probabilistic interpretation (**ours**: stub/freeze/record; host: local/cloud) | freeze store, record artifacts, host classifiers |
+| **Oracle** | Evaluate envelopes (**ours**, not optional glue) | step asserts, trajectory/temporal invariants, allowed outcomes |
 
-Slice 0 collapses Driver+Observer into `ControlPlaneAdapter` and Cognition into turn pins.
+Slice 0 often collapses Driver+Observer into `ControlPlaneAdapter`. Cognition is no longer
+“labels only”: stub + freeze/record providers ship; local/cloud remain host-supplied.
 
 ### Target cognition provider (not fully implemented)
 
@@ -322,26 +365,47 @@ Short face: [README — Pipeline](../README.md#pipeline-face). **This section is
 
 Agent **authors**; runner **executes**; oracle **verdicts**. Schema = agent “score surface.”
 
-### Ecosystem (compose)
+### Ecosystem (compose — seeds and plugins, not the product)
+
+The old picture that put “ConjectureScript IR” alone in the center and “runner+oracle”
+as a thin next box reads as **open-source scenario scripts**. Correct picture: **one
+product box** (IR + runner + oracle); everything else is seed or plugin.
 
 ```text
-  Specs/ODD ─┬─► Collinear/sim (seed) ─┐
-             ├─► Coding agent (IR) ────┼─► ConjectureScript ─► Runner+Oracle
-             └─► Human goldens ────────┘         │
-                                    ┌────────────┴────────────┐
-                                    ▼                         ▼
-                             Playwright/HTTP            pytest / JUnit / CI
-                             (Driver)                   Real app ledger
+  Specs / ODD / epics / bugs
+           │
+     ┌─────┼──────────────┐
+     ▼     ▼              ▼
+  Collinear   Coding      Human
+  / sim       agent       goldens
+  (seed)      (draft IR)  (author)
+     │         │            │
+     └────┬────┴─────┬──────┘
+          ▼          ▼
+   ┌─────────────────────────────────────┐
+   │  CONJECTURE                         │
+   │  ┌─────┐   ┌────────┐   ┌────────┐  │
+   │  │ IR  │──►│ RUNNER │──►│ ORACLE │  │
+   │  └─────┘   │ freeze │   │ kinds  │  │
+   │            │ CLI    │   │ temp.  │  │
+   │            └───┬────┘   └────────┘  │
+   └────────────────┼────────────────────┘
+                    │ Driver plugin
+                    ▼
+             Real application
+                    │
+                    ▼  (reports)
+             pytest / CI / JUnit   ← *host*, not the oracle
 ```
 
 | Piece | Pattern |
 |---|---|
-| **Collinear / sim labs** | Upstream **seed** paths; optional Conjecture as deterministic verifier on sim paths. Not: replace their world. |
-| **Eval platforms** | Parallel trajectory **scores**; we **gate contracts**. |
-| **Playwright / HTTP / SSE** | **Drivers** under the oracle. |
-| **pytest / CI** | Host for `conjecture run` + freeze dir. |
-| **Coding agents** | Author IR against schema. |
-| **CCP** | Reference ownership domain. |
+| **Collinear / sim labs** | Upstream **seed** only; Conjecture **verifies** control-plane law on selected paths. Not: we become their sim. |
+| **Eval platforms** | Parallel **scores**; our **oracle** still gates owner/pin/terminal. |
+| **Playwright / HTTP / SSE** | **Driver plugins** invoked by *our* runner loop. |
+| **pytest / CI** | Process host for `conjecture run` + freeze dir + exit codes. |
+| **Coding agents** | Author IR against schema; do not replace runner/oracle. |
+| **CCP** | Reference domain bound through adapter — oracle kinds stay Conjecture’s. |
 
 ### Collinear: differentiate and integrate
 

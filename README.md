@@ -71,30 +71,45 @@ with frozen/sampled cognition** is the defensible framing.
 
 ---
 
-## Pipeline (face)
+## What the product is (IR + runner + oracle)
+
+**Not** “an open-source scenario script format.” Without **our runner** and **our oracle**,
+the YAML would be only a schema. Conjecture is three cores:
+
+| Core | Job | In-tree today |
+|------|-----|----------------|
+| **IR** | Portable contract language (`ConjectureScript`) | script model, load JSON/YAML, scope |
+| **Runner** | Execute under pin/freeze; call Driver; collect observation | `run_script`, CognitionProvider, freeze store, CLI |
+| **Oracle** | Pass/fail on **authoritative state** | standard + temporal invariants, outcome sets, fail-closed |
 
 ```text
-Spec / epic / ODD / incident / sim seed
-  → Agent or human authors ConjectureScript (schema-validated IR)
-  → Runner (CognitionProvider + Driver + Observer)
-  → Oracle (step + trajectory invariants, allowed outcomes)
-  → Report / CI gate
+  seeds (specs · sim · agent · human)
+              │
+              ▼
+     ┌────────────────────────────┐
+     │  CONJECTURE                │
+     │  IR → RUNNER → ORACLE      │
+     └──────────┬─────────────────┘
+                │ Driver plugin (HTTP / Playwright / in-process)
+                ▼
+         Real application          pytest/CI only *hosts* the run
 ```
 
-Same idea as agentic coding: **organic authoring → deterministic artifact → framework executes.**  
-Full stage table, ecosystem diagram, Collinear compare, tempting-features scope:  
-**[Specification §2.1](docs/SPEC.md#21-pipeline-ecosystem-and-collinear)**.
+**Pipeline:** author IR → our runner executes → our oracle verdicts → report/CI.  
+Playwright is a **driver**, not the product. Collinear **seeds** paths; it does not replace the oracle.
+
+Full ecosystem + Collinear: **[Specification §2](docs/SPEC.md#2-project-architecture)** · **[§2.1](docs/SPEC.md#21-pipeline-ecosystem-and-collinear)**.
 
 | | Collinear-class | Conjecture |
 |--|-----------------|------------|
 | **Job** | Sim users/worlds, multi-turn **data**, rubrics | **Control-plane contracts** under pin/freeze |
 | **Green bar** | Quality / task / preference scores | Owner · pin · terminal · refusal envelope |
-| **Integrate** | Sim **seeds** scripts; failed contracts re-probe in sim | CI **gates** merge on authoritative state |
+| **Integrate** | Sim **seeds** scripts; failed contracts re-probe in sim | CI **gates** merge on *our* oracle |
 
 **Smell test:** “sim scored 0.87” → their lane. “No dual owner, pin held” → ours.
 
-**Never core here:** built-in sim worlds, quality scoreboards, creative execution engines.  
-**In scope:** agent script synthesizer, freeze, path-faithful drivers, portable IR.
+**Never core:** built-in sim worlds, quality scoreboards, creative execution engines.  
+**Always core:** IR + runner + oracle (if any one is missing, the claim collapses).
 
 ### Multi-actor scripts
 

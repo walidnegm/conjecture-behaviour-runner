@@ -114,14 +114,6 @@ against a Driver (`handle`). The same envelopes can later be described in full
 
 ---
 
-## Script language note
-
-Section below documents the **CP play-back form** (`ConjectureScript`) used by today’s
-runner and E2E. The **generalized trajectory description** (actors, waits, nondeterminism
-envelopes, profiles) lives in `experimental/Scenario` + `schema.json` — see CBR-SPEC.
-
----
-
 ## What scenarios actually test
 
 | Assert (control-plane ground truth) | Do not assert (default wedge) |
@@ -137,9 +129,37 @@ A CI golden is **probe + expected result**. Scripts with no expected state are s
 
 ## Script language (what you write)
 
-A **script** is multi-turn steps + optional pins + **expected contracts** (invariants /
-allowed outcomes). The **runner** plays it; the host **adapter** observes; the
-**verifier** judges. Reply wording is not the pass criterion.
+### Load-bearing trajectory: twists → invariants
+
+This is the script we care about: a **trajectory of twists and turns** that can stress
+the control plane, with **invariants / allowed outcomes** bound at those landings — not
+a novel of every chat line.
+
+```text
+  twists & turns (path)
+       continue · detour · handoff · complete · ambient noise
+              │
+              ▼  at critical landings
+  allowed outcomes + invariants  (state law that must hold)
+              │
+              ▼
+  verifier checks those — wording free to vary
+```
+
+| You write | Meaning |
+|-----------|---------|
+| Load-bearing **turns** | Which twist are we probing? |
+| **Allowed outcomes** | Legal landings after that twist |
+| **Invariants** | State that must hold across those landings |
+| Pins / freeze | Cognition fixed so CI is reproducible |
+
+Path without invariants = a tour. **Twists with invariants = a test.**
+
+Full flexible language (actors, waits, nondeterminism, profiles): `experimental/Scenario`.  
+CP play-back form for today’s runner: `ConjectureScript` (below). Same mental model.
+
+A **script** is multi-turn steps + optional pins + **expected contracts**. The **runner**
+you choose plays it; the host **adapter** observes; the **verifier** judges.
 
 ### Building blocks
 

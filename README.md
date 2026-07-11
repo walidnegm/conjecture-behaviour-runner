@@ -7,6 +7,52 @@ MIT · **0.1.5** · [Bot0.ai](https://bot0.ai)
 
 ---
 
+## What this is (plain English)
+
+**Not** “did steps run in the right order?” (ordinal / unit tests).  
+**Not** “did the bot write a good sentence?” (LLM eval).
+
+**Yes:** after each user message in a multi-turn flow, is the **conversation machine**
+still legal?
+
+| Check | Meaning |
+|-------|---------|
+| **Who owns this turn?** | Who is allowed to answer (e.g. cost-out vs front door) |
+| **What is locked?** | Same entity pin (workflow / claim / invoice id) |
+| **Mid-flight law** | No illegal restart, no silent pin drop, no dual write |
+
+```text
+User: "cost out Keynote"
+User: "make volume 10k"     ← reply can still sound fine
+
+Unit / ordinal tests:  ✅ something returned
+LLM eval:              ✅ text looks helpful
+Conjecture:            ✅ still cost_out owns the turn
+                       ✅ still pinned to the same workflow_id
+                       ❌ FAIL if continue stole to front door or lost the pin
+```
+
+**One line:** regression tests for multi-turn **state law** (owner · pin · mid-flight)
+under **pinned cognition** — so CI catches *looks fine in chat, broken underneath*.
+
+### Who “deserves to go next”?
+
+In a control-plane style app, that is **not** “parse the last chat line for keywords.”
+It is roughly:
+
+1. **Ledger state** — what is mid-flight? (`active_task.kind`, e.g. `cost_out`)  
+2. **Entity pin** — which record is locked? (`workflow_id`, …)  
+3. **This turn’s classification** (pinned for CI) — `continue` vs `detour` vs `new_task` / `abandon`
+
+If the ledger says cost-out is active and the turn is **continue**, cost-out **owns**
+delivery even if the user text *looks* like a glossary or scorecards question.  
+If the turn is **detour** / **abandon**, ownership **yields**.
+
+Conjecture asserts that those rules still held **after** Act. Ordinary ordinal tests
+do not model exclusive owner or pins.
+
+---
+
 ## The pain (real, not only synthetic)
 
 In multi-turn control planes, the reply can look fine while **exclusive owner**, **entity

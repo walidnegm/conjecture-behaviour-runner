@@ -7,11 +7,12 @@
 | **Agent coder guide** | Integration + golden authoring | [../AGENTS.md](../AGENTS.md) |
 | **Script author prompt seed** | Trajectory + ODD → Conjecture Script | [../prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) |
 
-**Claim hierarchy (0.1.3 — CBR-SPEC §0):**  
-(1) **Face** — freeze-safe state-law gates; red bar when reply still looks fine.  
-(2) **Sticky technical** — contract testing / behavioral envelopes / pin-freeze.  
-(3) **Architecture gloss** — conformance under probabilistic cognition, **CCP-shaped + Act only**.  
-Hero demo: [e2e_multi_turn.py](../examples/e2e_multi_turn.py).
+**Claim hierarchy (CBR-SPEC §0):**  
+(1) **Face (plain)** — catch agent bugs that still look fine in chat (why/what/so on README).  
+    *Precise:* freeze-safe state-law gates.  
+(2) **Sticky technical** — contract testing / envelopes / pin-freeze.  
+(3) **Architecture gloss** — CCP-shaped + Act only.  
+Hero: [e2e_multi_turn.py](../examples/e2e_multi_turn.py).
 
 ## Canonical stack (architecture — face README leads with the demo)
 

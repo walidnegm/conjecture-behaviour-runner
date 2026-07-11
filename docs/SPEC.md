@@ -13,7 +13,7 @@
 | **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
 | **Prompt seed** | [prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) — trajectory + ODD → Script |
 | **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.3** |
-| **Claim hierarchy (locked)** | **Face:** freeze-safe state-law gates · **Technical:** contract testing / envelopes / pin-freeze · **Gloss:** conformance under probabilistic cognition (CCP-shaped + Act only) — see §0 |
+| **Claim hierarchy (locked)** | **Face (plain):** catch agent bugs that still look fine in chat · **Precise:** freeze-safe state-law gates · **Technical:** envelopes / pin-freeze · **Gloss:** CCP-shaped conformance only — see §0 |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Inspiration / primary pattern** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) — hosts isomorphic to that format are the apt application |
 
@@ -30,20 +30,30 @@ slices implement; they do not redefine the wedge without a SPEC version bump.
 
 ### Claim hierarchy (locked — do not invert)
 
-Three layers. **Face wins** on the homepage and pitch. Sticky mechanism language **supports**
-the face claim; it does **not** expand it back into platform theater.
+Three layers. **Face wins** on the homepage and pitch (plain English first). Sticky
+mechanism language **supports** the face claim; it does **not** expand it into platform theater.
 
-| Layer | Text | Role |
-|---|---|---|
-| **1. Face (sell / one-liner)** | Freeze-safe regression gates for control-plane **state law** (owner · pin · mid-flight/terminal) under pinned cognition — red bar even when the reply looks fine | Hero demo + buyer pitch |
-| **2. Technical definition (sticky)** | Contract testing for the conversational control plane — behavioral envelopes (allowed outcomes + invariants) over authoritative state, under pinned or replayed cognition. Not “one golden sentence.” Not a new universal testing paradigm. | How green is defined; mechanism |
-| **3. Architecture gloss (scoped)** | Authoritative control-plane conformance under probabilistic cognition — **when** the host is CCP-shaped (or isomorphic) and Act is under a real Driver | Research combination; **not** “every live multi-step agent today” |
+| Layer | Plain English (user-facing) | Precise wording | Role |
+|---|---|---|---|
+| **1. Face** | **Catch the agent bugs that still look fine in chat** — CI fails when mid-conversation **rules** break (who owns the turn, which record is locked), not when wording changes | Freeze-safe regression gates for control-plane **state law** (owner · pin · mid-flight/terminal) under pinned cognition | Hero + buyer pitch |
+| **2. Technical** | Test conversation **machine rules**, not essay quality; freeze AI decision labels so PR checks are cheap and repeatable | Contract testing for the conversational control plane — behavioral envelopes (allowed outcomes + invariants) over authoritative state, under pinned or replayed cognition. Not “one golden sentence.” Not a new universal testing paradigm. | How green is defined |
+| **3. Architecture** | For apps that work like a control plane (one owner, locked records, clear finish) — not every chatbot | Authoritative control-plane conformance under probabilistic cognition — **when** the host is CCP-shaped (or isomorphic) and Act is under a real Driver | Research gloss; scoped |
 
-#### Face (layer 1 — locked one-liner)
+#### Face (layer 1) — plain then precise
+
+**Plain (lead with this):**
+
+| | |
+|--|--|
+| **Why** | Multi-turn agents fail *quietly*: the reply can sound fine while the system lost the task owner, dropped the locked workflow/invoice, or restarted finished work. Wording scores miss that. |
+| **What** | Regression goldens that check **conversation machine rules** after each turn (owner, pin, mid-flight vs restart). |
+| **So** | **CI goes red** when those rules break — even if the prose still looks polished. AI labels are **pinned/frozen** so checks stay fast and identical every PR. |
+
+**Precise (spec short name):**
 
 > **Freeze-safe regression gates for control-plane state law** —  
-> owner · pin · mid-flight / terminal envelopes under **pinned or replayed cognition**.  
-> The bar goes red when state breaks **even if the reply still looks fine**.
+> owner · pin · mid-flight / terminal under **pinned or replayed cognition**.  
+> Red bar when state breaks **even if the reply still looks fine**.
 
 #### Technical definition (layer 2 — sticky; keep under face)
 

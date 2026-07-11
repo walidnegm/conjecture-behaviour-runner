@@ -7,12 +7,13 @@
 
 **Claim hierarchy** (do not invert — CBR-SPEC §0):
 
-1. **Face:** freeze-safe **state-law** regression (owner · pin · terminal/mid-flight) under
-   pinned cognition — red bar even when the reply looks fine. **Not** a prose/quality grader.
-2. **Technical (sticky):** contract testing for the conversational control plane —
-   behavioral envelopes over authoritative state under pin/freeze. Not one golden sentence.
+1. **Face (plain):** catch agent bugs that **still look fine in chat** — CI fails on broken
+   conversation **rules** (owner / locked record / illegal restart), not on wording.  
+   *Precise:* freeze-safe state-law regression under pin/freeze.
+2. **Technical (sticky):** contract testing — behavioral envelopes over authoritative state
+   under pin/freeze. Not one golden sentence; not a prose grader.
 3. **Architecture (scoped):** control-plane conformance under probabilistic cognition —
-   **only** for CCP-shaped hosts with real Act under a Driver (not free discovery for every agent).
+   **only** for CCP-shaped hosts with real Act under a Driver.
 
 **Inspiration / apt hosts:** [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
 and apps **isomorphic** to that format (single-writer ownership, entity pins, sole-continue /

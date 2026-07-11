@@ -1,10 +1,18 @@
 # Conjecture Behaviour Runner
 
-**Freeze-safe regression gates for control-plane state law.**
+**Catch the agent bugs that still look fine in chat.**
 
-We do **not** care if your agent uses a different adjective today.  
-We care that it did **not** violate core legal state, drop session pins, or rewrite
-ledger identity mid-flight — even when the reply still looks fine.
+| | In plain English |
+|--|------------------|
+| **Why** | Multi-turn agents often fail *quietly*: the reply still sounds helpful, but the system dropped which task owns the turn, lost the workflow/invoice it was working on, or restarted a finished job. LLM “was the answer good?” checks miss that. |
+| **What** | Small **regression tests** (goldens) that check the **rules of the conversation machine** after each turn — who owns the turn, which record is locked, whether mid-flight work can be hijacked. |
+| **So** | When those rules break, **CI goes red** — even if the wording still looks polished. You freeze the AI’s decision labels for the test so runs are **cheap, fast, and the same every PR** (no paying for a live model on every check). |
+
+We do **not** care if the agent uses a different adjective today.  
+We care that it did **not** drop the locked record, hand the turn to two owners, or rewrite
+history mid-flight.
+
+*Short technical name (for the spec):* **freeze-safe regression gates for control-plane state law.**
 
 Built by [Bot0.ai](https://bot0.ai). MIT · Alpha **0.1.3**
 
@@ -20,11 +28,8 @@ Built by [Bot0.ai](https://bot0.ai). MIT · Alpha **0.1.3**
 
 ## Watch the bar turn red (start here)
 
-In multi-turn agents, **silent failure** is the failure mode: the text still looks fine
-to a human or an LLM evaluator while **owner / pin / terminal law** is broken.
-
-This repo ships a tiny real Act surface (`MiniChatApp.handle()`) and three planted bugs.
-Replies can still look fine. **Conjecture goes red.**
+This is the point in one demo: a tiny real chat app, three planted bugs.  
+The replies can still look fine. **Conjecture goes red.**
 
 ```bash
 git clone https://github.com/walidnegm/conjecture-behaviour-runner.git
@@ -45,32 +50,23 @@ That demo is the value prop. Ontology and vision live in the [spec](docs/SPEC.md
 
 ---
 
-## What this is (claim hierarchy)
+## What this is (plain, then precise)
 
-### 1. Face — sell this
+### In one breath
 
-> **Freeze-safe regression gates for control-plane state law**  
-> (turn ownership · entity pins · mid-flight / terminal boundaries).  
-> Goldens go red when state breaks — even when the reply looks fine.  
-> Cognition is **pinned or frozen** so CI is cheap and repeatable (no live LLM on every PR).
+You write a short multi-turn story (“start a cost-out, then continue”) and list **what must
+still be true** after each step (same owner, same workflow id, no illegal restart).  
+Conjecture **runs that story** against your app (or our mini demo), **freezes** the fuzzy AI
+labels for the test, and **fails the build** if the machine state is wrong — not if the
+sentence wording changed.
 
-### 2. Technical definition — sticky mechanism (under the face)
+### Claim layers (for docs / agents — do not invert)
 
-> **Contract testing for the conversational control plane** —  
-> **behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**,  
-> under **pinned or replayed cognition**.  
->  
-> Not “one golden sentence.” Not a new universal testing paradigm.
-
-This is how green is defined. It does **not** replace the face claim or imply a full
-multi-surface behaviour platform.
-
-### 3. Architecture gloss — scoped, not the pitch
-
-> Authoritative control-plane conformance under probabilistic cognition —  
-> **when** the host is [CCP](https://github.com/walidnegm/conversation-control-plane)-shaped
-> (or isomorphic) and Act is under a real Driver.  
-> Not “every LangGraph app / free live discovery today.”
+| Layer | Plain English | Precise wording |
+|-------|---------------|-----------------|
+| **1. Face** | Catch silent multi-turn state bugs in CI | Freeze-safe regression gates for control-plane state law |
+| **2. Technical** | Test the conversation **rules**, not the essay quality, with fixed AI labels | Contract testing: behavioral envelopes over authoritative state under pin/freeze |
+| **3. Architecture** | For apps built like a [control plane](https://github.com/walidnegm/conversation-control-plane) (one owner, locked records, clear start/finish) | Conformance under probabilistic cognition — CCP-shaped + real Act only |
 
 Normative hierarchy: [CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative).
 

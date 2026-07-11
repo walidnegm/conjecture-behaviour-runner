@@ -6,10 +6,11 @@
 | **Document ID** | `CBR-SPEC` |
 | **Canonical path** | [`docs/SPEC.md`](./SPEC.md) |
 | **Title** | Conjecture Behaviour Runner Specification |
-| **Version** | **0.1.2** (alpha) — positioning finalized |
-| **Status** | **Active** — authoritative for IR, pipeline, verifier, scope; foundations ship |
+| **Version** | **0.1.2** (alpha) — claim + implementation surface aligned with code |
+| **Status** | **Active** — authoritative for IR, runner, verifier, scope; foundations ship |
 | **Audience** | Integrators, contributors, agent authors of goldens |
-| **Companion face** | [README](../README.md) — wedge, quickstart, plain-English script language |
+| **Companion face** | [README](../README.md) — project face (green bar, script language, quickstart) |
+| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.2** |
 | **One-liner (locked)** | Contract testing for the conversational control plane — behavioral envelopes over authoritative state under pinned or replayed cognition |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Reference domain** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
@@ -226,12 +227,15 @@ Scenario source → validated Scenario IR → ExecutionPlan
        → Trajectory → Verifier results → Report
 ```
 
-| Layer today | Status |
+| Layer today (0.1.2) | Status |
 |---|---|
-| `ConjectureScript` / `run_script` / `RunResult` | **Stable Slice 0** |
-| Experimental `Scenario` / `Trajectory` / waits / evidence | **Schema + models** — not fully joined to the runner |
-| Cognition modes enum | **Labels**; full provider (resolve/record/replay + model identity) not shipped |
-| CLI | **Demo** — not a discovery/report/shard test runner yet |
+| `ConjectureScript` / `run_script` / `RunResult` | **Stable** |
+| CognitionProvider + FreezeStore (stub / freeze / record) | **Shipped** — local/cloud still host-supplied |
+| Verifier: standard + temporal + outcome-specific | **Shipped** — richer temporal / domain kinds open |
+| CLI: `run`, `path-faithful`, JSON/JUnit, discovery | **Shipped** — shards/retries/timeouts open |
+| Path-faithful mini-app + planted bugs | **Shipped** (credibility vertical) |
+| Experimental `Scenario` / `Trajectory` + compile bridge | **Partial** — compile + trajectory bridge; not full rich runner |
+| LangGraph / Crew / Temporal / HTTP / Playwright adapters | **Roadmap** — extension contract locked in §0 |
 
 Free-form experimental preconditions/postconditions as **strings** are **descriptions** until a
 typed predicate registry or callables exist — do not treat them as executable truth.
@@ -331,25 +335,26 @@ adversarial generation remain **to build**.
 Without **our runner** and **our verifier**, `ConjectureScript` would be only an open-source
 scenario schema — useful YAML, not a product. **The project is three co-equal cores:**
 
-| Core | Owns | Ships today (0.1.1) |
+| Core | Owns | Ships today (0.1.2) |
 |---|---|---|
-| **IR** | Portable contract language (`ConjectureScript`, scope, pins) | `script.py`, JSON/YAML load, schema surface for agents |
-| **Runner** | Execute a script under pinned/frozen cognition; drive Act/Observe | `run_script`, `CognitionProvider` + freeze store, CLI `conjecture run` |
-| **Verifier** | Pass/fail on authoritative state (not reply quality) | `invariants.py`, `temporal.py`, outcome-specific sets, fail-closed kinds |
+| **IR** | Portable contract language (`ConjectureScript`, scope, pins, expected) | `script.py`, JSON/YAML load |
+| **Runner** | Execute under pin/freeze; drive Act/Observe | `run_script`, `cognition.py`, CLI |
+| **Verifier** | Pass/fail on authoritative state | `invariants.py`, `temporal.py`, outcome-specific |
 
 ```text
                     ┌──────────────────────────────────────────┐
                     │         CONJECTURE (the product)         │
                     │                                          │
-   seeds / authors  │   IR  ──►  RUNNER  ──►  VERIFIER           │
-   ────────────────►│  script    execute     verdict           │
+   seeds / authors  │   IR  ──►  RUNNER  ──►  VERIFIER         │
+   ────────────────►│  script    execute     judge             │
                     │            + freeze    + envelope        │
                     │            + CLI                         │
                     └────────┬───────────────────┬─────────────┘
                              │                   │
                     pluggable Driver      reports / CI exit
                     (HTTP, Playwright,    (JUnit, JSON —
-                     in-process, …)        pytest *hosts* us)
+                     LangGraph, Temporal,  pytest *hosts* us)
+                     Crew, in-process, …)
                              │
                              ▼
                       Real application

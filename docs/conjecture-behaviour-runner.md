@@ -63,6 +63,19 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 | **Scenario** | One goal-directed route with contracts filled |
 | **Trajectory** | One observed run of a scenario under one profile |
 
+### Analogy: CARLA / AV scenarios — not Playwright, not model-eval labs
+
+Conjecture is methodologically closer to **scenario construction for autonomous
+systems** (e.g. CARLA scenario runner, SOTIF edge-case work) than to:
+
+- **Playwright-class E2E** — click → assert fixed UI text (UI may later be *a driver*, not the product);
+- **LLM simulation / eval labs** — score or train the **model** in a sandbox (task success, synthetic users, RL data).
+
+Like AV scenario work: declare an **ODD**, collect **ground truth** (maps/sensors ↔ here:
+code contracts, session traffic, explorer), build **scenarios**, generate **edge conditions**,
+and pin **invariants / allowed outcomes** when the world is nondeterministic. Edge generation
+from ground-truth collection is a later slice; Slice 0 seals the first contracts mid-flow.
+
 ### ODD (Operational Design Domain)
 
 **ODD** (ISO 21448 / SOTIF lineage) = specification of the **input space the system

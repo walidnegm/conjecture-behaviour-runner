@@ -40,6 +40,23 @@ in advance**.
 > **Objective is not skinned down** because the first phase is simpler — we still build out
 > ODD/scope, modalities, drivers, and distribution.
 
+### Where this sits (not Collinear, not Playwright)
+
+Conjecture is closer to **scenario construction in autonomous driving** (e.g. **CARLA** /
+SOTIF-style ODD work) than to LLM product-eval platforms or browser E2E tools.
+
+| Approach | What it optimizes for | How Conjecture differs |
+|----------|----------------------|-------------------------|
+| **Playwright / Cypress-style E2E** | Deterministic UI: click → wait → assert fixed text/DOM | UI can be *one driver later*. The product is **behaviour contracts** (outcomes + invariants), not click-assert-text as the definition of “pass.” |
+| **LLM eval / simulation labs** (e.g. multi-turn agent sandboxes for model improvement) | Score or train the **model**: task success, rubrics, synthetic users, RL signal | We evaluate the **host system’s contracts** (ownership, pins, refusal, mid-flow state) under incomplete, auto-grown code — not primarily model leaderboard quality. |
+| **CARLA-style scenario building** | Scenarios + edge cases under an **ODD**; ground truth from the world / maps / sensors; generate stress and out-of-domain probes | **Closest analogy.** Declare the claimed domain (ODD/scope), author scenarios from **ground truth** (code contracts, real traffic, explorer), generate **edge conditions**, pin **what must hold** when the world is nondeterministic. |
+| **Conjecture (this package)** | Multi-turn **behaviour envelopes** for agentic products built under vibe/auto coding | Scenario + trajectory + optional edge generation from ground-truth collection; first sealable surface is control-plane mid-flow contracts. |
+
+**In short:** Playwright automates the browser. Many eval platforms stress the **model**.  
+Conjecture is for **scenario- and edge-driven behaviour contracts** on systems whose path set
+is incomplete — the same *kind of problem* AV stacks face with ODD and edge cases, applied
+to agentic product control flow.
+
 ---
 
 ## Why this product exists

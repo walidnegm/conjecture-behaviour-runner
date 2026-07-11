@@ -1,19 +1,11 @@
 # Examples
 
-**Canonical stack** (same as README / CBR-SPEC / docs/README — abbreviated here):
+**Face claim:** freeze-safe **state-law** gates (owner · pin · terminal) under pin/freeze —
+not a chat quality product. Inspiration: [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane).
 
-```text
-  seeds (specs · Collinear/other multi-turn tools · agent · human)
-       → authored TRAJECTORY of twists
-       → Conjecture Scenario and/or Conjecture Script
-       → control-plane runner (run_script) + Driver
-       → OBSERVED TRAJECTORY → VERIFIER
-       → pytest / CI only *hosts* the run
-```
+## Start here (hero)
 
-## Start here
-
-Multi-turn agentic conversation (healthy **PASS** + planted bugs **FAIL**):
+Multi-turn conversation on a real `handle()` (healthy **PASS** + planted bugs **FAIL**):
 
 ```bash
 pip install -e ".[dev]"
@@ -23,25 +15,15 @@ python examples/e2e_multi_turn.py
 
 | File | What |
 |------|------|
-| **`e2e_multi_turn.py`** | E2E: conversation → MiniChatApp Act → verifier PASS/FAIL |
-| **`scenario_sole_continue.yaml`** / **`.json`** | **Conjecture Scenario** — rich description (scope, profiles, waits, nondeterminism, evidence, terminals) |
-| **`scenario_compile_and_run.py`** | Scenario → validate → compile Script → PASS + dual_owner FAIL (`pip install -e ".[scenarios]"`) |
-| **`trajectory_authored_sole_continue.json`** | **Authored trajectory** as Conjecture Script (twists + expected envelopes) |
-| **`trajectory_observed_pass.json`** | **Observed trajectory** after a healthy run (PASS) |
-| **`trajectory_observed_fail_dual_owner.json`** | Observed trajectory when continue steals owner (FAIL) |
-| `minimal_script.py` | Null-adapter smoke (`always_true`) |
-| `control_plane_goldens.py` | Control-plane adapter goldens (`pip install -e ".[control-plane]"`) |
-| `sole_continue_golden.json` / `.yaml` | Portable sole-continue **Conjecture Script** (adapter-oriented effects) |
+| **`e2e_multi_turn.py`** | **Hero** — MiniChatApp Act → verifier PASS/FAIL (planted bugs) |
+| **`trajectory_authored_sole_continue.json`** | Script golden (authored trajectory + envelopes) |
+| **`trajectory_observed_pass.json`** / **`…_fail_dual_owner.json`** | Observed evidence shapes |
+| **`scenario_sole_continue.yaml`** / **`.json`** | Experimental Scenario description language |
+| **`scenario_compile_and_run.py`** | Scenario → Script → run (`pip install -e ".[scenarios]"`) |
+| `control_plane_goldens.py` | CCP stream unit goldens (`[control-plane]`) |
+| `sole_continue_golden.json` / `.yaml` | Portable Script with arrange effects |
+| `minimal_script.py` | Null-adapter smoke |
 
-**Scenario vs Script vs observed:** Scenario *describes* (cool language). Script *runs*
-(play-back). Observed is *evidence* of one run. FAIL = expected ⊭ observation.
+**FAIL** = expected contracts ⊭ `TurnObservation` (state law). Not prose quality.
 
-```bash
-pip install -e ".[dev,scenarios]"
-python examples/scenario_compile_and_run.py
-```
-
-Host-private goldens stay in your application repository.
-
-Agent authoring: [../prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md)  
-( trajectory + ODD worksheet → Script JSON ).
+Agent authoring: [../prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md)

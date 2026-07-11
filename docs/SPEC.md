@@ -80,15 +80,20 @@ Without runner + verifier in-tree, Conjecture is only a scenario **format**. Tha
 
 Shipping first-party packages for each engine is **roadmap**; the **extension contract** is finalized.
 
-### Peers and plugins (locked)
+### How we sit in the stack (locked — differentiate by job, not brand tables)
 
-| Kind | Examples | Relationship |
+We do **not** define Conjecture as “unlike Product X.” We define it by **job and green bar**.
+
+| Layer | Examples | Relationship to Conjecture |
 |---|---|---|
-| **Peer (sim / data)** | Collinear-class | They explore / score paths; we bind **ground truth on state** and CI-gate |
-| **Plugin (driver)** | Playwright, HTTP, SSE, LangGraph, Temporal | Called *by* our runner |
-| **Host (process)** | pytest, CI, JUnit | Invokes `conjecture run` — not the verifier |
-| **Parallel (eval)** | LangSmith, Braintrust, … | Trajectory **scores**; not a substitute for state contracts |
-| **Commercial (optional)** | **Verdict** | Hosted/faster/different product surface; may use or reimplement cores |
+| **Orchestration** | LangGraph, Crew, Temporal, custom FSMs | **Hosts** — they run work; we gate state law via Driver/Observer |
+| **UI / transport drivers** | Playwright, HTTP, SSE, WebSocket | **Plugins** called by *our* runner |
+| **Process host** | pytest, CI, JUnit | Invokes `conjecture run` — not the verifier |
+| **Exploration / sim / eval (optional)** | Multi-turn sim labs, trajectory scorers | May **seed** paths or score in parallel; **do not set our green bar** |
+| **Commercial (optional)** | **Verdict** | Hosted/faster/different surface; may use or reimplement cores |
+
+**Our green bar (differentiation):** declared control-plane (and projected) contracts hold
+under pinned/frozen cognition. That is the product. Everything else is input or plugin.
 
 ### Ground truth (required for helpful goldens)
 
@@ -113,7 +118,7 @@ Authoring (human or agent) must emit expected contracts against the schema.
 |---|---|---|
 | **Document type** | Project face / getting started | **Specification** (normative) |
 | **Job** | Why / how to start / friendly script language | Design, tables, field contracts, scope |
-| **Pipeline · Collinear · scope** | Short face + links here | **Full** diagrams and comparison |
+| **Pipeline · ecosystem · scope** | Short face + links here | **Full** diagrams and extension map |
 | **Script IR** | Intro + kinds + mini story | Field tables, multi-turn patterns, mid-flight state machine, golden JSON |
 | **Contributions / Verdict** | One paragraph + link | **Full** maps and commercial boundary |
 | **On conflict** | Follow **this Specification**; update README |
@@ -210,8 +215,8 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 | **Cucumber** | Readable scenarios + step defs that can assert **any** state. Not “exact string only.” Conjecture is specialized agent/control-plane verifiers; integration is possible. |
 | **Hypothesis stateful** | Closest **method** analogue: actions → transitions → invariants → **shrink**. Without generation/shrink, Slice 0 is a **hand-authored** transition API. |
 | **Eval platforms** (LangSmith, Braintrust, DeepEval, Promptfoo, Inspect, Phoenix, …) | Already multi-turn / trajectory / tools. Differentiation is **narrower**: verify **authoritative-state contracts** for all acceptable trajectories — not “they only score the model.” |
-| **Collinear-class** | Overlap grows with explorers, ODD, N-run distributions. Honest today: they lean **sim/data**; we lean **app control-plane conformance with pinned cognition**. |
-| **CARLA / Scenic** | Useful **aspiration** for scenario generation under constraints. Premature as a claim for current code (no world runtime, scheduler, minimizer). |
+| **Sim / eval platforms** | Different job (explore or score trajectories). We may consume path seeds; our green bar remains **state contracts under freeze**. |
+| **CARLA / Scenic** | Method aspiration for generation under ODD later — not claimed for current code. |
 
 ### Canonical pipeline (target — partial today)
 
@@ -354,10 +359,10 @@ scenario schema — useful YAML, not a product. **The project is three co-equal 
 
 | Piece | Role relative to Conjecture |
 |---|---|
-| Collinear / sim / coding agent / human | **Author or seed** IR — not the verdict engine |
-| Playwright / HTTP / SSE | **Driver plugin** called *by* our runner — not the product |
+| Specs, agents, humans, optional sim exports | **Author or seed** IR — not the verifier |
+| Playwright / HTTP / SSE / LangGraph / Temporal | **Driver plugin** called *by* our runner — not the product |
 | pytest / JUnit / CI | **Host process** that invokes `conjecture run` — not the verifier |
-| Eval platforms | Parallel **scores** — not a substitute for our contract verifier |
+| Trajectory scorers | Parallel **scores** — not a substitute for state-contract verification |
 
 If someone only publishes the schema and runs checks in ad-hoc pytest, they have a
 **format**. Conjecture’s claim requires **runner + verifier in-tree** so green means

@@ -13,18 +13,19 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 |---|---|
 | **GitHub** | [github.com/walidnegm/conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner) |
 | **Import** | `conjecture_behaviour_runner` |
-| **Specification (`CBR-SPEC`)** | [docs/SPEC.md](docs/SPEC.md) — **§0 finalized claim** · architecture · integrations |
+| **Specification (`CBR-SPEC`)** | [docs/SPEC.md](docs/SPEC.md) — **§0 finalized claim** · architecture · ecosystem |
 | **License** | MIT · **Status** | Alpha — 0.1.2 (positioning finalized) |
 
 ### Finalized claim (short)
 
+We differentiate by **what we assert**, not by racing sim/eval brands feature-for-feature.
+
 | | |
 |--|--|
-| **Product** | **IR + runner + verifier** (not a scenario schema alone) |
-| **What scenarios assert** | Control-plane **ground truth**: owner, pins, legal landings, mid-flight law — under freeze |
-| **What they are not** | Model quality tests, Collinear-style sim worlds, “hypothesis with no expected result” |
-| **Orchestrators** | **LangGraph · Crew · Temporal · …** orchestrate; Conjecture is a **Driver/Observer** peer that **gates state law** (adapters roadmap; contract finalized) |
-| **Collinear-class** | Peer for exploration/data; we bind expected state and CI-gate |
+| **Product** | **IR + runner + verifier** — multi-turn **control-plane contracts** under pin/freeze |
+| **Green bar** | Owner, pins, legal landings, mid-flight law held (expected state declared) |
+| **Works with** | LangGraph · Crew · Temporal · HTTP · Playwright as **hosts/drivers** (they orchestrate; we gate law) |
+| **Not our product** | Model quality scores, preference data, built-in user sim worlds, hypothesis scripts with no expected result |
 | **Commercial** | Optional **Verdict** (hosted / faster / different) — separate from OSS |
 
 Normative detail: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
@@ -34,7 +35,7 @@ Normative detail: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normat
 | Doc | Role | Length |
 |-----|------|--------|
 | **This README** | Why it exists, how to run, script language in plain English | Short face |
-| **[Specification (`CBR-SPEC`)](docs/SPEC.md)** | Normative pipeline, architecture, field tables, Collinear, OSS/Verdict, roadmap | Full design |
+| **[Specification (`CBR-SPEC`)](docs/SPEC.md)** | Normative pipeline, architecture, field tables, ecosystem, OSS/Verdict, roadmap | Full design |
 
 If the README and the spec disagree, **the spec wins** for contracts; fix the README next.
 
@@ -70,12 +71,10 @@ with frozen/sampled cognition** is the defensible framing.
 
 | Related work | How Conjecture relates |
 |--------------|-------------------------|
-| **LangGraph / Crew / Temporal** | **Orchestration hosts** — they run the graph/agents/workflows; we gate control-plane (and projected) contracts via Driver/Observer adapters |
+| **LangGraph / Crew / Temporal** | **Orchestration hosts** — they run the graph/agents/workflows; we gate control-plane contracts via Driver/Observer |
 | **Playwright / HTTP / SSE** | **Driver plugins** — not the product |
-| **Collinear-class sim** | **Peer** for path exploration/data; we require **expected state** and CI-gate |
-| **Eval platforms** | Parallel **scores**; we gate **state law** under pin/freeze |
-| **Hypothesis stateful** | Closest *method* analogue (actions + invariants; shrink later) |
-| **Cucumber** | Readable scenarios + bindings; we specialize agent/control-plane envelopes |
+| **Sim / eval platforms** | Optional **path seeds** or parallel scores; they do not define our green bar |
+| **Hypothesis / Cucumber** | Method/language cousins; we specialize multi-turn control-plane envelopes under freeze |
 
 **Tight one-liners we prefer:**
 

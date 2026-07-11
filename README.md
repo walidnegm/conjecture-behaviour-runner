@@ -37,31 +37,33 @@ We differentiate by **what we assert** (the green bar), not by vendor bake-offs.
 
 | | |
 |--|--|
-| **Product** | **IR + runner + verifier** — multi-turn **control-plane contracts** under pin/freeze |
-| **Green bar** | Owner, pins, legal landings, mid-flight law hold — **expected state must be declared** |
-| **Works with** | **LangGraph · Crew · Temporal · HTTP · Playwright** as hosts/drivers (they orchestrate; we gate law) |
-| **Not our product** | Model quality scores, preference data, built-in user-sim worlds, hypothesis-only scripts |
-| **Commercial** | Optional **Verdict** (hosted / faster / different) — separate from OSS **Verifier** |
+| **Description language** | Flexible **trajectory/scenario** files: actors, steps, scope, allowed outcomes, required invariants (not tied to one driver) |
+| **Who runs it** | A **runner** + **Driver** (CP `run_script` today; Playwright / LangGraph / Temporal / HTTP as plugins or alternate runners) |
+| **Verifier** | Shared judge: expected envelopes vs **observed** trajectory |
+| **Green bar** | Declared state law holds under pin/freeze — not reply wording |
+| **Play-back form** | `ConjectureScript` = thin form for the **control-plane runner** (compile target) — not the whole language |
+| **Commercial** | Optional **Verdict** — separate from OSS **Verifier** |
 
 Normative: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
 
 ```text
-  specs / agents / humans / optional path seeds
-                    │
-                    ▼
-         ┌──────────────────────────┐
-         │  CONJECTURE              │
-         │  IR → RUNNER → VERIFIER  │
-         └───────────┬──────────────┘
-                     │ Driver plugin
-                     ▼
-    App · LangGraph · Temporal · Crew · HTTP · Playwright
-                     │
-              pytest / CI (process host only)
+  trajectory/scenario DESCRIPTION  (generalized language)
+              │
+              ▼  who runs it? (explicit)
+     ┌────────┴────────┐
+     ▼                 ▼
+  CP runner      other runners (e.g. UI)
+  (run_script)   (roadmap)
+     │                 │
+     └────────┬────────┘
+              ▼
+         Driver → app
+              │
+     observed trajectory → VERIFIER → CI
 ```
 
-**Always core:** IR + runner + verifier.  
-**Never core:** user-sim worlds, quality scoreboards, proprietary “creative” engines.
+**Always core:** description envelopes + at least one runner + verifier.  
+**Never core:** user-sim worlds, quality scoreboards, “the YAML file runs itself.”
 
 ---
 

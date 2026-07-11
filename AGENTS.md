@@ -8,16 +8,30 @@
 
 ## 0. What you are integrating
 
+**Do not confuse description language with who runs it.**
+
 | Piece | Package surface | Your job |
 |-------|-----------------|----------|
-| **IR** | `ConjectureScript`, `DialogueTurn`, `InvariantSpec`, `ScriptScope` | Author or generate goldens with **expected state** |
-| **Runner** | `run_script(...)`, CLI `conjecture run` | Call it; supply adapter + cognition mode |
-| **Verifier** | standard + temporal invariant kinds | Declare `kind` + `expected`; never invent free-form pass rules |
+| **Trajectory / scenario description** | `experimental.Scenario`, `schema.json` (flexible language) | Optional rich input: actors, steps, scope, allowed_outcomes, required_invariants, waits |
+| **Play-back form** | `ConjectureScript`, `DialogueTurn`, `InvariantSpec`, `ScriptScope` | CP-runner goldens with **expected state** (author or compile from Scenario) |
+| **Runner (who executes)** | `run_script(...)`, CLI `conjecture run` | Choose this CP runner (or later another); supply Driver/adapter + cognition |
+| **Verifier** | standard + temporal kinds | Declare `kind` + `expected`; never free-form pass rules |
 | **Host binding** | `ControlPlaneAdapter` / `BaseControlPlaneAdapter` | Map **your** ledger/graph/workflow → `TurnObservation` |
+| **Observed trajectory** | `RunResult` / experimental `Trajectory` | Evidence of one run — output, not input |
 
 **Green bar:** owner, pins, legal landings, mid-flight law under pin/freeze — **not** reply wording.
 
-**Product cores:** IR + runner + verifier. Without runner+verifier you only have a schema — rejected.
+```text
+  Scenario DESCRIPTION  ──compile?──►  ConjectureScript  ──►  CP runner  ──►  Driver
+         (language)                    (play-back form)     (who runs)      (Act)
+                                                                              │
+                                                                    observed trajectory
+                                                                              │
+                                                                          VERIFIER
+```
+
+Without a **runner + verifier**, description files are inert.  
+Without a **description language**, you only have an ad-hoc driver test.
 
 ---
 

@@ -50,15 +50,44 @@ Not “one golden sentence.” Not a new universal testing paradigm.
 The *shape* (IR + runner + verifier over projected state) can host more, but we do not
 market “test the whole agent” until domain ground truth is first-class.
 
-### Product = three cores (locked)
+### Product = language + who runs it + who judges (locked)
+
+**Do not collapse these.** Recent docs over-narrowed “IR” to `ConjectureScript` (the
+control-plane *driver form*). The original design is wider:
+
+| Layer | What it is | Not the same as |
+|---|---|---|
+| **Trajectory / scenario description language** | Generalized **input**: actors, steps, scope/ODD, nondeterminism, **allowed_outcomes**, **required_invariants**, waits, evidence, execution profiles | A single Python harness or Playwright |
+| **Who runs the trajectory** | A **runner** + **Driver**: control-plane adapter, HTTP/SSE, Playwright, LangGraph, Temporal, … | The description file itself |
+| **Observed trajectory** | Evidence of **one** run under one profile (`Trajectory` / `RunResult`) | The authored scenario |
+| **Verifier** | Judges envelopes vs observation (portable kinds) | The driver / orchestrator |
+
+```text
+  Scenario / trajectory DESCRIPTION (flexible language)
+       │  actors · steps · scope · allowed_outcomes · required_invariants · waits
+       │
+       ▼  compile / bind for a runner
+  Execution form (e.g. ConjectureScript for CP runner, or UI plan for Playwright)
+       │
+       ▼  WHO RUNS IT (pluggable)
+  Runner + Driver ──► app / graph / browser / workflow
+       │
+       ▼  observed trajectory (evidence)
+  Verifier ──► pass/fail on expected envelopes
+```
 
 | Core | Name | Role |
 |---|---|---|
-| **IR** | `ConjectureScript` | Portable contract language (path + **expected** state) |
-| **Runner** | `run_script` / CLI | Execute under pin/freeze; drive Act/Observe |
-| **Verifier** | invariants + temporal | Judge pass/fail (not “Oracle Corp”; not commercial **Verdict**) |
+| **Description IR** | `Scenario` (+ related models) · portable envelopes | Flexible trajectory *language* — **input** |
+| **Play-back form** | `ConjectureScript` (Slice 0 stable) | Thin compile target for the **control-plane runner** today |
+| **Runner** | `run_script` / CLI / future UI runners | **Who executes** steps (one of several possible runners) |
+| **Verifier** | invariants + temporal | Judge pass/fail (not Oracle Corp; not commercial **Verdict**) |
 
-Without runner + verifier in-tree, Conjecture is only a scenario **format**. That is rejected.
+**Without a runner + verifier**, description files alone are inert YAML.  
+**Without a generalized description language**, you only have an ad-hoc driver API.
+
+`ConjectureScript` is the **first sealable play-back form** for control-plane mid-flight
+law — **not** a replacement for the full scenario/trajectory language.
 
 ### Orchestration engines (LangGraph, Crew, Temporal, …)
 
@@ -332,48 +361,45 @@ adversarial generation remain **to build**.
 
 ## 2. Project architecture
 
-### What Conjecture *is* (not a script format alone)
+### What Conjecture *is* (description language + runners + verifier)
 
-Without **our runner** and **our verifier**, `ConjectureScript` would be only an open-source
-scenario schema — useful YAML, not a product. **The project is three co-equal cores:**
+Without **runners** and **verifier**, scenario/trajectory files are inert.  
+Without a **generalized description language**, you only have a one-off driver API.
 
-| Core | Owns | Ships today (0.1.2) |
+| Layer | Owns | Ships today (0.1.2) |
 |---|---|---|
-| **IR** | Portable contract language (`ConjectureScript`, scope, pins, expected) | `script.py`, JSON/YAML load |
-| **Runner** | Execute under pin/freeze; drive Act/Observe | `run_script`, `cognition.py`, CLI |
-| **Verifier** | Pass/fail on authoritative state | `invariants.py`, `temporal.py`, outcome-specific |
+| **Description language** | Flexible trajectory input (`Scenario`, scope, nondeterminism, waits, evidence) | `experimental/scenario_models.py`, `schema.json` |
+| **Play-back form** | CP-oriented compile target (`ConjectureScript`) | `script.py`, JSON/YAML load |
+| **Runner(s)** | **Who executes** the trajectory via a Driver | **CP runner:** `run_script` + CLI; others roadmap |
+| **Verifier** | Pass/fail on envelopes vs observation | `invariants.py`, `temporal.py` |
+| **Observed trajectory** | Evidence of one run | `RunResult`; `experimental/trajectory.py` |
 
 ```text
-                    ┌──────────────────────────────────────────┐
-                    │         CONJECTURE (the product)         │
-                    │                                          │
-   seeds / authors  │   IR  ──►  RUNNER  ──►  VERIFIER         │
-   ────────────────►│  script    execute     judge             │
-                    │            + freeze    + envelope        │
-                    │            + CLI                         │
-                    └────────┬───────────────────┬─────────────┘
-                             │                   │
-                    pluggable Driver      reports / CI exit
-                    (HTTP, Playwright,    (JUnit, JSON —
-                     LangGraph, Temporal,  pytest *hosts* us)
-                     Crew, in-process, …)
-                             │
-                             ▼
-                      Real application
+   authors / seeds
+        │
+        ▼
+   Scenario / trajectory DESCRIPTION  (generalized language)
+        │
+        ├── compile ──► ConjectureScript ──► CP runner (run_script) ──┐
+        │                                                              │
+        └── (later) UI / other plans ──► Playwright / other runners ──┤
+                                                                       ▼
+                                                              Driver → app
+                                                                       │
+                                                              observed trajectory
+                                                                       │
+                                                              VERIFIER (shared)
 ```
 
-**Ecosystem pieces do not replace the middle box.**
+**Who runs the trajectory?** Explicit choice of runner + Driver — not implied by the file alone.
 
-| Piece | Role relative to Conjecture |
+| Piece | Role |
 |---|---|
-| Specs, agents, humans, optional sim exports | **Author or seed** IR — not the verifier |
-| Playwright / HTTP / SSE / LangGraph / Temporal | **Driver plugin** called *by* our runner — not the product |
-| pytest / JUnit / CI | **Host process** that invokes `conjecture run` — not the verifier |
-| Trajectory scorers | Parallel **scores** — not a substitute for state-contract verification |
-
-If someone only publishes the schema and runs checks in ad-hoc pytest, they have a
-**format**. Conjecture’s claim requires **runner + verifier in-tree** so green means
-*our* envelope semantics.
+| Specs, agents, humans, path seeds | Author **description** (+ expected envelopes) |
+| CP runner / future UI runners | **Who runs** it |
+| Playwright / HTTP / LangGraph / Temporal | **Driver** under a runner |
+| pytest / CI | Process host |
+| Verifier | Shared judge — independent of which runner drove Act |
 
 ### Four extension points (product boundary)
 
@@ -443,46 +469,60 @@ not a feature bake-off against named sim/eval vendors.
 
 ```text
   INPUTS: epic · ODD · incident · transcript · optional path seed
-        → Agent/human authors ConjectureScript (schema + **expected state**)
-        → RUNNER (freeze · Driver · Observer)
-        → VERIFIER (invariants · allowed outcomes · trajectory)
+        → Author Scenario / trajectory DESCRIPTION
+             (actors, steps, scope, allowed_outcomes, required_invariants, …)
+        → Choose WHO RUNS IT (runner + Driver)
+             e.g. compile → ConjectureScript → CP run_script
+             or later: UI plan → Playwright runner
+        → Observed trajectory (evidence of one run)
+        → VERIFIER (envelopes vs observation)
         → Report / CI gate
 ```
 
 | Stage | Owns | Rule |
 |---|---|---|
 | Spec / epic / story | Claimed scope | Humans own the claim |
-| Authoring | Draft goldens | Validated IR **with expected** |
-| IR | Contract language | Schema + enum kinds |
-| Runner | Act + observe under pin/freeze | Thin; drivers are plugins |
-| Verifier | Pass/fail on authoritative state | Owner, pin, terminal, trajectory |
+| Description language | Flexible trajectory file | Envelopes + expected — not driver code |
+| Runner selection | **Who executes** | Explicit; file does not imply runner |
+| Driver | Act on host | Plugin under the chosen runner |
+| Observed trajectory | Evidence | One run under one profile |
+| Verifier | Pass/fail | Shared kinds; independent of runner |
 
-### Ecosystem (seeds and plugins)
-
-**One product box:** IR + runner + verifier. Everything else feeds it or plugs in.
+### Ecosystem (seeds, description, runners)
 
 ```text
   specs / agents / humans / optional path seeds
                     │
                     ▼
-         ┌──────────────────────┐
-         │ CONJECTURE           │
-         │ IR → RUNNER → VERIFY │
-         └──────────┬───────────┘
-                    │ Driver (HTTP · Playwright · LangGraph · Temporal · …)
-                    ▼
-              Real application
+         Scenario / trajectory DESCRIPTION
                     │
-             pytest / CI (process host only)
+         ┌──────────┴──────────┐
+         ▼                     ▼
+   CP play-back form     other plans (later)
+   (ConjectureScript)    (e.g. UI)
+         │                     │
+         ▼                     ▼
+   CP runner              other runners
+   (run_script)           (e.g. Playwright)
+         │                     │
+         └──────────┬──────────┘
+                    ▼
+              Driver → application
+                    │
+           observed trajectory
+                    │
+                 VERIFIER
+                    │
+             pytest / CI (process host)
 ```
 
 | Piece | Pattern |
 |---|---|
-| Path seeds (traffic, sim export, explorer) | Optional **input**; still need **expected state** for CI |
-| Coding agents | Author IR; do not replace runner/verifier |
-| Playwright / HTTP / SSE | Driver plugins |
-| LangGraph / Crew / Temporal | Orchestration hosts + adapters |
-| Trajectory scorers | Parallel scores if useful; **not** our merge gate |
+| Path seeds | Feed **description** authoring; still need expected envelopes |
+| Coding agents | Author description or ConjectureScript; use prompt seed |
+| CP runner | Default **who runs** control-plane goldens today |
+| Playwright / HTTP / LangGraph / Temporal | Drivers (and later alternate runners) |
+| Trajectory scorers | Parallel scores; **not** our merge gate |
 
 ### Tempting features (scope pin — normative)
 
@@ -739,18 +779,29 @@ detour / completion. Most production bugs live mid-flight — author there.
 `system`. Slice 0 `DialogueTurn.actor` defaults to `user`. Same invariant language applies
 when the stimulus is not a human chat line.
 
-### Script vs experimental `Scenario`
+### Description language vs play-back form vs who runs it
 
-| | **ConjectureScript** (Slice 0) | **Scenario** (experimental / later) |
-|--|-------------------------------|-------------------------------------|
-| Purpose | CI-safe multi-turn **play back** | Rich route: scope/ODD, profiles, waits, evidence |
-| Step unit | `DialogueTurn` | `Step` (actor, control_point, maneuver, wait, …) |
-| Cognition | Pin + modes | Nondeterminism + execution profiles |
-| Status | **Stable enough for goldens** | Quarantined; not 0.1 public API |
+| | **Scenario** (description language) | **ConjectureScript** (play-back form) | **Runner** (who executes) |
+|--|-------------------------------------|----------------------------------------|---------------------------|
+| Job | Flexible trajectory **description** | Thin form for CP mid-flight play-back | Applies steps via a Driver |
+| Contains | actors, steps, scope, nondeterminism envelopes, waits, evidence, profiles | turns, pins, effects, expected kinds | cognition + adapter loop |
+| Status | `experimental/` + `schema.json` | **Stable 0.1.x** | `run_script` + CLI today; other runners later |
+| Who writes it | Humans, agents, path seeds | Author directly **or** compile from Scenario | Host/CI invokes |
 
-Scripts do not go away when Scenario lands: scripts remain the thin multi-turn
-**control-plane** vertical; Scenario adds ODD metadata, UI/async waits, and trajectory
-evidence for broader surfaces.
+**Observed trajectory** (`experimental.trajectory.Trajectory` or `RunResult`) is **output**
+of a run — not the input description.
+
+`compile_scenario_to_script` is the bridge: description → CP play-back form →
+**Conjecture CP runner**. Other runners may consume Scenario without going through
+`ConjectureScript` (e.g. future Playwright plan).
+
+**Original load-bearing ideas (keep):**
+
+- `nondeterminism.allowed_outcomes` + `required_invariants` on steps  
+- Three terminal buckets: expected / tolerated_degraded / failure+graceful  
+- Scope: in_scope / out_of_scope / expected_refusal  
+- Trajectory-as-evidence across N runs under a profile  
+- Separation of **description** from **who runs it**
 
 ### Run loop (harness contract)
 

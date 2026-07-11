@@ -2,14 +2,14 @@
 
 | Field | Value |
 |---|---|
-| **Status** | Alpha (0.1) — **product vision** full; **Slice 0** portable surface shipping |
-| **Product one-liner** | Behaviour-based evaluation for agentic multi-turn systems — **invariants and allowed outcomes**, not string equality |
+| **Status** | Alpha (0.1) — **full design** stated; **Slice 0** portable surface shipping |
+| **One-liner** | Behaviour-based evaluation for agentic multi-turn systems — **invariants and allowed outcomes**, not string equality |
 | **Why it exists** | Vibe-coded / auto-coded systems accrete **unknown pathways** (probabilistic specs, weak or dynamic scope, changing requirements). You cannot inventory every path; you pin **behaviour contracts** that must hold when paths appear. |
 | **Slice 0 (now)** | Multi-turn **control-plane** invariant testing (stub/freeze cognition) + optional CCP goldens |
-| **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` |
+| **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Companion (reference domain)** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
 
-This document is the **public contract**. It states the full product shape first; Slice 0 is the first implementation cut, not a redefinition of the product as “only CCP tests.”
+This document is the **public contract**. It states the full **project design** first; Slice 0 is the first implementation cut, not a redefinition of the project as “only CCP tests.”
 
 ---
 
@@ -35,9 +35,9 @@ Evaluation must pin:
 2. **Allowed outcomes** (envelope of legal behaviours)  
 3. Optionally **distribution** (outcome rates over N runs when cognition is live)  
 
-That is the load-bearing idea of the **behaviour runner**. Conjecture is that product.
+That is the load-bearing idea of the **behaviour runner**. Conjecture is that **project**.
 Slice 0 implements a first vertical on multi-turn control-flow contracts (stub/freeze
-cognition) — not a claim that the product *is only* one domain’s unit tests.
+cognition) — not a claim that the project *is only* one domain’s unit tests.
 
 The **objective is not skinned down** because the first phase is simpler. We still
 build out ODD/scope, generation modalities, trajectories, UI drivers, and
@@ -63,7 +63,7 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 
 | Concept | Meaning |
 |---|---|
-| **Route network** | Map of transitions in the product (grows over time) |
+| **Route network** | Map of transitions in the system under test (grows over time) |
 | **Scenario** | One goal-directed route with contracts filled |
 | **Trajectory** | One observed run of a scenario under one profile |
 
@@ -72,9 +72,9 @@ Without invariants + allowed outcomes, “happy path passed” cannot be told fr
 Conjecture is methodologically closer to **scenario construction for autonomous
 systems** (e.g. CARLA scenario runner, SOTIF edge-case work) than to:
 
-- **Playwright-class E2E** — click → assert fixed UI text (UI may later be *a driver*, not the product);
-- **LLM feedback / model-eval products** — score reply quality, preference data, synthetic users,
-  RL signal, leaderboards. **We deliberately do not compete there.** Our primary verdict is
+- **Playwright-class E2E** — click → assert fixed UI text (UI may later be *a driver*, not the project definition);
+- **LLM feedback / model-eval platforms** — score reply quality, preference data, synthetic users,
+  RL signal, leaderboards. **Out of this project’s scope.** Our primary verdict is
   **host behaviour contracts** (ownership, pins, legal landings, honest terminals), not
   “was the model’s answer good?”
 
@@ -95,9 +95,9 @@ A script is **not only a human chat transcript**. Turns may be:
 | **System / completion** | Job complete, stream terminal, timeout, cancel, scheduled tick |
 
 Experimental YAML already models this (`Actor`: `user` · `agent` · `system`).
-Slice 0’s `DialogueTurn.user_text` is the **user-centric first API**, not the product ceiling.
+Slice 0’s `DialogueTurn.user_text` is the **user-centric first API**, not the design ceiling.
 
-**Product phasing:**
+**Roadmap phasing:**
 
 1. **User-centric (Slice 0+)** — human-led multi-turn scripts; pin-driven cognition.  
 2. **Agent-initiated + completion** — steps with no new human utterance (async finish, mid-flight).  
@@ -171,7 +171,7 @@ adversarial generation remain **to build**.
 
 ---
 
-## 2. Product architecture (full runner)
+## 2. Project architecture (full runner)
 
 ```text
                     ┌──────────────────────────────────────┐
@@ -198,7 +198,7 @@ adversarial generation remain **to build**.
 | **Trajectory** | Evidence of one run under one profile (distribution later) |
 | **Corpus** | Goldens humans own; later bootstrap and adversarial generation |
 
-**Scripts assert host contracts** (control plane, ledger, or other adapter-projected state). They do not invent a second product model out of thin air — but the **host is not required to be CCP**. CCP is the reference binding for Slice 0.
+**Scripts assert host contracts** (control plane, ledger, or other adapter-projected state). They do not invent a second domain model out of thin air — but the **host is not required to be CCP**. CCP is the reference binding for Slice 0.
 
 ---
 
@@ -212,9 +212,9 @@ adversarial generation remain **to build**.
 | **3** | **Agent-to-agent** handoff scripts + corpus generation (code seed, styles, detours, adversarial / OOD) |
 | **4** | Distribution monitoring when cognition is live |
 
-Not in scope as a product line: **LLM feedback scoring** / preference datasets / model leaderboards.
+Not in project scope: **LLM feedback scoring** / preference datasets / model leaderboards.
 
-Deterministic “click → assert fixed text” UI tests can remain outside this framework; UI is an optional **driver** for behaviour contracts, not the product definition.
+Deterministic “click → assert fixed text” UI tests can remain outside this framework; UI is an optional **driver** for behaviour contracts, not the project definition.
 
 ---
 
@@ -293,8 +293,8 @@ MIT. Alpha.
 
 | Horizon | Intent |
 |---|---|
-| **Product** | Full behaviour runner: scenarios, trajectories, drivers, generation, distribution |
+| **Full design** | Behaviour runner: scenarios, trajectories, drivers, generation, distribution |
 | **Slice 0** | Control-plane multi-turn invariants + portable package + CCP goldens |
 | **Next** | Path-faithful chat · scenario/UI surface · corpus · N-run distribution |
 
-Host adapters and product-private goldens stay in host repos; this package keeps a portable, leak-free surface.
+Host adapters and host-private goldens stay in host repos; this package keeps a portable, leak-free surface.

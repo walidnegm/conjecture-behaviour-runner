@@ -59,7 +59,7 @@ class NullControlPlaneAdapter:
     """No-op adapter for packaging smoke tests and examples.
 
     Always reports empty observation; only ``kind == \"always_true\"``
-    invariants pass. Replace with a real control-plane binding for product use.
+    invariants pass. Replace with a real control-plane binding for host use.
     """
 
     def apply_effect(

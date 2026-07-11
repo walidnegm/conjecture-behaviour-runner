@@ -39,7 +39,7 @@ class Actor(str, Enum):
     """Who initiates the step in a multi-turn scenario.
 
     Scripts are not user-only: agent-initiated turns, agent-to-agent handoffs,
-    and system/completion events are first-class. Product phasing starts
+    and system/completion events are first-class. Roadmap phasing starts
     user-centric (Slice 0 ``DialogueTurn``), then agent/system, then multi-agent.
     """
 

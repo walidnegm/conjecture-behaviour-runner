@@ -32,34 +32,34 @@ in advance**.
 | **CLI** | `conjecture` |
 | **License** | MIT · **Status** | Alpha — Slice 0 shipping |
 
-> **Product name:** Conjecture Behaviour Runner (“Conjecture”).  
+> **Project:** Conjecture Behaviour Runner (“Conjecture”) — MIT open-source package.  
 > **Slice 0 (now):** multi-turn **control-plane** invariants (stub/freeze cognition) + optional
 > [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) goldens.  
 > **Later slices:** path-faithful chat drivers, scenario YAML + UI surfaces, corpus generation,
 > distribution monitoring over live cognition.  
-> **Objective is not skinned down** because the first phase is simpler — we still build out
+> **Design is not skinned down** because the first phase is simpler — we still build out
 > ODD/scope, modalities, drivers, and distribution.
 
 ### Where this sits (not LLM-feedback labs, not Playwright)
 
 Conjecture is closer to **scenario construction in autonomous driving** (e.g. **CARLA** /
-SOTIF-style ODD work) than to **LLM feedback / model-quality eval products** or browser E2E tools.
+SOTIF-style ODD work) than to **LLM feedback / model-quality eval platforms** or browser E2E tools.
 
-We are **careful not to compete** as “the company that scores LLM replies / trains models from
-simulated users.” That market already exists. We pin **host-system behaviour contracts**
-when code and multi-turn ownership are incomplete.
+We deliberately stay out of “score LLM replies / train models from simulated users.” That
+space already exists. This project pins **host-system behaviour contracts** when code and
+multi-turn ownership are incomplete.
 
 | Approach | What it optimizes for | How Conjecture differs |
 |----------|----------------------|-------------------------|
-| **Playwright / Cypress-style E2E** | Deterministic UI: click → wait → assert fixed text/DOM | UI can be *one driver later*. The product is **behaviour contracts** (outcomes + invariants), not click-assert-text as the definition of “pass.” |
-| **LLM feedback / model-eval labs** (rubrics, preference data, synthetic users, RL signal, leaderboards) | Score or improve the **model** | **Out of scope as a product.** We do not ship “was the answer good?” as the primary verdict. We check **who may own the turn, what must stay pinned, which landings are legal** on the *host*. |
+| **Playwright / Cypress-style E2E** | Deterministic UI: click → wait → assert fixed text/DOM | UI can be *one driver later*. This project is **behaviour contracts** (outcomes + invariants), not click-assert-text as the definition of “pass.” |
+| **LLM feedback / model-eval labs** (rubrics, preference data, synthetic users, RL signal, leaderboards) | Score or improve the **model** | **Out of project scope.** We do not ship “was the answer good?” as the primary verdict. We check **who may own the turn, what must stay pinned, which landings are legal** on the *host*. |
 | **CARLA-style scenario building** | Scenarios + edge cases under an **ODD**; ground truth from the world / maps / sensors; generate stress and out-of-domain probes | **Closest analogy.** Declare the claimed domain (ODD/scope), author scenarios from **ground truth** (code contracts, real traffic, explorer), generate **edge conditions**, pin **what must hold** when the world is nondeterministic. |
-| **Conjecture (this package)** | Multi-turn **behaviour envelopes** for agentic products built under vibe/auto coding | Scenario + trajectory + optional edge generation from ground-truth collection; first sealable surface is control-plane mid-flow contracts. |
+| **Conjecture (this package)** | Multi-turn **behaviour envelopes** for agentic apps built under vibe/auto coding | Scenario + trajectory + optional edge generation from ground-truth collection; first sealable surface is control-plane mid-flow contracts. |
 
-**In short:** Playwright automates the browser. LLM-feedback companies evaluate **model quality**.  
+**In short:** Playwright automates the browser. LLM-feedback platforms evaluate **model quality**.  
 Conjecture is for **scenario- and edge-driven behaviour contracts** on systems whose path set
 is incomplete — the same *kind of problem* AV stacks face with ODD and edge cases, applied
-to agentic product control flow.
+to agentic **application** control flow.
 
 ### Scripts are multi-actor (not “user only”)
 
@@ -74,7 +74,7 @@ A script is a **sequence of turns that move system state**. Initiation is not li
 
 The experimental scenario model already names actors: `user` · `agent` · `system`
 (`Actor` in `experimental.scenario_models`). Slice 0’s `DialogueTurn.user_text` is the
-**user-centric first surface** — not a claim that only humans exist in the product.
+**user-centric first surface** — not a claim that only humans exist in the design.
 
 **Phasing (intentional):**
 
@@ -85,11 +85,11 @@ The experimental scenario model already names actors: `user` · `agent` · `syst
 3. **Later — agent-to-agent.** Multi-agent handoffs and completion chains under the same
    invariant envelope — still **host contracts**, not model-feedback scoring.
 
-Same product idea the whole way: **behaviour envelopes**, not “grade this LLM reply.”
+Same idea the whole way: **behaviour envelopes**, not “grade this LLM reply.”
 
 ---
 
-## Why this product exists
+## Why this project exists
 
 ### The software under test is not a closed machine
 
@@ -105,11 +105,11 @@ landings** — even when the wording looks fine. So evaluation pins:
 2. **Allowed outcomes** — envelope of legal landings (not one golden string)  
 3. **Optionally distribution** — rates over N runs when cognition is live  
 
-That is the full **behaviour-runner** product idea (scenario + trajectory + modes +
-generation + monitoring). Conjecture is that product. Slice 0 is the first sealable
-vertical — not a redefinition as “browser click-assert-text” or “one product’s unit tests.”
+That is the full **behaviour-runner** design (scenario + trajectory + modes +
+generation + monitoring). **Conjecture is that project.** Slice 0 is the first sealable
+vertical — not a redefinition as “browser click-assert-text” or “one app’s unit tests.”
 
-**Slice 0 is simpler. The product objective is not.** We still build out ODD/scope,
+**Slice 0 is simpler. The full design is not.** We still build out ODD/scope,
 modalities, UI drivers, corpus generation, and N-run distribution.
 
 ### Behaviour-driven testing and ODD (methodology we keep)
@@ -147,7 +147,7 @@ different ground truths**. Mixing them without labels confuses trust and triage.
 
 | Source | What you read / write | What you get | Build status |
 |--------|----------------------|--------------|--------------|
-| **Specs** | Epics, ODD/scope, product contracts, acceptance intent | *Intended* use-cases — what the design claims | **Partial** (authored by hand today) |
+| **Specs** | Epics, ODD/scope, design contracts, acceptance intent | *Intended* use-cases — what the design claims | **Partial** (authored by hand today) |
 | **Codebase scan** | Routers, ledgers, state machines, tools, prompts, existing regs | *Structural* use-cases — transitions the code actually admits | **Partial** (Slice 0 goldens are hand-curated from contracts; **automated scan → draft scripts not built out**) |
 | **Raw scripts / ideas / edge lists** | Free-form scenario seeds, “what if…”, sticky notes, incident notes | *Hypothesis* and **edge conditions** before they are formal ODD probes | **Partial** (humans write `ConjectureScript`s; **idea → scenario pipeline not built out**) |
 | **User traffic** | Sessions, transcripts, telemetry | *Empirical* routes people actually drive | **Not built out** |
@@ -166,13 +166,13 @@ These are **different extractors into the same corpus**, not synonyms:
 **Honest status:** Slice 0 proves we can **play back** pinned scripts with real
 invariant checks. We have **not** fully built automated “scan the codebase →
 draft use-cases,” “specs → scenario pack,” or “raw edge list → formal probes.”
-That generation and curation stack is still the product roadmap.
+That generation and curation stack is still on the **project roadmap**.
 
 Full write-up: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) §1.1.
 
 ---
 
-## The full product shape (not only Slice 0)
+## Full project shape (not only Slice 0)
 
 ```text
                     ┌──────────────────────────────────────┐
@@ -208,7 +208,7 @@ requiring a browser or free live LLM on every CI run.
 ## What ships today (0.1 / Slice 0)
 
 - Portable **script model** + **`run_script`**
-- **Cognition pins** (portable labels; host/product flags in `extras`)
+- **Cognition pins** (portable labels; host-specific flags in `extras`)
 - **Invariant library** (`BaseControlPlaneAdapter`, fail-closed unknown kinds)
 - **Adapter protocol** — plug *your* control plane / ledger / app state
 - Optional **Conversation Control Plane** binding + **3 portable goldens**
@@ -238,7 +238,7 @@ Conjecture checks the contracts. Wording of the assistant reply is **not** the p
 | **`InvariantSpec`** | A rule that **must hold after the turn** — independent of reply wording |
 | **`allowed_outcomes`** | Optional envelope of legal landings (more than one is fine) when cognition is live |
 
-Slice 0 is **user-centric** (`user_text` on each turn). Product scope also includes **agent**,
+Slice 0 is **user-centric** (`user_text` on each turn). The broader design also includes **agent**,
 **agent-to-agent**, and **system/completion** steps later (`actor` on the turn; experimental
 scenario `Actor`: `user` · `agent` · `system`).
 
@@ -414,7 +414,7 @@ More: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md)
 
 ## Who this is for
 
-- Teams shipping **agentic / LLM-shaped** products that grow by generation and iteration  
+- Teams shipping **agentic / LLM-shaped applications** that grow by generation and iteration  
 - Anyone whose **output looks fine** while **flow, identity, or legal outcomes** fail  
 - Codebases where **scope is incomplete** and new paths keep appearing  
 - Hosts that need a **CI-safe behaviour contract layer** (reference goldens are examples, not the ceiling)
@@ -425,20 +425,24 @@ More: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md)
 
 - Replacing every unit test with multi-turn scripts  
 - Live LLM on every PR by default  
-- Browser as the *only* truth for ownership bugs (UI is a later *driver*, not the product)  
-- Phrase laundry lists as “understanding” (cognition stays label-based; scripts pin outcomes)
+- Browser as the *only* truth for ownership bugs (UI is a later *driver*, not the project definition)  
+- Phrase laundry lists as “understanding” (cognition stays label-based; scripts pin outcomes)  
+- Competing as an LLM-feedback / model-quality scoring platform  
 
 ---
 
 ## Status
 
-**Alpha.** MIT.
+**Alpha.** MIT open source.
 
 | Horizon | Intent |
 |---------|--------|
-| **Product** | Full behaviour runner: scenarios, trajectories, drivers, generation, distribution |
+| **Full design** | Behaviour runner: scenarios, trajectories, drivers, generation, distribution |
 | **Slice 0** | Control-plane multi-turn invariants + portable package + CCP goldens |
 | **Next** | Path-faithful chat driver · scenario/UI surface · corpus · N-run distribution |
+
+Contributions welcome — scripts, invariants, adapters, and docs that stay portable
+(host-private goldens stay in *your* app repo).
 
 ---
 

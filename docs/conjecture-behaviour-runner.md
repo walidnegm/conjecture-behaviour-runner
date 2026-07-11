@@ -724,3 +724,25 @@ MIT. Alpha.
 Host adapters and host-private goldens stay in host repos; this package keeps a portable, leak-free surface.
 
 **Document name:** *public contract (spec)* — file `docs/conjecture-behaviour-runner.md`.
+
+---
+
+## 8. Contributions, Verdict, and foundational ideas
+
+See the public README for the full tables:
+
+- [Where open-source contributions can go](../README.md#where-open-source-contributions-can-go)
+- [Conjecture (OSS) vs Verdict (commercial)](../README.md#conjecture-oss-vs-verdict-commercial)
+- [Foundational ideas](../README.md#foundational-ideas-open-for-community-or-verdict)
+
+**Normative summary:**
+
+1. MIT core welcomes portable drivers, observers, providers, oracle kinds, agent
+   synthesizers, ecosystem bridges, CLI, and docs.  
+2. **Verdict** (commercial) may host, accelerate, or reimplement product surfaces
+   independently — it is not required to land every idea in OSS first, and OSS is
+   not blocked by Verdict.  
+3. Host-private goldens stay out of this repository.  
+4. Foundational ideas (schema-as-agent-API, arrange≠act, freeze for CI, sim bridge
+   not sim core, temporal packs, contract hold-rates) are shared design stakes —
+   implementable by community **or** commercial without changing IR meaning.

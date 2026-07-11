@@ -617,8 +617,94 @@ conjecture path-faithful --prove-bugs
 conjecture run examples/ --adapter path-faithful --json-report /tmp/out.json --junit /tmp/out.xml
 ```
 
-Contributions welcome — scripts, invariants, adapters, drivers, and docs that stay portable
-(host-private goldens stay in *your* app repo).
+---
+
+## Where open-source contributions can go
+
+MIT is intentional: **use, fork, and ship** the IR + oracle + thin runner. Good first
+(and deep) PRs stay **portable** — no host-private goldens, no monorepo dumps.
+
+### High-value OSS contribution map
+
+| Area | Examples of what to build | Why it helps |
+|------|---------------------------|--------------|
+| **Drivers** | HTTP/SSE chat client, WebSocket, Playwright adapter, LangGraph/Temporal hooks | Path-faithful Act without rebuilding a sim world |
+| **Observers** | Map your ledger / tool log / event bus → `TurnObservation` | Authoritative evidence for the oracle |
+| **Cognition providers** | Host local/cloud classifier wrappers; better freeze artifact tooling | CI freeze/replay against real routers |
+| **Oracle kinds** | Temporal ops, outcome-specific packs, domain-neutral invariants | Deeper contracts without quality rubrics |
+| **Agent interface** | Spec/epic → validated `ConjectureScript` (schema + repair loop) | “Agentic coding for goldens” |
+| **Ecosystem bridges** | Collinear/sim trajectory → script seed; LangSmith/Braintrust trace → observation | Integrate, don’t clone |
+| **Corpus / goldens** | Portable multi-turn patterns (sole-continue, detour, pin-stable) with `scope` | Shared regression language |
+| **CLI / CI** | Discovery filters, sharding, timeouts, richer JUnit, rerun manifests | Make `conjecture run` production-grade |
+| **Docs & examples** | Host adapter tutorials, failure postmortems, ODD/scope recipes | Lower the barrier to first green run |
+| **Schema / IR** | Safer `from_dict` validators, versioned script format, compile rules | Stable score surface for agents |
+
+**Contribution norms:** one concept per PR; tests for new invariant kinds and providers;
+fail closed on unknown kinds; keep Collinear/Playwright/eval platforms as **integrations**,
+not reimplementations in core.
+
+Host-private goldens and product-specific pins stay in **your** app repo (or a private
+adapter package). The public tree stays leak-free.
+
+---
+
+## Conjecture (OSS) vs Verdict (commercial)
+
+**Conjecture** is the open project: language (IR), oracle, cognition freeze primitives,
+thin runner, extension points.
+
+**Verdict** (planned commercial line — name may evolve) is a **separate product** that
+can sit on Conjecture or reimplement pieces. The company is free to move fast, host
+differently, or productize UX that does not belong in MIT core.
+
+| | **Conjecture (MIT OSS)** | **Verdict (commercial — free to diverge)** |
+|--|-------------------------|-----------------------------------------------|
+| **Mission** | Portable contracts + community extensions | Hosted / enterprise product experience |
+| **What ships** | Schema, runner, oracle, freeze store, CLI, examples | Whatever customers need — may use Conjecture or a fork |
+| **Speed** | Community + maintainers; deliberate core | **Can implement faster or differently** (hosted runners, managed freeze, multi-tenant) |
+| **Hosting** | You run it | **Verdict can be fully hosted**, VPC, or hybrid |
+| **UI / studio** | Optional community tools | Scenario studio, dashboards, org SSO, audit packs |
+| **Corpus** | Portable goldens only | Private corpora, sim-seed pipelines, fleet hold-rates |
+| **Support / SLA** | Best-effort issues | Commercial support |
+| **License boundary** | MIT core stays MIT | Proprietary layers **around** or **beside** the core — not a silent relicensing of community PRs |
+
+**Principle:** OSS builds the **contract substrate**. Verdict (or any vendor) builds
+**ops, scale, and product surface**. Contributors are not blocked by commercial roadmap;
+commercial is not blocked by waiting for every OSS PR.
+
+```text
+  Community PRs ──► Conjecture MIT core (IR · oracle · drivers · freeze)
+                              │
+                              ├── anyone embeds in CI / products
+                              │
+                              └── Verdict (optional): hosted runs · UI · SSO ·
+                                  managed freeze · private corpus · SLA
+                                  (may implement the same ideas differently)
+```
+
+---
+
+## Foundational ideas (open for community or Verdict)
+
+These are **design stakes**, not promises of who implements them first:
+
+| Idea | Sketch |
+|------|--------|
+| **Schema as agent API** | One versioned JSON schema is the only thing agents must target to author goldens |
+| **Arrange ≠ Act** | `LedgerEffect` / seeds arrange; Driver Act is the SUT; never conflate in path-faithful mode |
+| **Pin / freeze as law for CI** | Live cognition optional; merge gates prefer freeze-replay |
+| **Mini-ODD on every golden** | `scope.in_scope` / `out_of_scope` / `expected_refusal` travel with the script |
+| **Trajectory as evidence** | Logs support the oracle; they are not a second product |
+| **Outcome-specific contracts** | Allowed landing A ⇒ invariant set A; branching without quality scores |
+| **Temporal oracle pack** | eventually / never / until / at-most-once ownership and side effects |
+| **Sim bridge, not sim core** | Collinear-class tools seed and stress; Conjecture gates law |
+| **Driver plugins** | Same IR over in-process, HTTP, SSE, Playwright |
+| **Failure shrinking** (later) | Minimal multi-turn counterexample (Hypothesis-class), still contract-focused |
+| **Contract hold-rates** (later) | N-run rates of *invariant hold*, not preference rubrics |
+| **Verdict-shaped ops** | Multi-tenant run history, RBAC, webhooks, scheduled fleets — commercial-friendly |
+
+Community can implement any of the portable rows. Verdict can ship hosted or alternate
+implementations of the same ideas without forking the meaning of `ConjectureScript`.
 
 ---
 

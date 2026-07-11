@@ -51,6 +51,43 @@ modes + generation + monitoring). Conjecture is that product. The first *runner
 implementation* that ships is where agentic products hurt first: **turn ownership and
 mid-flow contracts** — not “browser click-assert-text” as the MVP.
 
+**Slice 0 is simpler. The product objective is not.** We still build out ODD/scope,
+modalities, UI drivers, corpus generation, and N-run distribution.
+
+### Behaviour-driven testing and ODD (methodology we keep)
+
+Classical tests often pin **exact outputs**. Behaviour-driven evaluation pins:
+
+| Idea | Meaning |
+|------|---------|
+| **Allowed outcomes** | Legal landings for a step/turn (more than one is fine) |
+| **Required invariants** | Must hold **no matter which** allowed outcome occurred |
+| **Trajectory** | One observed run of a scenario under one profile |
+| **Distribution** (later) | Rates across N trajectories when cognition is live |
+
+Without those, you cannot tell “happy path passed” from “happy path passed by accident.”
+
+**ODD (Operational Design Domain)** — from ISO 21448 / SOTIF practice — is the
+**claimed input boundary** for a scenario class: what the system says it handles.
+It is **metadata on the claim**, not a single test case.
+
+| Field (plain language) | Role |
+|------------------------|------|
+| `in_scope` | Supported — should handle |
+| `out_of_scope` | Unsupported — refuse / degrade gracefully |
+| `expected_refusal` | Probes that must be rejected |
+
+**ODD vs adversarial** (do not conflate):
+
+- **ODD / scope** = specification of the boundary  
+- **Adversarial generation** = technique that *uses* the boundary (in-scope stress + out-of-scope refusal)  
+
+Four **corpus modalities** still belong to the product: code-based · user-watching ·
+agent-plays-the-game · adversarial. Slice 0 is mostly code-based control-plane contracts;
+the rest is **build-out**, not cancelled vision.
+
+Full write-up: [docs/conjecture-behaviour-runner.md](docs/conjecture-behaviour-runner.md) §1.1.
+
 ---
 
 ## The full product shape (not only Slice 0)

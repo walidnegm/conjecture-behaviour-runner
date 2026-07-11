@@ -45,7 +45,7 @@ from conjecture_behaviour_runner.temporal import (
     check_trajectory_invariant,
 )
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 __all__ = [
     "STANDARD_INVARIANT_KINDS",

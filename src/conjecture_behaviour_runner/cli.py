@@ -185,6 +185,30 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     p_pf.set_defaults(func=_cmd_path_faithful)
 
+    p_ui = sub.add_parser(
+        "ui",
+        help="Open local browser UI for path-faithful story + planted bugs",
+    )
+    p_ui.add_argument("--host", default="127.0.0.1")
+    p_ui.add_argument("--port", type=int, default=8765)
+    p_ui.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Do not open a browser tab automatically",
+    )
+
+    def _cmd_ui(ns: argparse.Namespace) -> int:
+        from conjecture_behaviour_runner.ui_server import serve_ui
+
+        serve_ui(
+            host=ns.host,
+            port=ns.port,
+            open_browser=not ns.no_browser,
+        )
+        return 0
+
+    p_ui.set_defaults(func=_cmd_ui)
+
     # Back-compat: --demo / bare --version
     parser.add_argument(
         "--demo",

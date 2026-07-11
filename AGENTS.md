@@ -5,19 +5,14 @@
 **Face demo:** [examples/e2e_multi_turn.py](examples/e2e_multi_turn.py) — path-faithful `handle()` + planted bugs.  
 **Prompt seed:** [prompts/conjecture_script_author.seed.md](prompts/conjecture_script_author.seed.md).
 
-**Claim hierarchy** (do not invert — CBR-SPEC §0):
+**Contributor first:** five concepts only — **Script · Turn · Driver · Observation · Invariant**.  
+See [CONTRIBUTING.md](CONTRIBUTING.md) and `conjecture ui`. Deeper claim hierarchy is CBR-SPEC §0.
 
-1. **Face (plain):** catch agent bugs that **still look fine in chat** — CI fails on broken
-   conversation **rules** (owner / locked record / illegal restart), not on wording.  
-   *Precise:* freeze-safe state-law regression under pin/freeze.
-2. **Technical (sticky):** contract testing — behavioral envelopes over authoritative state
-   under pin/freeze. Not one golden sentence; not a prose grader.
-3. **Architecture (scoped):** control-plane conformance under probabilistic cognition —
-   **only** for CCP-shaped hosts with real Act under a Driver.
+**Face (plain):** catch agent bugs that **still look fine in chat** — CI fails on broken
+conversation **rules** (owner / locked record / illegal restart), not on wording.
 
 **Inspiration / apt hosts:** [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
-and apps **isomorphic** to that format (single-writer ownership, entity pins, sole-continue /
-terminal discipline). Transactional multi-turn systems — not pure creative chat.
+and apps with single-writer ownership + entity pins. Not pure creative chat.
 
 ---
 

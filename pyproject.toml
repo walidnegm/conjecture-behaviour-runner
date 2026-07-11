@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "conjecture-behaviour-runner"
-version = "0.1.3"
-description = "Freeze-safe regression gates for control-plane state law — owner, pin, mid-flight/terminal envelopes under pinned cognition (Bot0.ai)"
+version = "0.1.4"
+description = "Catch agent bugs that still look fine in chat — Script/Turn/Driver/Observation/Invariant for multi-turn state law under pinned cognition"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

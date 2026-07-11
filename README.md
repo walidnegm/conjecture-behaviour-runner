@@ -2,265 +2,151 @@
 
 **Catch the agent bugs that still look fine in chat.**
 
-| | In plain English |
-|--|------------------|
-| **Why** | Multi-turn agents often fail *quietly*: the reply still sounds helpful, but the system dropped which task owns the turn, lost the workflow/invoice it was working on, or restarted a finished job. LLM “was the answer good?” checks miss that. |
-| **What** | Small **regression tests** (goldens) that check the **rules of the conversation machine** after each turn — who owns the turn, which record is locked, whether mid-flight work can be hijacked. |
-| **So** | When those rules break, **CI goes red** — even if the wording still looks polished. You freeze the AI’s decision labels for the test so runs are **cheap, fast, and the same every PR** (no paying for a live model on every check). |
+Multi-turn agents fail *quietly*: the reply still sounds fine, but the system dropped
+who owns the turn, lost the locked record, or restarted finished work. Conjecture is a
+small **Script → Driver → Observation → Invariant** kit so CI goes red on **state law**,
+not on wording — with cognition **pinned/frozen** so runs stay cheap and identical.
 
-We do **not** care if the agent uses a different adjective today.  
-We care that it did **not** drop the locked record, hand the turn to two owners, or rewrite
-history mid-flight.
-
-*Short technical name (for the spec):* **freeze-safe regression gates for control-plane state law.**
-
-Built by [Bot0.ai](https://bot0.ai). MIT · Alpha **0.1.3**
-
-| | |
-|---|---|
-| **GitHub** | [github.com/walidnegm/conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner) |
-| **Import** | `conjecture_behaviour_runner` |
-| **Spec** | [`docs/SPEC.md`](docs/SPEC.md) (**CBR-SPEC**) |
-| **Agent guide** | [`AGENTS.md`](AGENTS.md) |
-| **Inspiration / pattern** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
+MIT · Alpha **0.1.4** · [Bot0.ai](https://bot0.ai)
 
 ---
 
-## Watch the bar turn red (start here)
-
-This is the point in one demo: a tiny real chat app, three planted bugs.  
-The replies can still look fine. **Conjecture goes red.**
+## 30-second start
 
 ```bash
 git clone https://github.com/walidnegm/conjecture-behaviour-runner.git
 cd conjecture-behaviour-runner
 pip install -e ".[dev]"
-python examples/e2e_multi_turn.py
-# or: conjecture path-faithful --prove-bugs
+
+# Browser UI — story, healthy run, planted bugs
+conjecture ui
+# → http://127.0.0.1:8765
+
+# Or CLI only
+conjecture path-faithful --prove-bugs
 ```
 
-| Run | Result | What broke (state law) |
-|-----|--------|-------------------------|
-| Healthy continue | **PASS** | Mid-flight contracts hold under freeze |
-| Continue steals to front door | **FAIL** | Dual owner — reply can still look fine |
-| Continue drops `workflow_id` | **FAIL** | Lost entity pin |
-| Continue wipes the task | **FAIL** | Illegal restart mid-flight |
+### Minimal code (this is the whole public model)
 
-That demo is the value prop. Ontology and vision live in the [spec](docs/SPEC.md).
+```python
+from conjecture_behaviour_runner import (
+    ConjectureScript, DialogueTurn, InvariantSpec, CognitionPin,
+    run_script, LlmMode,
+)
+from conjecture_behaviour_runner.path_faithful import MiniAppAdapter, MiniChatApp
 
----
-
-## What this is (plain, then precise)
-
-### In one breath
-
-You write a short multi-turn story (“start a cost-out, then continue”) and list **what must
-still be true** after each step (same owner, same workflow id, no illegal restart).  
-Conjecture **runs that story** against your app (or our mini demo), **freezes** the fuzzy AI
-labels for the test, and **fails the build** if the machine state is wrong — not if the
-sentence wording changed.
-
-### Claim layers (for docs / agents — do not invert)
-
-| Layer | Plain English | Precise wording |
-|-------|---------------|-----------------|
-| **1. Face** | Catch silent multi-turn state bugs in CI | Freeze-safe regression gates for control-plane state law |
-| **2. Technical** | Test the conversation **rules**, not the essay quality, with fixed AI labels | Contract testing: behavioral envelopes over authoritative state under pin/freeze |
-| **3. Architecture** | For apps built like a [control plane](https://github.com/walidnegm/conversation-control-plane) (one owner, locked records, clear start/finish) | Conformance under probabilistic cognition — CCP-shaped + real Act only |
-
-Normative hierarchy: [CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative).
-
-| Today (backed by code) | Not today (vision / roadmap) |
-|------------------------|------------------------------|
-| Path-faithful mini-app + planted bugs | Emergent bug *discovery* under free live classify→route→tools |
-| Goldens: Script + verifier kinds + freeze | Full multi-runner “behaviour platform” |
-| Portable kinds for **CCP-shaped** hosts | First-party LangGraph/Crew packages as turnkey products |
-| Optional CCP stream unit goldens | Generation / shrink / N-run hold-rate dashboards |
-
-**First adopter:** dogfood for [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
-and hosts that **follow the same format** (single-writer ownership, pins, sole-continue /
-terminal discipline). That pattern is the **inspiration and primary application** —
-not “every chatbot.”
-
----
-
-## Why it exists
-
-### Silent failure (the problem)
-
-LLM evaluators and screenshot tests score **prose**. Multi-turn systems fail in **state**:
-
-- A detour or ambient question **hijacks** a locked workflow mid-approval  
-- A sub-agent **drops** an entity lock while the reply stays polite  
-- A terminal task is **illicitly re-activated** by a later message  
-- Two writers claim the turn (**dual owner**) after a handoff  
-
-The reply can still look fine. Conjecture locks onto **deterministic state enforcement**.
-
-### CI-friendly determinism
-
-| Layer | Who owns it |
-|-------|-------------|
-| Probabilistic cognition (intent / route labels) | **Pinned or frozen** for the golden |
-| State transitions + pass/fail | **Code** — adapter observation + verifier |
-
-Teams get **fast, cheap, repeatable** regression in GitHub Actions without paying for
-thousands of live LLM calls on every PR.
-
----
-
-## Where it is most useful
-
-```text
-                    [ High stakes / transactional ]
-                    FinTech · supply chain · healthcare · ops ledgers
-                                  ▲
-                                  │   ◄── Conjecture sweet spot
-                                  │       (state enforcement)
-                                  │
-[ Low stakes / creative ] ────────┼──────────► [ Exploratory / open chat ]
- Marketing copy · drafts          │            General Q&A bots
-                                  ▼
+script = ConjectureScript(
+    script_id="demo",
+    description="continue keeps owner and pin",
+    conversation_id="conv_1",
+    turns=[
+        DialogueTurn(
+            user_text="cost out the onboarding workflow",
+            pin=CognitionPin(task_intent="new_task", read_kind="cost_out"),
+            invariants=[
+                InvariantSpec(kind="exclusive_owner", expected="cost_out"),
+                InvariantSpec(kind="pin_present", expected="workflow_id"),
+            ],
+        ),
+        DialogueTurn(
+            user_text="make the volume 10k",
+            pin=CognitionPin(task_intent="continue"),
+            invariants=[
+                InvariantSpec(kind="exclusive_owner", expected="cost_out"),
+                InvariantSpec(
+                    kind="pin_equals",
+                    expected={"key": "workflow_id", "value": "wf_1"},
+                ),
+            ],
+        ),
+    ],
+)
+result = run_script(
+    script,
+    adapter=MiniAppAdapter(MiniChatApp()),  # your Driver
+    llm_mode=LlmMode.STUB,
+)
+assert result.passed
 ```
 
-**Sweet spot:** engineering teams building **transactional, high-stakes** multi-turn agents
-that already (or will) model **turn ownership, entity pins, and terminal states**.
-
-**High-utility scenarios:**
-
-| Scenario | What you pin |
-|----------|----------------|
-| **Context & entity locking** | Mid sensitive workflow (e.g. $10k invoice approval), ambient chat must **not** change `invoice_id` / workflow pin |
-| **State-machine compliance** | Terminal task must not be illicitly re-activated; no mutate-after-complete |
-| **Handoff integrity** | Agent A → Agent B: exclusive owner shifts safely — **no dual writer** |
-
-**Apt for Conjecture:** apps that follow a **control-plane format** like the
-[Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
-(or an isomorphic ledger: single writer, pins, mid-flight vs front door, terminals).  
-**Not apt:** pure creative chat with no authoritative mid-flight state to protect.
-
-LangGraph / Crew / Temporal hosts fit **when** they project that shape into
-`TurnObservation` — the orchestrator is a **Driver surface**, not a free pass to use
-the vocabulary without modeling ownership and pins.
+Five concepts: **Script · Turn · Driver · Observation · Invariant**.  
+Deeper model (Scenario, ODD, multi-runner, Verdict) lives in
+[`docs/SPEC.md`](docs/SPEC.md) — **not required to contribute**.
 
 ---
 
-## Why we build this (not another eval platform)
+## Watch the bar turn red
 
-**2026 landscape (honest):** the big tools dominate *eval everything* — multi-turn
-traces, LLM-as-judge, tool-order scores, red-team sims, observability
-(LangSmith, DeepEval, Phoenix, Braintrust, Promptfoo, Galileo, Confident AI, …).
-Execution shells (Playwright, Cucumber) and general property testing (Hypothesis)
-exist. Searches for *conversation control-plane testing*, *ownership invariants*,
-*pin stability regression*, *freeze-safe terminal compliance* do **not** turn up a
-product in this lane.
+In-repo mini-app with a real `handle()` and three planted bugs:
 
-**Nobody owns this pain:** *the reply sounded fine, but we silently lost the locked
-workflow / dual-wrote / restarted completed work.*
-
-| Aspect | Typical eval / obs stack | Conjecture |
-|--------|--------------------------|------------|
-| Multi-turn trajectories | Full traces, goal scores | Evidence only — not the green bar |
-| LLM-as-judge / prose quality | Core product | **Out of scope** |
-| Deterministic CI | Often live model + flake | **Pin / freeze** → cheap, identical every PR |
-| State law (owner, pin, terminal) | Custom one-offs if at all | **Core** portable kinds |
-| “Looks fine but broken” | Rare primary claim | **Hero** |
-
-**Redundancy check:**
-
-- Happy with LangSmith + a few judges for “did it mostly do the right thing?” →
-  Conjecture is **alongside**, not a replacement: the **cheap CI gate** for state law.
-- Ever shipped a bug where the **chat log looked perfect** and the **ledger was wrong** →
-  that is the tool. Quality platforms catch quality; Conjecture gates **scaffolding law**.
-
-**Worth it?** For high-stakes / transactional agents with authoritative mid-flight state —
-**yes**. For pure creative chat, simple RAG, or “grade the essay” — **no** (use eval stacks).
-
-We refuse to become “yet another eval platform.” Related work detail: [CBR-SPEC](docs/SPEC.md).
-
----
-
-## Critical trap — do not become a chat validator
-
-| Do | Do not |
-|----|--------|
-| Assert owner, pin, terminal, legal landing | Assert prose style, tone, “good answer” |
-| Freeze cognition for CI | Require live LLM on every PR |
-| Fail closed on unknown kinds | Soft-pass “looks mostly fine” |
-
-If you use Conjecture to grade adjectives, the framework will feel **restrictive, clunky,
-and brittle**. That is out of scope by design.
-
-**Winning pitch:** *AI agents are software systems that must obey laws — not creative
-writing projects that only need a quality score.*
-
----
-
-## How FAIL is decided
-
-After each turn: **Act** → `TurnObservation` (authoritative projection) → **Verifier**
-checks the golden’s expected contracts.
-
-`passed = (failures == [])`. Unknown kinds fail closed.  
-Not a model score. See [CBR-SPEC §4.1](docs/SPEC.md#41-script-structure-slice-0--multi-turn-design).
-
----
-
-## Examples (same sole-continue path)
-
-| Shape | File |
-|-------|------|
-| **E2E (hero)** | [`examples/e2e_multi_turn.py`](examples/e2e_multi_turn.py) |
-| **Script golden** | [`examples/trajectory_authored_sole_continue.json`](examples/trajectory_authored_sole_continue.json) |
-| **Observed PASS / FAIL** | [`trajectory_observed_pass.json`](examples/trajectory_observed_pass.json) · [`…_fail_dual_owner.json`](examples/trajectory_observed_fail_dual_owner.json) |
-| **Scenario** (experimental description) | [`scenario_sole_continue.yaml`](examples/scenario_sole_continue.yaml) · [`scenario_compile_and_run.py`](examples/scenario_compile_and_run.py) |
-| **CCP unit goldens** | [`control_plane_goldens.py`](examples/control_plane_goldens.py) (`pip install -e ".[control-plane]"`) |
-
-Face vocabulary for day-to-day work: **golden (Script) · run · verifier**.  
-Richer names (Scenario, multi-runner, seeds) are in the [spec](docs/SPEC.md) — not required to get value.
-
----
-
-## What ships (0.1.3)
-
-| **Do this today** | Status |
-|-------------------|--------|
-| Path-faithful mini-app + planted bugs | ✅ |
-| Script + freeze/stub + standard + temporal verifiers | ✅ |
-| CLI (`conjecture run`, `path-faithful`, JSON/JUnit) | ✅ |
-| Optional CCP stream goldens | ✅ |
-
-| **Useful scaffolding** | Status |
-|------------------------|--------|
-| Scenario models + compile bridge | ✅ experimental |
-| Agent prompt seed / AGENTS.md | ✅ |
-
-| **Vision (not the value prop yet)** | Status |
-|-------------------------------------|--------|
-| First-party LangGraph/Crew/Temporal packages | ⬜ |
-| Generation / shrink / N-run distributions | ⬜ |
-| Non-toy Driver on a production host (e.g. full chat path) | ⬜ next dogfood |
-
----
-
-## Quickstart
+| Run | Result | What broke |
+|-----|--------|------------|
+| Healthy continue | **PASS** | Mid-flight owner + pin hold |
+| Dual owner | **FAIL** | Steal to front door — reply can still look fine |
+| Drop pin | **FAIL** | Lost `workflow_id` |
+| Illegal restart | **FAIL** | Task wiped mid-flight |
 
 ```bash
-pip install -e ".[dev]"
-pytest tests/ -q
-python examples/e2e_multi_turn.py
+conjecture path-faithful --prove-bugs
+# or: conjecture ui  →  “Prove planted bugs”
 ```
-
-Host integration: implement `ControlPlaneAdapter` / `BaseControlPlaneAdapter` (project
-your ledger → `TurnObservation`), or start from `path_faithful.MiniAppAdapter` /
-`contrib.control_plane.ControlPlaneStreamAdapter`. Details: [`AGENTS.md`](AGENTS.md).
 
 ---
 
-## Contribute · Verdict
+## Why this is not another eval platform
 
-**MIT:** portable drivers, providers, kinds, docs — no host-private goldens.  
-**Verdict** (commercial, optional): hosted/studio/SSO — may diverge; does not block OSS.  
-Maps: [CBR-SPEC §8](docs/SPEC.md#8-contributions-verdict-and-foundational-ideas).
+LangSmith / DeepEval / Phoenix / etc. own **traces and LLM-as-judge**.  
+Nobody owns: *“the reply sounded fine but we lost the locked workflow / dual-wrote /
+restarted completed work.”*
 
-Copyright © Bot0.ai / contributors. MIT.
+Use Conjecture **alongside** quality tools as the **cheap state-law CI gate** — not as a
+replacement for trajectory scoring. Best fit: high-stakes multi-turn systems with
+ownership + pins (see [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
+as inspiration). Skip pure creative chat with no authoritative mid-flight state.
+
+---
+
+## Local UI (OSS)
+
+```bash
+conjecture ui --port 8765
+```
+
+Stdlib HTTP server (no Flask). Shows the planned story, healthy timeline
+(must-hold vs measured), and planted-bug proof cards.
+
+*(Bot0 monorepo also has a superadmin console at `/account/admin/conjecture` for
+in-product dogfood — same idea, host-specific.)*
+
+---
+
+## Contribute
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** — contribution matrix, contributor-sized
+issues, and what *not* to ask first-time contributors to build.
+
+**Highest-leverage next community package:** generic **HTTP/JSON Driver + Observer**
+(configure endpoint + JSON paths for owner/pins) so hosts need not implement Python
+protocols first.
+
+| Help wanted | Status |
+|-------------|--------|
+| HTTP driver / observer | Planned |
+| LangGraph · Temporal · OpenAI Agents · Playwright | Needed |
+| Example packs with planted bugs | Needed |
+
+---
+
+## Docs map
+
+| Start here | Deeper |
+|------------|--------|
+| This README | [docs/SPEC.md](docs/SPEC.md) architecture |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | [AGENTS.md](AGENTS.md) host adapter notes |
+| `conjecture ui` | [examples/](examples/) |
+
+---
+
+## License
+
+MIT · Copyright © Bot0.ai / contributors.

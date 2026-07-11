@@ -216,8 +216,64 @@ def sole_continue_script() -> ConjectureScript:
     )
 
 
+def sole_continue_story() -> dict[str, Any]:
+    """Plain-English story for UI / docs (planned turns + must-hold)."""
+    return {
+        "title": "What this golden tests",
+        "why": (
+            "We are not grading chat prose. We check whether mid-flight cost-out "
+            "keeps the right owner and locked workflow — even when a message looks "
+            "like ordinary chat."
+        ),
+        "plot": (
+            "User starts cost-out on a workflow, then continues with a volume change. "
+            "Owner must stay cost_out and workflow_id must stay pinned."
+        ),
+        "what_green_means": (
+            "PASS = measured owner/pin/blocks match the rules after each turn. "
+            "FAIL = a rule broke even if a reply could still look fine."
+        ),
+        "turns": [
+            {
+                "index": 0,
+                "user_says": "cost out the onboarding workflow",
+                "story": "Turn 0: start cost-out and bind a workflow pin.",
+                "must_hold": [
+                    "Owner is cost_out",
+                    "workflow_id pin is present",
+                    "Landing in continue_owned",
+                ],
+            },
+            {
+                "index": 1,
+                "user_says": "make the volume 10k",
+                "story": "Turn 1: continue mid-flight — must not steal owner or drop pin.",
+                "must_hold": [
+                    "Owner is still cost_out",
+                    "workflow_id still equals wf_1",
+                    "blocks_resolve stays true",
+                ],
+            },
+        ],
+        "planted_bugs": [
+            {
+                "id": "dual_owner",
+                "plain": "Continue steals to front_door (dual owner)",
+            },
+            {
+                "id": "drop_pin",
+                "plain": "Continue drops workflow_id",
+            },
+            {
+                "id": "illegal_restart",
+                "plain": "Continue wipes the active task",
+            },
+        ],
+    }
+
+
 def run_path_faithful_demo(*, bug: Optional[str] = None) -> dict[str, Any]:
-    """Run sole-continue golden against mini-app; return result dict."""
+    """Run sole-continue golden against mini-app; return result dict for UI/CLI."""
     from conjecture_behaviour_runner.harness import run_script
     from conjecture_behaviour_runner.modes import LlmMode
 
@@ -225,12 +281,38 @@ def run_path_faithful_demo(*, bug: Optional[str] = None) -> dict[str, Any]:
     adapter = MiniAppAdapter(app)
     script = sole_continue_script()
     result = run_script(script, adapter=adapter, llm_mode=LlmMode.STUB)
+    story = sole_continue_story()
+    # Merge planned must_hold into observed turns for the UI timeline.
+    planned = {t["index"]: t for t in story["turns"]}
+    turns_out: list[dict[str, Any]] = []
+    for tr in result.turn_results:
+        idx = int(tr.get("index", 0))
+        plan = planned.get(idx) or {}
+        obs = tr.get("observation") or {}
+        turns_out.append(
+            {
+                "index": idx,
+                "user_text": tr.get("user_text"),
+                "story": plan.get("story"),
+                "must_hold": plan.get("must_hold") or [],
+                "passed": not (tr.get("failures") or []),
+                "failures": list(tr.get("failures") or []),
+                "exclusive_owner": obs.get("exclusive_owner"),
+                "active_kind": obs.get("active_kind"),
+                "pins": dict(obs.get("pins") or {}),
+                "observed_outcome": obs.get("observed_outcome"),
+                "extras": dict(obs.get("extras") or {}),
+            }
+        )
     return {
         "bug": bug,
         "passed": result.passed,
         "failures": list(result.failures),
         "script_id": result.script_id,
         "messages": list(app.messages),
+        "story": story,
+        "turns": turns_out,
+        "result": result.to_dict(),
     }
 
 
@@ -245,6 +327,13 @@ def prove_planted_bugs() -> dict[str, Any]:
         "dual_owner_caught": not dual["passed"],
         "drop_pin_caught": not drop["passed"],
         "illegal_restart_caught": not restart["passed"],
+        "helpful": (
+            clean["passed"]
+            and (not dual["passed"])
+            and (not drop["passed"])
+            and (not restart["passed"])
+        ),
+        "story": sole_continue_story(),
         "details": {
             "clean": clean,
             "dual_owner": dual,

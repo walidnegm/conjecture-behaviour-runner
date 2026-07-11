@@ -6,17 +6,106 @@
 | **Document ID** | `CBR-SPEC` |
 | **Canonical path** | [`docs/SPEC.md`](./SPEC.md) |
 | **Title** | Conjecture Behaviour Runner Specification |
-| **Version** | **0.1.1** (alpha) |
+| **Version** | **0.1.2** (alpha) — positioning finalized |
 | **Status** | **Active** — authoritative for IR, pipeline, verifier, scope; foundations ship |
 | **Audience** | Integrators, contributors, agent authors of goldens |
 | **Companion face** | [README](../README.md) — wedge, quickstart, plain-English script language |
-| **One-liner** | Contract testing for the conversational control plane — behavioral envelopes over authoritative state under pinned or replayed cognition |
+| **One-liner (locked)** | Contract testing for the conversational control plane — behavioral envelopes over authoritative state under pinned or replayed cognition |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Reference domain** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) |
 
 **What “Specification” means here:** this document is the **normative source of truth** for
 behaviour, contracts, and extension points. Code implements it; the README popularizes it.
 It is **not** a marketing brief, ADR log, or epic backlog (those live elsewhere).
+
+---
+
+## 0. Finalized product claim (normative)
+
+This section freezes the market/architecture decisions from design review. Later
+slices implement; they do not redefine the wedge without a SPEC version bump.
+
+### One-liner (locked)
+
+> **Contract testing for the conversational control plane** —  
+> **behavioral envelopes** (allowed outcomes + invariants) over **authoritative state**,  
+> under **pinned or replayed cognition**.
+
+Not “one golden sentence.” Not a new universal testing paradigm.  
+**Wedge:** authoritative **control-plane conformance** under probabilistic cognition.
+
+### What we test (and what we do not)
+
+| We test | We do **not** primarily test |
+|---|---|
+| **Control-plane law:** exclusive owner, active kind, entity pins, mid-flight vs front door, detours, terminals, blocks_resolve / no illegal restart | Model wording quality, preference scores, leaderboards |
+| **Behavioral envelopes:** legal landings + state that must hold | Single ideal trajectory only |
+| **Ground truth on state:** expected outcomes + invariants (required for CI goldens) | Hypothesis-only scripts with no expected result |
+| Optional later: domain facts *if* projected into observation + verifier kinds | Built-in full domain sim / world model |
+
+**Default product scope = multi-turn control-plane contracts.**  
+The *shape* (IR + runner + verifier over projected state) can host more, but we do not
+market “test the whole agent” until domain ground truth is first-class.
+
+### Product = three cores (locked)
+
+| Core | Name | Role |
+|---|---|---|
+| **IR** | `ConjectureScript` | Portable contract language (path + **expected** state) |
+| **Runner** | `run_script` / CLI | Execute under pin/freeze; drive Act/Observe |
+| **Verifier** | invariants + temporal | Judge pass/fail (not “Oracle Corp”; not commercial **Verdict**) |
+
+Without runner + verifier in-tree, Conjecture is only a scenario **format**. That is rejected.
+
+### Orchestration engines (LangGraph, Crew, Temporal, …)
+
+**Compose — do not replace.** Engines orchestrate; Conjecture gates law.
+
+```text
+  LangGraph / CrewAI / Temporal / custom FSM / …
+              │  owns graph, agents, workflows, activities
+              ▼
+     Driver + Observer adapter  ──►  Conjecture runner + verifier
+              │                              ▲
+              ▼                              │
+        app / tools / ledger          freeze + expected contracts
+```
+
+| Engine | Typical fit |
+|---|---|
+| **LangGraph** | Driver: invoke/stream graph; Observer: checkpoint / thread state → owner, pins, outcome |
+| **CrewAI / multi-agent** | Agent→agent turns; exclusive owner; pin across handoff; no dual writer |
+| **Temporal** | System/completion turns; job done / cancel / timeout; no mutate-after-terminal |
+| **Others** | Same adapter pattern: project runtime state → `TurnObservation` |
+
+Shipping first-party packages for each engine is **roadmap**; the **extension contract** is finalized.
+
+### Peers and plugins (locked)
+
+| Kind | Examples | Relationship |
+|---|---|---|
+| **Peer (sim / data)** | Collinear-class | They explore / score paths; we bind **ground truth on state** and CI-gate |
+| **Plugin (driver)** | Playwright, HTTP, SSE, LangGraph, Temporal | Called *by* our runner |
+| **Host (process)** | pytest, CI, JUnit | Invokes `conjecture run` — not the verifier |
+| **Parallel (eval)** | LangSmith, Braintrust, … | Trajectory **scores**; not a substitute for state contracts |
+| **Commercial (optional)** | **Verdict** | Hosted/faster/different product surface; may use or reimplement cores |
+
+### Ground truth (required for helpful goldens)
+
+A CI golden is a **probe + expected result**, not a hypothesis sketch:
+
+- **Expected:** `allowed_outcomes` and/or invariants (step and/or trajectory)  
+- **Optional later:** observation snapshot, terminal bucket, domain asserts  
+- **Exploratory** scripts (no expected) must not gate merge  
+
+Authoring (human or agent) must emit expected contracts against the schema.
+
+### What “green” means
+
+| Green means | Green does **not** mean |
+|---|---|
+| Declared control-plane (and any projected) contracts held under pinned/frozen cognition | The model’s prose was good |
+| Verifier passed on observations from the host adapter | Every orchestration edge was exhaustively explored |
 
 ### Doc balance (README vs this Specification)
 
@@ -241,7 +330,7 @@ scenario schema — useful YAML, not a product. **The project is three co-equal 
 |---|---|---|
 | **IR** | Portable contract language (`ConjectureScript`, scope, pins) | `script.py`, JSON/YAML load, schema surface for agents |
 | **Runner** | Execute a script under pinned/frozen cognition; drive Act/Observe | `run_script`, `CognitionProvider` + freeze store, CLI `conjecture run` |
-| **Verifier** | Verdict on authoritative state (not reply quality) | `invariants.py`, `temporal.py`, outcome-specific sets, fail-closed kinds |
+| **Verifier** | Pass/fail on authoritative state (not reply quality) | `invariants.py`, `temporal.py`, outcome-specific sets, fail-closed kinds |
 
 ```text
                     ┌──────────────────────────────────────────┐
@@ -278,7 +367,7 @@ If someone only publishes the schema and runs checks in ad-hoc pytest, they have
 
 | Extension | Responsibility | Examples |
 |---|---|---|
-| **Driver** | Act on the actual system (**plugin**; runner owns the loop) | HTTP, SSE, WebSocket, Playwright, in-process, Temporal, LangGraph |
+| **Driver** | Act on the actual system (**plugin**; runner owns the loop) | HTTP, SSE, WebSocket, Playwright, in-process, **LangGraph**, **Crew**, **Temporal**, … |
 | **Observer** | Authoritative evidence | messages, routing, tool I/O, ledger, ownership, terminals, DB, events |
 | **Cognition provider** | Probabilistic interpretation (**ours**: stub/freeze/record; host: local/cloud) | freeze store, record artifacts, host classifiers |
 | **Verifier** | Evaluate envelopes (**ours**, not optional glue) | step asserts, trajectory/temporal invariants, allowed outcomes |
@@ -304,8 +393,8 @@ where applicable, raw + parsed output, validation evidence. **Mode labels alone 
 |---|---|---|
 | **0** | Script model, pin-driven harness, standard invariants, optional CCP goldens | ✅ |
 | **0.1.1 foundations** | `CognitionProvider` + freeze/record disk store; trajectory + outcome-specific verifiers; `compile_scenario_to_script` + `run_result_to_trajectory`; CLI `run` / `path-faithful` / JSON+JUnit; **MiniChatApp** path-faithful Act + three planted bugs | ✅ landed (thin but real) |
-| **1 next** | Host HTTP/SSE/Playwright drivers; live freeze from real classifiers; agent **script synthesizer** (spec→JSON golden) | open |
-| **2** | Richer temporal ops; generation + shrink; production runner (shards, retries, timeouts) | open |
+| **1 next** | Host HTTP/SSE/Playwright drivers; **LangGraph / Temporal / Crew adapters**; agent **script synthesizer** (spec→JSON with required expected); fail closed if golden has no expected | open |
+| **2** | Richer temporal ops; observation/domain ground truth; generation + shrink; production runner (shards, retries) | open |
 | **3** | ODD-driven corpus / explorer / N-run **contract hold-rate** distributions | open |
 
 ### 0.1.1 module map

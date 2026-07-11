@@ -13,8 +13,21 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 |---|---|
 | **GitHub** | [github.com/walidnegm/conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner) |
 | **Import** | `conjecture_behaviour_runner` |
-| **Specification (`CBR-SPEC`)** | [docs/SPEC.md](docs/SPEC.md) — full design, IR, Collinear, contributions |
-| **License** | MIT · **Status** | Alpha — 0.1.1 |
+| **Specification (`CBR-SPEC`)** | [docs/SPEC.md](docs/SPEC.md) — **§0 finalized claim** · architecture · integrations |
+| **License** | MIT · **Status** | Alpha — 0.1.2 (positioning finalized) |
+
+### Finalized claim (short)
+
+| | |
+|--|--|
+| **Product** | **IR + runner + verifier** (not a scenario schema alone) |
+| **What scenarios assert** | Control-plane **ground truth**: owner, pins, legal landings, mid-flight law — under freeze |
+| **What they are not** | Model quality tests, Collinear-style sim worlds, “hypothesis with no expected result” |
+| **Orchestrators** | **LangGraph · Crew · Temporal · …** orchestrate; Conjecture is a **Driver/Observer** peer that **gates state law** (adapters roadmap; contract finalized) |
+| **Collinear-class** | Peer for exploration/data; we bind expected state and CI-gate |
+| **Commercial** | Optional **Verdict** (hosted / faster / different) — separate from OSS |
+
+Normative detail: **[CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)**.
 
 ### How to read the docs
 
@@ -48,21 +61,21 @@ with frozen/sampled cognition** is the defensible framing.
 ### Positioning (compose with existing tools — do not replace them)
 
 ```text
-  Conjecture scenario + verifier (behavioral envelope)
+  Conjecture IR + runner + verifier
              ↓
-  Driver: Playwright / HTTP / SSE / WebSocket / in-process / …
+  Driver: Playwright / HTTP / SSE / LangGraph / Temporal / Crew / in-process / …
              ↓
-  Real application + Observer (ledger, tools, events)
+  Real application + Observer (ledger, graph state, workflow status, …)
 ```
 
-| Related work | What it is | How Conjecture relates |
-|--------------|------------|-------------------------|
-| **Playwright** | Full execution substrate (assertions, fixtures, traces, isolation, …) | **Driver candidate**, not a straw-man “fixed DOM text” tool. We do **not** rebuild Playwright’s runner. |
-| **Cucumber / Gherkin** | Readable scenarios bound to **arbitrary** step code (DB, API, state — not only strings) | Scenario *language* + bindings. Conjecture is specialized **agent/control-plane semantics**; a Cucumber integration is possible later, not a claim that Cucumber = exact output. |
-| **Hypothesis stateful** | Action sequences + preconditions + invariants + **shrinking** to minimal fail | **Closest methodological analogue.** Slice 0 is hand-authored transitions; generation + shrink is roadmap, not claimed done. |
-| **Eval platforms** (LangSmith, Braintrust, DeepEval, Promptfoo, Inspect, Phoenix, …) | Multi-turn sims, traces, tool paths, custom scorers — often **score observed trajectories** | We narrow to: **all acceptable trajectories preserve explicit authoritative-state contracts** (ownership, pins, terminals). Overlap exists; “they only score text” is outdated. |
-| **Collinear-class sim labs** | Simulated users/worlds, multi-turn data, verifiers, rubrics | Stronger on **simulation & data**. Our wedge today: **deterministic conformance of app control plane** when cognition is pinned/replayed — not “unrelated.” |
-| **CARLA / Scenic** | Real scenario runtime in a simulated world + generators | **Aspiration** for generation/ODD later — **not** what ships today (no world model, scheduler, minimizer). |
+| Related work | How Conjecture relates |
+|--------------|-------------------------|
+| **LangGraph / Crew / Temporal** | **Orchestration hosts** — they run the graph/agents/workflows; we gate control-plane (and projected) contracts via Driver/Observer adapters |
+| **Playwright / HTTP / SSE** | **Driver plugins** — not the product |
+| **Collinear-class sim** | **Peer** for path exploration/data; we require **expected state** and CI-gate |
+| **Eval platforms** | Parallel **scores**; we gate **state law** under pin/freeze |
+| **Hypothesis stateful** | Closest *method* analogue (actions + invariants; shrink later) |
+| **Cucumber** | Readable scenarios + bindings; we specialize agent/control-plane envelopes |
 
 **Tight one-liners we prefer:**
 
@@ -126,7 +139,7 @@ We verify **authoritative-state contracts** under pinned/frozen cognition.
 
 | Point | Role (0.1.1) |
 |-------|----------------|
-| **Driver** | Act on the system (mini-app + CCP adapter; HTTP/Playwright open) |
+| **Driver** | Act on the system (mini-app + CCP; HTTP/Playwright/LangGraph/Temporal adapters open) |
 | **Observer** | `TurnObservation` (owner, pins, extras, outcome) |
 | **Cognition** | Stub + FreezeStore record/replay; local/cloud host-supplied |
 | **Verifier** | Step + outcome-specific + trajectory kinds |
@@ -372,8 +385,8 @@ More: [docs/SPEC.md](docs/SPEC.md) ·
 | Horizon | Intent |
 |---------|--------|
 | **Defensible wedge** | Control-plane conformance under pinned/replayed cognition |
-| **0.1.1 foundations** | CognitionProvider + freeze/record store · temporal + outcome-specific verifiers · Scenario→script→Trajectory bridge · CLI `run` / JSON+JUnit · **path-faithful mini-app** + planted-bug proof |
-| **Still open** | Host HTTP/SSE/Playwright drivers · full CognitionProvider for local/cloud models · richer temporal ops · generation/shrink · agent script-synthesizer · production-scale CLI (shards/retries) |
+| **0.1.2** | Positioning **finalized** ([CBR-SPEC §0](docs/SPEC.md#0-finalized-product-claim-normative)) · 0.1.1 foundations ship |
+| **Still open** | LangGraph/Crew/Temporal adapters · HTTP/Playwright drivers · agent synthesizer with **required expected** · domain ground truth · shrink · production CLI |
 
 ### Quick: path-faithful credibility demo
 

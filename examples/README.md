@@ -13,7 +13,7 @@ python examples/e2e_multi_turn.py
 | **`e2e_multi_turn.py`** | **Upfront demo** — conversation → MiniChatApp Act → verifier PASS/FAIL |
 | `minimal_script.py` | Null-adapter smoke (`always_true`) |
 | `control_plane_goldens.py` | CCP adapter goldens (`pip install -e ".[control-plane]"`) |
-| `sole_continue_golden.json` / `.yaml` | Portable sole-continue IR (load with `load_script_*`) |
+| `sole_continue_golden.json` / `.yaml` | Portable sole-continue Script (load with `load_script_*`) |
 
 Host-private goldens stay in your application repository; these examples are contract demos only.
 

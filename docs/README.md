@@ -7,6 +7,6 @@
 
 - **§0** finalized product claim (green bar, cores, orchestrators, ground truth)  
 - **§2–3** architecture + implementation module map  
-- **§4.1** IR field tables  
+- **§4.1** Script field tables  
 
 Legacy URL `conjecture-behaviour-runner.md` → redirects to [SPEC.md](./SPEC.md).

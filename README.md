@@ -15,7 +15,7 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 | **Import** | `conjecture_behaviour_runner` |
 | **Implementation spec** | [`docs/SPEC.md`](docs/SPEC.md) — **CBR-SPEC** (normative) |
 | **Agent coder guide** | [`AGENTS.md`](AGENTS.md) — integrate host; agent output **is** the golden |
-| **Prompt seed** | [`prompts/conjecture_script_author.seed.md`](prompts/conjecture_script_author.seed.md) — emit runnable IR, not a test plan |
+| **Prompt seed** | [`prompts/conjecture_script_author.seed.md`](prompts/conjecture_script_author.seed.md) — emit runnable Script, not a test plan |
 | **License** | MIT · **Status** | Alpha **0.1.2** |
 
 ### How to read the docs
@@ -23,7 +23,7 @@ Built by [Bot0.ai](https://bot0.ai). MIT open source.
 | Doc | Type | Role |
 |-----|------|------|
 | **This README** | Project face | Why, E2E demo, script language, quickstart |
-| **[CBR-SPEC](docs/SPEC.md)** | **Specification** | Normative claim, architecture, IR, ecosystem |
+| **[CBR-SPEC](docs/SPEC.md)** | **Specification** | Normative claim, architecture, Scenario/Script, ecosystem |
 | **[AGENTS.md](AGENTS.md)** | Agent coder contract | Host adapter checklist, golden rules, workflow |
 | **[Prompt seed](prompts/conjecture_script_author.seed.md)** | LLM/coding-agent prompt | Emit valid `ConjectureScript` JSON with expected state |
 
@@ -301,13 +301,14 @@ Adapters map **your** host (ledger, graph state, workflow status) into `TurnObse
 
 | Area | Status |
 |------|--------|
-| IR (`ConjectureScript`, scope, load JSON/YAML) | ✅ |
+| Conjecture Scenario (`experimental/Scenario`, schema) | ✅ experimental |
+| Conjecture Script (`ConjectureScript`, scope, load JSON/YAML) | ✅ stable |
 | Runner (`run_script`, CognitionProvider, FreezeStore) | ✅ |
 | Verifier (standard + temporal + outcome-specific) | ✅ |
 | CLI (`conjecture run`, `path-faithful`, JSON/JUnit) | ✅ |
 | Path-faithful mini-app + planted bugs | ✅ |
 | Optional CCP stream goldens | ✅ (`[control-plane]`) |
-| Scenario → script → Trajectory bridge | ✅ experimental |
+| Scenario → Script → observed trajectory bridge | ✅ experimental |
 | LangGraph / Crew / Temporal / HTTP / Playwright adapters | ⬜ roadmap (contract locked) |
 | Agent synthesizer requiring expected | ⬜ roadmap |
 | Domain ground-truth plugins | ⬜ roadmap |

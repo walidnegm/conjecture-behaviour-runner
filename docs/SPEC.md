@@ -7,7 +7,7 @@
 | **Canonical path** | [`docs/SPEC.md`](./SPEC.md) |
 | **Title** | Conjecture Behaviour Runner Specification |
 | **Version** | **0.1.2** (alpha) — claim + implementation surface aligned with code |
-| **Status** | **Active** — authoritative for IR, runner, verifier, scope; foundations ship |
+| **Status** | **Active** — authoritative for Scenario/Script, runner, verifier, scope; foundations ship |
 | **Audience** | Integrators, contributors, agent authors of goldens |
 | **Companion face** | [README](../README.md) — project face (green bar, E2E, script language) |
 | **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
@@ -148,7 +148,7 @@ A CI golden is a **probe + expected result**, not a hypothesis sketch:
 
 Authoring (human or agent) must emit expected contracts against the schema.
 
-**Agent-written IR is the test case.** A coding agent following
+**Agent-written Script is the test case.** A coding agent following
 `prompts/conjecture_script_author.seed.md` should produce the golden file the runner
 executes — not a prose plan that still needs hand translation. Product laws remain
 human-owned; the agent **encodes** them into Conjecture Scenario and/or Script.
@@ -167,7 +167,7 @@ human-owned; the agent **encodes** them into Conjecture Scenario and/or Script.
 | **Document type** | Project face / getting started | **Specification** (normative) |
 | **Job** | Why / how to start / friendly script language | Design, tables, field contracts, scope |
 | **Pipeline · ecosystem · scope** | Short face + links here | **Full** diagrams and extension map |
-| **Script IR** | Intro + kinds + mini story | Field tables, multi-turn patterns, mid-flight state machine, golden JSON |
+| **Conjecture Script** | Intro + kinds + mini story | Field tables, multi-turn patterns, mid-flight state machine, golden JSON |
 | **Contributions / Verdict** | One paragraph + link | **Full** maps and commercial boundary |
 | **On conflict** | Follow **this Specification**; update README |
 
@@ -545,7 +545,7 @@ Same diagram as pipeline above. Pieces map as:
 | Built-in **sim users / worlds** | **Never core** — optional external path seeds only |
 | Proprietary “creative” **execution engine** | **Never core** — thin Driver |
 | Logger-as-product | **Support only** — trajectory = verifier evidence |
-| Agent script synthesizer (spec→IR + expected) | **In scope** (open) |
+| Agent script synthesizer (spec→Script + expected) | **In scope** (open) |
 | Freeze / record / replay | **In scope** (shipped foundation) |
 | Path-faithful HTTP/SSE/Playwright + orchestrator adapters | **In scope** (mini-app done; hosts next) |
 | Generation + shrink | **Later** |
@@ -581,7 +581,8 @@ Normative mapping of **product cores → modules**. If code drifts, fix code or 
 
 | Product core | Primary modules | Public entry |
 |---|---|---|
-| IR | `script.py`, `pins.py` | `ConjectureScript`, `load_script_json` |
+| Conjecture Scenario | `experimental/scenario_models.py`, `schema.json` | `Scenario`, optional `[scenarios]` |
+| Conjecture Script | `script.py`, `pins.py` | `ConjectureScript`, `load_script_json` |
 | Runner | `harness.py`, `cognition.py`, `cli.py` | `run_script`, `conjecture run` |
 | Verifier | `invariants.py`, `temporal.py` | `check_standard_invariant`, trajectory kinds |
 | Host binding | `protocol.py`, `path_faithful.py`, `contrib/*` | `ControlPlaneAdapter` |
@@ -1081,7 +1082,7 @@ MIT: **use, fork, ship** Scenario language + Script + verifier + thin runner(s).
 | **Corpus** | Portable sole-continue / detour / pin-stable goldens | Shared language |
 | **CLI / CI** | Sharding, timeouts, richer JUnit, rerun | Production runner |
 | **Docs & examples** | Adapter tutorials, ODD recipes | First green run |
-| **Schema / IR** | Versioned format, stronger validators | Stable agent surface |
+| **Schema / Script** | Versioned format, stronger validators | Stable agent surface |
 
 **Norms:** one concept per PR; tests for new kinds/providers; fail closed; no host-private
 goldens in this repo; do not reimplement Playwright, sim worlds, or eval platforms in core.

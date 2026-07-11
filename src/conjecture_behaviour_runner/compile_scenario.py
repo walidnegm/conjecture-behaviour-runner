@@ -1,4 +1,4 @@
-"""Compile experimental Scenario IR → ConjectureScript (ExecutionPlan thin form).
+"""Compile Conjecture Scenario → Conjecture Script (ExecutionPlan thin form).
 
 Experimental preconditions/postconditions remain **descriptions** unless the step
 ``payload`` carries executable ``invariants`` / ``pin`` / ``effects`` / ``user_text``.

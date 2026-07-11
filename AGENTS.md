@@ -123,7 +123,7 @@ control plane, then bind **invariants / allowed outcomes** at those landings.
 
 Path without invariants = a tour. Twists **with** invariants = a test.
 
-### Minimal IR shape
+### Minimal Conjecture Script shape
 
 ```json
 {
@@ -172,7 +172,7 @@ any free-form chat about “we should test sole-continue.”
 
 | Agent writes… | Role |
 |---------------|------|
-| Valid IR + **expected** kinds/outcomes | **The test case** (merge-gate input) |
+| Valid Script + **expected** kinds/outcomes | **The test case** (merge-gate input) |
 | Long NL “test plan” prose | Not executable — not the test |
 | Path-only JSON, empty invariants | Sketch only — not a CI gate |
 
@@ -181,7 +181,7 @@ artifact the runner already knows how to run.** The prompt seed exists so the ag
 defaults to that artifact shape.
 
 **Still human/product-owned:** *which* laws (owners, pins, refusals). Agents must not
-invent product rules; they **encode** stated rules into IR. If the law is unknown, ask.
+invent product rules; they **encode** stated rules into a Script. If the law is unknown, ask.
 
 ## 5. Agent coder workflow (recommended)
 
@@ -189,8 +189,8 @@ invent product rules; they **encode** stated rules into IR. If the law is unknow
 1. Read CBR-SPEC §0 (claim) + this AGENTS.md
 2. Read host control-plane / ledger / graph state (what is authoritative)
 3. Pick scenario class + expected laws (product rules, not model vibes)
-4. Use prompts/conjecture_script_author.seed.md to draft ConjectureScript JSON
-   → that JSON *is* the test case once validated
+4. Use prompts/conjecture_script_author.seed.md to draft a Conjecture Script JSON
+   → that Script *is* the test case once validated
 5. Validate: load_script_json / script_from_dict (fail closed on bad shape)
 6. Implement or extend host adapter observe_turn (Act → TurnObservation)
 7. run_script STUB or FREEZE; assert RunResult.passed

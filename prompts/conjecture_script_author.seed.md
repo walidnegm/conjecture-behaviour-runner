@@ -26,7 +26,7 @@ Same mental model: **twists → invariants**; Script is what the current runner 
 Whatever valid `ConjectureScript` JSON you emit is what CI will run. You are not writing
 a plan for someone else to turn into a test later — **you are writing the golden.**
 
-- Prefer short, load-bearing IR over long NL “test plans.”
+- Prefer short, load-bearing Script over long NL “test plans.”
 - Empty invariants = not a test. Expected state is mandatory for gating goldens.
 - Product laws (who owns, which pin) come from the human/host — you encode them; you do not invent them.
 

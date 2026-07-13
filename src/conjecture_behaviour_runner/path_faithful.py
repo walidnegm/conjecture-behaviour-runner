@@ -45,6 +45,8 @@ class MiniChatApp:
       - ``illegal_restart`` — continue clears task (greenfield restart)
       - ``pin_without_open`` — inventory open pins entity id but leaves
         ``blocks_resolve`` false (pin-status only; hollow open)
+      - ``cold_system_suggest_miss`` — cold system-suggest open routes to
+        thin-structure refuse (no sketch); short re-ask forgets domain pin
     """
 
     def __init__(self, *, bug: Optional[str] = None) -> None:
@@ -53,10 +55,12 @@ class MiniChatApp:
         self.bug = bug
         self.ledger = MiniLedger()
         self.messages: list[str] = []
+        self._sketch_produced: bool = False
 
     def reset(self) -> None:
         self.ledger = MiniLedger()
         self.messages.clear()
+        self._sketch_produced = False
 
     def handle(
         self,
@@ -85,6 +89,50 @@ class MiniChatApp:
                 # Pin written; delivery is status-only (no open surface).
                 return self._obs("pin_status_only", blocks_resolve=False)
             return self._obs("inventory_open", blocks_resolve=True)
+
+        # Cold system-suggest open — user asks the system to invent a first
+        # multi-step sketch for a named domain (no process body yet). Portable
+        # law: authoring leaf + sketch_produced, not "structure empty seed".
+        if read_kind == "system_suggest_open":
+            domain = "domain_1"
+            if pin is not None:
+                domain = str(pin.extra("domain_label") or domain)
+            if self.bug == "cold_system_suggest_miss":
+                # Wrong leaf: treat as empty-structure refuse; no sketch, no domain.
+                self.ledger.exclusive_owner = "front_door"
+                self.ledger.active_kind = None
+                self.ledger.phase = ""
+                self._sketch_produced = False
+                return self._obs("thin_structure_refuse", blocks_resolve=False)
+            self.ledger.active_kind = "authoring"
+            self.ledger.exclusive_owner = "authoring"
+            self.ledger.phase = "sketch"
+            self.ledger.pins["domain_label"] = domain
+            self._sketch_produced = True
+            return self._obs("authoring_sketch", blocks_resolve=True)
+
+        # Short re-ask after cold open ("give me something to start with") —
+        # must keep domain pin + authoring owner (history bind), not amnesia.
+        if read_kind == "system_suggest_insist":
+            if self.bug == "cold_system_suggest_miss":
+                self.ledger.exclusive_owner = "front_door"
+                self.ledger.active_kind = None
+                self.ledger.pins.pop("domain_label", None)
+                self._sketch_produced = False
+                return self._obs("front_door_amnesia", blocks_resolve=False)
+            if self.ledger.active_kind == "authoring" or self.ledger.pins.get(
+                "domain_label",
+            ):
+                self.ledger.active_kind = "authoring"
+                self.ledger.exclusive_owner = "authoring"
+                self.ledger.phase = "sketch"
+                if "domain_label" not in self.ledger.pins:
+                    self.ledger.pins["domain_label"] = "domain_1"
+                self._sketch_produced = True
+                return self._obs("authoring_sketch", blocks_resolve=True)
+            # No prior open — front door (cannot invent domain from bare insist).
+            self.ledger.exclusive_owner = "front_door"
+            return self._obs("front_door", blocks_resolve=False)
 
         # Detour supersedes sole-continue (glossary / front-door yield).
         if intent == "detour":
@@ -115,6 +163,7 @@ class MiniChatApp:
                 return self._obs("continue_owned", blocks_resolve=True)
             if self.bug == "illegal_restart":
                 self.ledger = MiniLedger()
+                self._sketch_produced = False
                 return self._obs("front_door", blocks_resolve=False)
             # correct
             self.ledger.exclusive_owner = self.ledger.active_kind
@@ -139,6 +188,7 @@ class MiniChatApp:
             extras={
                 "blocks_resolve": blocks_resolve,
                 "preferred_workflow_id": self.ledger.pins.get("workflow_id"),
+                "sketch_produced": self._sketch_produced,
             },
         )
 

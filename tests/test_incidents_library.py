@@ -18,6 +18,7 @@ PORTABLE_SEEDS: tuple[tuple[str, str | None], ...] = (
     ("drop_pin_mid_continue", "drop_pin"),
     ("illegal_restart_mid_continue", "illegal_restart"),
     ("pin_without_open", "pin_without_open"),
+    ("cold_system_suggest_miss", "cold_system_suggest_miss"),
 )
 
 
@@ -35,10 +36,12 @@ class IncidentLibraryTests(unittest.TestCase):
         self.assertIn("patterns inventory", readme.lower())
         catalog = (INCIDENTS / "CATALOG.md").read_text(encoding="utf-8")
         # Must not pretend four seeds are the only known classes.
-        self.assertIn("Broader failure classes", catalog)
-        self.assertIn("packaging_too_wide", catalog)
-        self.assertIn("missing_state_leaf", catalog)
-        self.assertIn("inventory soft token", catalog.lower())
+        self.assertIn("Broader failure modes", catalog)
+        # Plain failure modes (not only snake_case slugs as “the mode”)
+        self.assertIn("Packaging steal", catalog)
+        self.assertIn("Missing session leaf", catalog)
+        self.assertIn("Hollow open", catalog)
+        self.assertIn("packaging_too_wide", catalog)  # slug still listed as id
 
     def test_catalog_lists_every_pattern_folder(self) -> None:
         catalog = (INCIDENTS / "CATALOG.md").read_text(encoding="utf-8")
@@ -68,7 +71,10 @@ class IncidentLibraryTests(unittest.TestCase):
             if (PATTERNS / slug).is_dir():
                 continue
             # Allow non-folder backticks only if not in index section — require folder
-            if slug.endswith("_continue") or slug == "pin_without_open":
+            if (
+                slug.endswith("_continue")
+                or slug in ("pin_without_open", "cold_system_suggest_miss")
+            ):
                 self.fail(f"CATALOG lists `{slug}` but patterns/{slug}/ missing")
 
     def test_portable_seeds_pass_on_healthy_app(self) -> None:

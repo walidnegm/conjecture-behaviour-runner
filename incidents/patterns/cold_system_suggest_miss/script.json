@@ -1,0 +1,59 @@
+{
+  "script_id": "cold_system_suggest_miss",
+  "description": "Portable seed: cold system-suggest open produces authoring sketch; short re-ask keeps domain pin",
+  "conversation_id": "conv_incident_cold_system_suggest_miss",
+  "scope": {
+    "in_scope": [
+      "cold system-suggest open → authoring leaf",
+      "first sketch produced (sketch_produced)",
+      "short re-ask binds prior domain pin"
+    ],
+    "out_of_scope": [
+      "product vocabulary (workflow/draft wordlists)",
+      "model quality of step prose",
+      "host packaging gap/idea copy"
+    ],
+    "expected_refusal": [
+      "thin-structure refuse on system-suggest open",
+      "front-door amnesia on short re-ask after open"
+    ]
+  },
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "open a multi-step activity for this domain — invent a first structure for me",
+      "pin": {
+        "task_intent": "new_task",
+        "read_kind": "system_suggest_open",
+        "extras": { "domain_label": "domain_1" }
+      },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "authoring" },
+        { "kind": "active_kind", "expected": "authoring" },
+        {
+          "kind": "pin_equals",
+          "expected": { "key": "domain_label", "value": "domain_1" }
+        },
+        { "kind": "extra_true", "expected": "sketch_produced" },
+        { "kind": "extra_true", "expected": "blocks_resolve" }
+      ]
+    },
+    {
+      "actor": "user",
+      "user_text": "you give me something to start with",
+      "pin": {
+        "task_intent": "continue",
+        "read_kind": "system_suggest_insist"
+      },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "authoring" },
+        { "kind": "active_kind", "expected": "authoring" },
+        {
+          "kind": "pin_equals",
+          "expected": { "key": "domain_label", "value": "domain_1" }
+        },
+        { "kind": "extra_true", "expected": "sketch_produced" }
+      ]
+    }
+  ]
+}

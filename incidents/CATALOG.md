@@ -1,81 +1,76 @@
 # Conjecture patterns inventory (incident catalog)
 
-**This file is the public registry of portable failure-class patterns.**  
+**This file is the public registry of portable failure-mode patterns.**  
 It is **not** the full history of every host product bug.
+
+## Vocabulary
+
+| Term | Meaning | Example |
+|------|---------|---------|
+| **Failure mode** | What goes wrong (plain English; industry term) | hollow open · packaging steal |
+| **Slug** | Stable machine **id** only (folders, scripts, greps) | `pin_without_open` |
+| **Class** (if used in a table) | Same as **failure mode** — not the snake_case id |
+
+Snake_case strings like `delivery_order_gap` / `packaging_too_wide` are **slugs**, not mode names.
 
 | Layer | What lives here |
 |-------|-----------------|
-| **Portable seeds** (`patterns/<slug>/` + runnable `script.json` on mini-app) | Adopters can FAIL/PASS without a product host |
-| **Documented classes** (table below, seed pending) | Named laws we track; host may already seal them |
-| **Host product inventory** | Stays in the host application (STEAL table, chat-path scripts, path seals) — **many more rows** than this file |
+| **Portable seeds** (`patterns/<slug>/` + `script.json`) | Runnable without a product host |
+| **Documented failure modes** | Plain-language laws; seed may be pending |
+| **Host product inventory** | Host app STEAL + chat-path scripts — many more rows |
 
-Playbook: [`README.md`](README.md).  
-Vocabulary: seal · slug · pin · open leaf · ratchet (see host lexicon when dogfooding Bot0).
+Playbook: [`README.md`](README.md).
 
 ---
 
 ## Portable seeds (runnable mini-app)
 
-| Slug | Class | Law broken | Demo kind / pin | Status | Notes |
-|------|-------|------------|-----------------|--------|-------|
-| `owner_steal_mid_continue` | owner steal | exclusive_owner must stay mid-flight kind on continue | `cost_out` | portable seed | Mini-app bug `owner_steal` |
-| `drop_pin_mid_continue` | pin drop | pin_equals / pin_present on continue | `workflow_id` | portable seed | Mini-app bug `drop_pin` |
-| `illegal_restart_mid_continue` | illegal restart | mid-flight must not wipe active task | `cost_out` | portable seed | Mini-app bug `illegal_restart` |
-| `pin_without_open` | hollow open | identity pin must not be sole answer; open surface (`blocks_resolve`) | `scenario_id` | portable seed | Mini-app bug `pin_without_open` |
+| Failure mode | Slug (id) | Law broken | Demo pin / kind | Status |
+|--------------|-----------|------------|-----------------|--------|
+| Owner steal | `owner_steal_mid_continue` | exclusive_owner must stay mid-flight on continue | kind `cost_out` | portable seed |
+| Pin drop | `drop_pin_mid_continue` | pin must stay on continue | pin `workflow_id` | portable seed |
+| Illegal restart | `illegal_restart_mid_continue` | continue must not wipe active task | kind `cost_out` | portable seed |
+| Hollow open | `pin_without_open` | pin is not the product answer; open surface (`blocks_resolve`) | pin `scenario_id` | portable seed |
+| Cold system-suggest miss | `cold_system_suggest_miss` | cold system-suggest open → authoring sketch + domain sticky on short re-ask | kind `authoring`, pin `domain_label`, extra `sketch_produced` | portable seed |
 
 Prove: healthy mini-app **PASS**; planted bug **FAIL**. See `tests/test_incidents_library.py`.
 
 ---
 
-## Broader failure classes (tracked laws — not only four)
+## Broader failure modes (tracked laws — not only four)
 
-These are **real classes** in multi-turn hosts (control plane + delivery). Public **runnable** seeds exist only where Status says “portable seed.” The rest are **named laws** adopters should seal in the host; Bot0 dogfood seals many of them with product path tests (not published here).
+Runnable public seeds exist only where Status says “portable seed.” Host dogfood seals many more with product path tests (not published here).
 
-| Class / slug | Law (one line) | Portable seed | Typical host proof |
-|--------------|----------------|---------------|--------------------|
-| **owner steal** | Mid-flight continue keeps exclusive owner | `owner_steal_mid_continue` | sole-continue matrix / chat-path |
-| **pin drop** | Mid-flight continue keeps identity pin | `drop_pin_mid_continue` | pin-hold scripts |
-| **illegal restart** | Continue must not wipe active task | `illegal_restart_mid_continue` | path-faithful prove-bugs |
-| **pin_without_open** | Pin is routing authority; delivery must open surface | `pin_without_open` | host open-leaf + content blocks |
-| **packaging_too_wide** | Glossary / product_knowledge must not package over action or inventory | seed pending | concept_packaging gates + exclusive owner |
-| **missing_state_leaf** | Session / waiting-on / activities must hit ledger leaf, not glossary | seed pending | session_activities exclusive owner |
-| **missing_sole_continue** | Sticky kinds own continue vs front-door / concept | related: owner steal | sole_continue_blocks_concept_gate |
-| **delivery_order_gap** | Wrong leaf won (inventory name, save, dispatch, soft name, …) | partial | delivery-order table + inventory resolve |
-| **inventory name exclusive** | Armed / known inventory name → code open or pick, not LLM stream dump | seed pending | armed_list_name_contract |
-| **inventory soft token** | Partial name (“keynote project”) hits tenant inventory, not platform glossary | seed pending | soft distinctive-token match |
-| **concept_gate steals inventory** | Definitional packaging must yield when inventory resolves | seed pending | same family as packaging + inventory |
-| **context-pin hijack** | Ambient pin must not steal wrong activity | seed pending | delivery-order / active_flow yield |
-| **fall-through trap** | Code-owned turn must not return None into freestyle LLM tables | seed pending | host path seals |
-| **true_glossary_detour** | Intentional definitional answer when packaging eligible (OK) | n/a | not a bug class |
+| Failure mode (plain) | Slug (if any) | Law (one line) | Portable seed |
+|----------------------|---------------|----------------|---------------|
+| Owner steal | `owner_steal_mid_continue` / host `missing_sole_continue` | Mid-flight continue keeps exclusive owner | `owner_steal_mid_continue` |
+| Pin drop | `drop_pin_mid_continue` | Mid-flight continue keeps identity pin | `drop_pin_mid_continue` |
+| Illegal restart | `illegal_restart_mid_continue` | Continue must not wipe active task | `illegal_restart_mid_continue` |
+| Hollow open | `pin_without_open` | Pin is routing authority; delivery must open surface | `pin_without_open` |
+| Packaging steal | `packaging_too_wide` | Glossary must not package over action or inventory | seed pending |
+| Missing session leaf | `missing_state_leaf` | Session / waiting-on → ledger leaf, not glossary | seed pending |
+| Wrong delivery leaf | `delivery_order_gap` | Wrong code leaf won (inventory, save, dispatch, …) | partial |
+| Inventory name exclusive | *(often under wrong delivery leaf)* | Known inventory name → code open/pick, not LLM dump | seed pending |
+| Inventory soft name | *(often under wrong delivery leaf)* | Partial name → tenant inventory, not platform glossary | seed pending |
+| Context-pin hijack | *(often under wrong delivery leaf)* | Ambient pin must not steal wrong activity | seed pending |
+| Fall-through trap | — | Code-owned turn must not fall into freestyle LLM | seed pending |
+| Cold system-suggest miss | `cold_system_suggest_miss` | Cold system-suggest open enters authoring + produces first sketch; short re-ask binds prior domain — not thin-structure refuse / amnesia | `cold_system_suggest_miss` |
+| Intentional glossary detour | `true_glossary_detour` | Definitional answer when packaging *should* run (OK) | n/a |
 
-**Honest count:** 4 runnable public seeds · **dozen+** named classes · host product tables often hold **10–20+ sealed incident rows** per mature dogfood.
+**Honest count:** 5 runnable public seeds · **dozen+** plain failure modes · host tables often **10–20+** sealed incident rows.
 
 ---
 
 ## How this relates to other docs
 
 ```text
-incidents/CATALOG.md          ← YOU ARE HERE (public patterns inventory)
+incidents/CATALOG.md          ← YOU ARE HERE
 incidents/README.md           ← classify → capture → land pattern
-incidents/patterns/<slug>/    ← runnable portable seeds only
+incidents/patterns/<slug>/    ← runnable seeds (folder name = slug)
 examples/                     ← demos (not full inventory)
-templates/                    ← parameterized script shapes
 tests/                        ← package unit tests — NOT the inventory
 ```
 
-When you land `patterns/<slug>/` with `INCIDENT.md` + `script.json`, add a **portable seeds** row.
+When you land `patterns/<slug>/` with `INCIDENT.md` + `script.json`, add a **portable seeds** row using **failure mode** + **slug** columns.
 
-**Host-private product goldens** stay in the host application repository. Do not copy tenant data or monorepo-only paths into this tree.
-
----
-
-## Expanding this catalog (expected growth)
-
-Public seeds should grow as we prove FAIL/PASS on the mini-app (or a sanitized host adapter):
-
-1. packaging_too_wide  
-2. missing_state_leaf / session status  
-3. inventory soft token / concept steals inventory  
-4. context-pin hijack  
-
-Until then, the **class rows above** are the inventory of laws — not an empty world of four bugs.
+**Host-private product goldens** stay in the host application repository.

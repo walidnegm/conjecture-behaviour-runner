@@ -33,6 +33,12 @@ class IncidentLibraryTests(unittest.TestCase):
         self.assertIn("script.json", readme)
         self.assertIn("CATALOG", readme)
         self.assertIn("patterns inventory", readme.lower())
+        catalog = (INCIDENTS / "CATALOG.md").read_text(encoding="utf-8")
+        # Must not pretend four seeds are the only known classes.
+        self.assertIn("Broader failure classes", catalog)
+        self.assertIn("packaging_too_wide", catalog)
+        self.assertIn("missing_state_leaf", catalog)
+        self.assertIn("inventory soft token", catalog.lower())
 
     def test_catalog_lists_every_pattern_folder(self) -> None:
         catalog = (INCIDENTS / "CATALOG.md").read_text(encoding="utf-8")

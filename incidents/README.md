@@ -10,14 +10,19 @@ implementation** bugs — and many of them are exactly what Conjecture is for.
 
 | Need | Open |
 |------|------|
-| **Patterns inventory (listed + described)** | [`CATALOG.md`](CATALOG.md) |
+| **Patterns inventory (listed + described)** | [`CATALOG.md`](CATALOG.md) — portable seeds **and** broader class list |
 | **This playbook** (classify → capture → land) | this file |
-| **One pattern** | `patterns/<slug>/INCIDENT.md` + `script.json` |
+| **One runnable pattern** | `patterns/<slug>/INCIDENT.md` + `script.json` |
 | **Copy template** | [`_template/`](_template/) |
 | **Package face / planted-bug demo** | [`../README.md`](../README.md) |
 | **Normative package spec** | [`../docs/SPEC.md`](../docs/SPEC.md) |
 | **Agent coder on-ramp** | [`../AGENTS.md`](../AGENTS.md) §7 |
 | **Host term lexicon** (Bot0 dogfood) | Host repo vocabulary doc (not shipped in this package) |
+
+**Important:** Only **four** folders under `patterns/` are runnable mini-app seeds today.
+`CATALOG.md` also lists **broader failure classes** (packaging_too_wide, inventory soft
+token, missing_state_leaf, …). Host dogfood keeps a **much larger** sealed incident
+table + chat-path scripts — public is the portable slice, not the whole memory.
 
 **`tests/` is not the inventory** — those are package unit tests.  
 **The inventory is `CATALOG.md` + `patterns/`.**

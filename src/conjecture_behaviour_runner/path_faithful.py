@@ -43,6 +43,8 @@ class MiniChatApp:
       - ``dual_owner`` — legacy alias for ``owner_steal``
       - ``drop_pin`` — continue clears workflow_id
       - ``illegal_restart`` — continue clears task (greenfield restart)
+      - ``pin_without_open`` — inventory open pins entity id but leaves
+        ``blocks_resolve`` false (pin-status only; hollow open)
     """
 
     def __init__(self, *, bug: Optional[str] = None) -> None:
@@ -66,8 +68,25 @@ class MiniChatApp:
         self.messages.append(message)
         intent = (pin.task_intent if pin else "continue") or "continue"
         intent = intent.strip() or "continue"
+        read_kind = (
+            (pin.read_kind if pin else "") or ""
+        ).strip()
 
-        # Detour supersedes
+        # Inventory / scenario open — identity pin + open leaf (blocks_resolve).
+        # Portable shape for pin_without_open: pin is not the product answer.
+        if read_kind in ("inventory_open", "scenario_open"):
+            self.ledger.pins["scenario_id"] = self.ledger.pins.get(
+                "scenario_id", "scen_1",
+            )
+            self.ledger.exclusive_owner = "front_door"
+            self.ledger.active_kind = None
+            self.ledger.phase = ""
+            if self.bug == "pin_without_open":
+                # Pin written; delivery is status-only (no open surface).
+                return self._obs("pin_status_only", blocks_resolve=False)
+            return self._obs("inventory_open", blocks_resolve=True)
+
+        # Detour supersedes sole-continue (glossary / front-door yield).
         if intent == "detour":
             self.ledger.exclusive_owner = "front_door"
             self.ledger.active_kind = None
@@ -276,6 +295,10 @@ def sole_continue_story() -> dict[str, Any]:
             {
                 "id": "illegal_restart",
                 "plain": "Continue wipes the active task",
+            },
+            {
+                "id": "pin_without_open",
+                "plain": "Inventory open pins scenario_id but blocks_resolve is false",
             },
         ],
     }

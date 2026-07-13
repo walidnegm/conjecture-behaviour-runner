@@ -149,6 +149,25 @@ control plane, then bind **invariants / allowed outcomes** at those landings.
 
 Path without invariants = a tour. Twists **with** invariants = a test.
 
+### Live bugs → incident library (learn + regress)
+
+When a host agent **writes the wrong kind into the ledger** or **fails to perform
+according to the ledger contract** (and the SDK already defines the law), treat it as
+**Conjecture-class** if the failure is state law under pinned cognition — not prose
+quality. Full playbook:
+
+| Step | Action |
+|------|--------|
+| 1 Classify | [`incidents/README.md`](incidents/README.md) checklist |
+| 2 Capture | `INCIDENT.md` + optional `scenario.yaml` |
+| 3 Executable | `script.json` (or compile Scenario → Script) |
+| 4 Red/green | FAIL on bug path; PASS after host fix |
+| 5 Catalog | `incidents/CATALOG.md` + `incidents/patterns/<slug>/` |
+
+If the **ledger SDK** is incomplete, fix the SDK first. If the SDK is complete,
+implementation bugs accumulate as patterns so future runs of Conjecture teach the
+failure class.
+
 ### Minimal Conjecture Script shape
 
 ```json
@@ -245,6 +264,8 @@ Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
 
 ## 7. Files to open first
 
+### Package architecture (how Conjecture works)
+
 | Path | Why |
 |------|-----|
 | [docs/SPEC.md](docs/SPEC.md) | Normative CBR-SPEC |
@@ -253,6 +274,16 @@ Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
 | [src/conjecture_behaviour_runner/protocol.py](src/conjecture_behaviour_runner/protocol.py) | Adapter + observation contract |
 | [src/conjecture_behaviour_runner/path_faithful.py](src/conjecture_behaviour_runner/path_faithful.py) | Mini-app Act + planted bugs |
 | [src/conjecture_behaviour_runner/invariants.py](src/conjecture_behaviour_runner/invariants.py) | Portable verifier kinds |
+
+### Patterns inventory (what failure classes we track)
+
+| Path | Why |
+|------|-----|
+| [incidents/CATALOG.md](incidents/CATALOG.md) | **Listed + described** failure-class slugs |
+| [incidents/README.md](incidents/README.md) | Classify → capture → land a pattern |
+| [incidents/patterns/](incidents/patterns/) | One folder per slug (`INCIDENT.md` + `script.json`) |
+
+**Not the inventory:** `tests/` (package unit tests only).
 
 ---
 

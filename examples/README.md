@@ -25,8 +25,11 @@ python examples/e2e_multi_turn.py
 | **`scenario_sole_continue.yaml`** / **`.json`** | Experimental Scenario description language |
 | **`scenario_compile_and_run.py`** | Scenario → Script → run (`pip install -e ".[scenarios]"`) |
 | `control_plane_goldens.py` | CCP stream unit goldens (`[control-plane]`) |
+| **`parameterized_templates.py`** | **Any kind** — `sole_continue_script` / `reorient_keeps_owner_script` |
 | `sole_continue_golden.json` / `.yaml` | Portable Script with arrange effects |
 | `minimal_script.py` | Null-adapter smoke |
+
+**Templates** (host vocabulary, not product goldens): [`../templates/README.md`](../templates/README.md).
 
 **FAIL** = expected contracts ⊭ `TurnObservation` (state law). Not prose quality.
 

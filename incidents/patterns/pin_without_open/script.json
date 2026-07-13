@@ -1,0 +1,45 @@
+{
+  "script_id": "pin_without_open",
+  "description": "Portable seed: inventory open must pin entity and open surface (blocks_resolve)",
+  "conversation_id": "conv_incident_pin_without_open",
+  "scope": {
+    "in_scope": [
+      "identity pin after inventory resolve",
+      "open leaf / blocks_resolve true"
+    ],
+    "out_of_scope": ["model quality scoring", "host-specific tool names"],
+    "expected_refusal": ["pin-status-only delivery with empty open surface"]
+  },
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "tell me more about that scenario and the runs inside it",
+      "pin": {
+        "task_intent": "detour",
+        "read_kind": "inventory_open"
+      },
+      "invariants": [
+        { "kind": "pin_present", "expected": "scenario_id" },
+        {
+          "kind": "pin_equals",
+          "expected": { "key": "scenario_id", "value": "scen_1" }
+        },
+        { "kind": "extra_true", "expected": "blocks_resolve" }
+      ]
+    },
+    {
+      "actor": "user",
+      "user_text": "what about the latest run?",
+      "pin": {
+        "task_intent": "continue"
+      },
+      "invariants": [
+        { "kind": "pin_present", "expected": "scenario_id" },
+        {
+          "kind": "owner_not",
+          "expected": "cost_out"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "script_id": "REPLACE_SLUG",
+  "description": "Incident golden: continue keeps host exclusive_owner and pin (edit kinds/pins)",
+  "conversation_id": "conv_incident_template",
+  "scope": {
+    "in_scope": ["mid-flight sole-continue under pinned cognition"],
+    "out_of_scope": ["model quality scoring"],
+    "expected_refusal": [
+      "owner steal on continue",
+      "pin drop on continue",
+      "illegal restart mid-flight"
+    ]
+  },
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "start YOUR_KIND on record R",
+      "pin": {
+        "task_intent": "new_task",
+        "read_kind": "YOUR_KIND"
+      },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "YOUR_KIND" },
+        { "kind": "pin_present", "expected": "YOUR_PIN_KEY" }
+      ]
+    },
+    {
+      "actor": "user",
+      "user_text": "update a field mid-flight",
+      "pin": {
+        "task_intent": "continue"
+      },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "YOUR_KIND" },
+        {
+          "kind": "pin_equals",
+          "expected": { "key": "YOUR_PIN_KEY", "value": "YOUR_PIN_VALUE" }
+        }
+      ]
+    }
+  ]
+}

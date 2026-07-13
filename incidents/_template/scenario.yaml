@@ -1,0 +1,60 @@
+# Copy to patterns/<slug>/scenario.yaml and edit.
+# Optional richer description; Script is the CI gate.
+#
+#   pip install -e ".[dev,scenarios]"
+#   # compile via examples/scenario_compile_and_run.py pattern or compile_scenario_to_script
+
+scenario_id: REPLACE_SLUG
+scenario_class: control_plane_incident
+
+scope:
+  in_scope:
+    - mid-flight sole-continue / handoff law under pinned cognition
+  out_of_scope:
+    - free live model quality scoring
+    - domain math not projected into Observation
+  expected_refusal:
+    - owner steal while mid-flight continue
+    - pin drop while mid-flight continue
+    - illegal restart mid-flight
+
+goal_state:
+  - exclusive_owner_holds
+  - pin_stable
+
+initial_state:
+  - idle_or_seeded_mid_flight
+
+execution_profiles:
+  - id: ci_stub
+    device: desktop
+    input_mode: chat_text
+    feature_flags:
+      cognition: stub
+
+steps:
+  - id: open_mid_flight
+    actor: user
+    control_point: chat_input
+    maneuver: start_sole_continue_task
+    payload:
+      # HOST VOCABULARY — not a Conjecture enum
+      user_text: "start <your task> on record R"
+      pin:
+        task_intent: new_task
+        read_kind: YOUR_KIND
+      invariants:
+        - { kind: exclusive_owner, expected: YOUR_KIND }
+        - { kind: pin_present, expected: YOUR_PIN_KEY }
+
+  - id: continue_must_hold
+    actor: user
+    control_point: chat_input
+    maneuver: continue_mid_flight
+    payload:
+      user_text: "update a field mid-flight"
+      pin:
+        task_intent: continue
+      invariants:
+        - { kind: exclusive_owner, expected: YOUR_KIND }
+        - { kind: pin_equals, expected: { key: YOUR_PIN_KEY, value: YOUR_PIN_VALUE } }

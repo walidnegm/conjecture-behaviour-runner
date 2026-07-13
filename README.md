@@ -24,6 +24,13 @@ into Observation. Demos below use **`cost_out` + `workflow_id` only as a concret
 stand-in** from the path-faithful mini-app (Conversation Control Plane dogfood). Swap
 the strings for your ledger; the invariants stay the same shape.
 
+**Parameterized templates** (shareable shapes, not product goldens):  
+`sole_continue_script(...)` · `reorient_keeps_owner_script(...)` · docs in
+[`templates/README.md`](templates/README.md). Example:
+`python examples/parameterized_templates.py`.  
+CCP host law (reorient ≠ COMPLETE, every result names a transition):
+[Host transition discipline](https://github.com/walidnegm/conversation-control-plane/blob/main/docs/host-transition-discipline.md).
+
 CI needs a **fixed classification** (pin or freeze), not a live model roll every
 run—so the same golden fails for the same state break on every PR. That is deliberate:
 this package does **not** prove the classifier was right. Pair it with separate
@@ -262,7 +269,31 @@ Local browser UI (`conjecture ui`) is a **demo viewer**, not a second product.
 
 [CONTRIBUTING.md](CONTRIBUTING.md) — matrix, sized issues, five-minute path.
 
-Help wanted: real host samples (HTTP), LangGraph/Temporal adapters, incident goldens.
+Help wanted: real host samples (HTTP), LangGraph/Temporal adapters, **incident patterns**.
+
+### Learning loop (bugs → patterns)
+
+When an agent submits the wrong type into the ledger or skips the ledger contract,
+and the **SDK is already complete**, that is often a **Conjecture-class** bug.
+Classify → Scenario → Script → catalog:
+
+- **Patterns inventory (list + describe):** [`incidents/CATALOG.md`](incidents/CATALOG.md)  
+- Playbook: [`incidents/README.md`](incidents/README.md)  
+- Template: [`incidents/_template/`](incidents/_template/)  
+- Patterns: [`incidents/patterns/`](incidents/patterns/)
+
+### Where to go (docs map)
+
+| Need | Path |
+|------|------|
+| Hero demo / planted bugs | this README (above) |
+| **Failure-class inventory** | [`incidents/CATALOG.md`](incidents/CATALOG.md) |
+| How to land a pattern | [`incidents/README.md`](incidents/README.md) |
+| Package unit tests | [`tests/`](tests/) — **not** the inventory |
+| Demos / E2E scripts | [`examples/`](examples/) |
+| Script shapes (any host kind) | [`templates/README.md`](templates/README.md) |
+| Normative spec | [`docs/SPEC.md`](docs/SPEC.md) |
+| Agent coder files-first | [`AGENTS.md`](AGENTS.md) §7 |
 
 ---
 

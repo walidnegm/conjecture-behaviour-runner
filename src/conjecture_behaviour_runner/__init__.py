@@ -40,6 +40,12 @@ from conjecture_behaviour_runner.script import (
     load_script_yaml,
     script_from_dict,
 )
+from conjecture_behaviour_runner.templates import (
+    TemplateStreamAdapter,
+    demo_scripts,
+    reorient_keeps_owner_script,
+    sole_continue_script,
+)
 from conjecture_behaviour_runner.temporal import (
     TRAJECTORY_INVARIANT_KINDS,
     check_trajectory_invariant,
@@ -67,14 +73,18 @@ __all__ = [
     "RunResult",
     "ScriptScope",
     "StubCognitionProvider",
+    "TemplateStreamAdapter",
     "TurnObservation",
     "check_standard_invariant",
     "check_trajectory_invariant",
+    "demo_scripts",
     "load_script_json",
     "load_script_yaml",
     "provider_for_mode",
+    "reorient_keeps_owner_script",
     "run_script",
     "script_from_dict",
+    "sole_continue_script",
     "__version__",
     "get_version",
 ]

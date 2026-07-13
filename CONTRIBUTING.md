@@ -70,6 +70,7 @@ Prefer PRs that someone needs personally:
 - A **Driver** / **Observer** (HTTP JSON is the highest leverage next)
 - A new **invariant kind** with a test
 - An **example** with planted bug → FAIL → one-line fix → PASS
+- An **incident pattern** under `incidents/patterns/<slug>/` (see `incidents/README.md`)
 - Report/CLI polish
 
 ### Contribution matrix (help wanted)

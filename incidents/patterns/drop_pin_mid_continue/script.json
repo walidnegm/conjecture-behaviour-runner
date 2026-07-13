@@ -1,0 +1,38 @@
+{
+  "script_id": "drop_pin_mid_continue",
+  "description": "Portable seed: continue must keep identity pin (demo workflow_id)",
+  "conversation_id": "conv_incident_drop_pin",
+  "scope": {
+    "in_scope": ["mid-flight sole-continue identity pin stable"],
+    "out_of_scope": ["model quality scoring"],
+    "expected_refusal": ["pin drop on continue"]
+  },
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "cost out the onboarding workflow",
+      "pin": {
+        "task_intent": "new_task",
+        "read_kind": "cost_out"
+      },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "cost_out" },
+        { "kind": "pin_present", "expected": "workflow_id" }
+      ]
+    },
+    {
+      "actor": "user",
+      "user_text": "make the volume 10k",
+      "pin": {
+        "task_intent": "continue"
+      },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "cost_out" },
+        {
+          "kind": "pin_equals",
+          "expected": { "key": "workflow_id", "value": "wf_1" }
+        }
+      ]
+    }
+  ]
+}

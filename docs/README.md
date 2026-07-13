@@ -4,6 +4,8 @@
 |----------|------|------|
 | **Conjecture Behaviour Runner Specification** | **Specification** (`CBR-SPEC`) | [SPEC.md](./SPEC.md) |
 | Project face (hero = planted-bug demo) | README | [../README.md](../README.md) |
+| **Patterns inventory** (failure classes) | Catalog | [../incidents/CATALOG.md](../incidents/CATALOG.md) |
+| **Incident → pattern playbook** | Learning loop | [../incidents/README.md](../incidents/README.md) |
 | **Agent coder guide** | Integration + golden authoring | [../AGENTS.md](../AGENTS.md) |
 | **Script author prompt seed** | Trajectory + ODD → Conjecture Script | [../prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) |
 

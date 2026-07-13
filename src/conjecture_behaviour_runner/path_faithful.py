@@ -47,6 +47,9 @@ class MiniChatApp:
         ``blocks_resolve`` false (pin-status only; hollow open)
       - ``cold_system_suggest_miss`` — cold system-suggest open routes to
         thin-structure refuse (no sketch); short re-ask forgets domain pin
+      - ``hollow_async_advance`` — authoring **advance** (continue-to-structure)
+        reports job/gate success but open surface empty (no reply / no blocks).
+        Distinct from ``pin_without_open`` (identity pin, no open).
     """
 
     def __init__(self, *, bug: Optional[str] = None) -> None:
@@ -56,11 +59,13 @@ class MiniChatApp:
         self.ledger = MiniLedger()
         self.messages: list[str] = []
         self._sketch_produced: bool = False
+        self._reply_nonempty: bool = False
 
     def reset(self) -> None:
         self.ledger = MiniLedger()
         self.messages.clear()
         self._sketch_produced = False
+        self._reply_nonempty = False
 
     def handle(
         self,
@@ -109,6 +114,7 @@ class MiniChatApp:
             self.ledger.phase = "sketch"
             self.ledger.pins["domain_label"] = domain
             self._sketch_produced = True
+            self._reply_nonempty = True
             return self._obs("authoring_sketch", blocks_resolve=True)
 
         # Short re-ask after cold open ("give me something to start with") —
@@ -119,6 +125,7 @@ class MiniChatApp:
                 self.ledger.active_kind = None
                 self.ledger.pins.pop("domain_label", None)
                 self._sketch_produced = False
+                self._reply_nonempty = False
                 return self._obs("front_door_amnesia", blocks_resolve=False)
             if self.ledger.active_kind == "authoring" or self.ledger.pins.get(
                 "domain_label",
@@ -129,10 +136,26 @@ class MiniChatApp:
                 if "domain_label" not in self.ledger.pins:
                     self.ledger.pins["domain_label"] = "domain_1"
                 self._sketch_produced = True
+                self._reply_nonempty = True
                 return self._obs("authoring_sketch", blocks_resolve=True)
             # No prior open — front door (cannot invent domain from bare insist).
             self.ledger.exclusive_owner = "front_door"
             return self._obs("front_door", blocks_resolve=False)
+
+        # Authoring advance (Continue to structured draft / proceed) — must open
+        # IR/review surface. Hollow async advance: job succeeds, surface empty.
+        if read_kind == "authoring_advance":
+            self.ledger.active_kind = "authoring"
+            self.ledger.exclusive_owner = "authoring"
+            self.ledger.phase = "ir_review"
+            if "domain_label" not in self.ledger.pins:
+                self.ledger.pins["domain_label"] = "domain_1"
+            if self.bug == "hollow_async_advance":
+                # Silent success: gate/job advanced, nothing for the user to see.
+                self._reply_nonempty = False
+                return self._obs("async_succeed_empty", blocks_resolve=False)
+            self._reply_nonempty = True
+            return self._obs("ir_review_open", blocks_resolve=True)
 
         # Detour supersedes sole-continue (glossary / front-door yield).
         if intent == "detour":
@@ -174,6 +197,14 @@ class MiniChatApp:
         return self._obs("front_door", blocks_resolve=False)
 
     def _obs(self, outcome: str, *, blocks_resolve: bool) -> TurnObservation:
+        # open_surface = user-visible delivery after advance/open.
+        # hollow_async_advance: job/gate "ok" but open_surface false.
+        if outcome == "async_succeed_empty":
+            open_surface = False
+            reply_nonempty = False
+        else:
+            open_surface = bool(blocks_resolve)
+            reply_nonempty = bool(self._reply_nonempty or blocks_resolve)
         return TurnObservation(
             exclusive_owner=self.ledger.exclusive_owner,
             active_kind=self.ledger.active_kind,
@@ -189,6 +220,8 @@ class MiniChatApp:
                 "blocks_resolve": blocks_resolve,
                 "preferred_workflow_id": self.ledger.pins.get("workflow_id"),
                 "sketch_produced": self._sketch_produced,
+                "reply_nonempty": reply_nonempty,
+                "open_surface": open_surface,
             },
         )
 

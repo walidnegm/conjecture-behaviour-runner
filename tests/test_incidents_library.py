@@ -19,6 +19,7 @@ PORTABLE_SEEDS: tuple[tuple[str, str | None], ...] = (
     ("illegal_restart_mid_continue", "illegal_restart"),
     ("pin_without_open", "pin_without_open"),
     ("cold_system_suggest_miss", "cold_system_suggest_miss"),
+    ("hollow_async_advance", "hollow_async_advance"),
 )
 
 
@@ -73,7 +74,11 @@ class IncidentLibraryTests(unittest.TestCase):
             # Allow non-folder backticks only if not in index section — require folder
             if (
                 slug.endswith("_continue")
-                or slug in ("pin_without_open", "cold_system_suggest_miss")
+                or slug in (
+                    "pin_without_open",
+                    "cold_system_suggest_miss",
+                    "hollow_async_advance",
+                )
             ):
                 self.fail(f"CATALOG lists `{slug}` but patterns/{slug}/ missing")
 

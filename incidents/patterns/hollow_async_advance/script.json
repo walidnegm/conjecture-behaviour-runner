@@ -1,0 +1,52 @@
+{
+  "script_id": "hollow_async_advance",
+  "description": "Portable seed: authoring advance must open surface (not silent job/gate success)",
+  "conversation_id": "conv_incident_hollow_async_advance",
+  "scope": {
+    "in_scope": [
+      "authoring advance after sketch",
+      "open_surface / blocks_resolve after advance",
+      "non-empty reply or structured blocks"
+    ],
+    "out_of_scope": [
+      "product chip label laundry",
+      "identity pin hollow open (separate: pin_without_open)",
+      "cold system-suggest first open (separate: cold_system_suggest_miss)"
+    ],
+    "expected_refusal": [
+      "async/gate succeed with empty open surface",
+      "silent success after Continue / proceed"
+    ]
+  },
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "open a multi-step activity for this domain — invent a first structure",
+      "pin": {
+        "task_intent": "new_task",
+        "read_kind": "system_suggest_open",
+        "extras": { "domain_label": "domain_1" }
+      },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "authoring" },
+        { "kind": "extra_true", "expected": "sketch_produced" },
+        { "kind": "extra_true", "expected": "blocks_resolve" },
+        { "kind": "extra_true", "expected": "open_surface" }
+      ]
+    },
+    {
+      "actor": "user",
+      "user_text": "Continue to structured draft",
+      "pin": {
+        "task_intent": "continue",
+        "read_kind": "authoring_advance"
+      },
+      "invariants": [
+        { "kind": "exclusive_owner", "expected": "authoring" },
+        { "kind": "extra_true", "expected": "blocks_resolve" },
+        { "kind": "extra_true", "expected": "open_surface" },
+        { "kind": "extra_true", "expected": "reply_nonempty" }
+      ]
+    }
+  ]
+}

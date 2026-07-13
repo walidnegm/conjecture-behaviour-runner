@@ -32,6 +32,7 @@ Playbook: [`README.md`](README.md).
 | Illegal restart | `illegal_restart_mid_continue` | continue must not wipe active task | kind `cost_out` | portable seed |
 | Hollow open | `pin_without_open` | pin is not the product answer; open surface (`blocks_resolve`) | pin `scenario_id` | portable seed |
 | Cold system-suggest miss | `cold_system_suggest_miss` | cold system-suggest open → authoring sketch + domain sticky on short re-ask | kind `authoring`, pin `domain_label`, extra `sketch_produced` | portable seed |
+| Hollow advance | `hollow_async_advance` | authoring advance must open surface (not silent job/gate success) | kind `authoring`, `read_kind=authoring_advance`, extras `open_surface` / `reply_nonempty` | portable seed |
 
 Prove: healthy mini-app **PASS**; planted bug **FAIL**. See `tests/test_incidents_library.py`.
 
@@ -47,6 +48,7 @@ Runnable public seeds exist only where Status says “portable seed.” Host dog
 | Pin drop | `drop_pin_mid_continue` | Mid-flight continue keeps identity pin | `drop_pin_mid_continue` |
 | Illegal restart | `illegal_restart_mid_continue` | Continue must not wipe active task | `illegal_restart_mid_continue` |
 | Hollow open | `pin_without_open` | Pin is routing authority; delivery must open surface | `pin_without_open` |
+| Hollow advance | `hollow_async_advance` | Authoring advance / async job success must open surface (not empty succeed) | `hollow_async_advance` |
 | Packaging steal | `packaging_too_wide` | Glossary must not package over action or inventory | seed pending |
 | Missing session leaf | `missing_state_leaf` | Session / waiting-on → ledger leaf, not glossary | seed pending |
 | Wrong delivery leaf | `delivery_order_gap` | Wrong code leaf won (inventory, save, dispatch, …) | partial |
@@ -57,7 +59,7 @@ Runnable public seeds exist only where Status says “portable seed.” Host dog
 | Cold system-suggest miss | `cold_system_suggest_miss` | Cold system-suggest open enters authoring + produces first sketch; short re-ask binds prior domain — not thin-structure refuse / amnesia | `cold_system_suggest_miss` |
 | Intentional glossary detour | `true_glossary_detour` | Definitional answer when packaging *should* run (OK) | n/a |
 
-**Honest count:** 5 runnable public seeds · **dozen+** plain failure modes · host tables often **10–20+** sealed incident rows.
+**Honest count:** 6 runnable public seeds · **dozen+** plain failure modes · host tables often **10–20+** sealed incident rows.
 
 ---
 

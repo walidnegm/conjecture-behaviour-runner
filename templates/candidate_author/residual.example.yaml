@@ -1,0 +1,23 @@
+# Hand residual probes (template). Host replaces path_id / turns with product language.
+
+residuals:
+  - path_id: residual.intake.false_detour_library
+    title: "False detour + library open mid intake"
+    failure_class_slug: missing_sole_continue
+    priority: high
+    seal_status: open
+    start_state:
+      active_task.kind: YOUR_INTAKE_KIND
+      last_read_id: ambient_record
+    turns:
+      - "(setup) Mid intake with ambient last_read set"
+      - "(probe) List or open library while still refining (may mislabel detour)"
+    must_hold:
+      - "If true detour: library OK but intake pin preserved"
+      - "If continue: library blocked"
+    must_not:
+      - "Ambient record inspect answers a refine note"
+    pin_hints:
+      task_intent: detour
+      read_kind: list_records
+    proof_pointer: "template residual — host implements library mid sole-continue gate"

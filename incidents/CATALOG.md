@@ -61,6 +61,22 @@ Runnable public seeds exist only where Status says “portable seed.” Host dog
 
 **Honest count:** 6 runnable public seeds · **dozen+** plain failure modes · host tables often **10–20+** sealed incident rows.
 
+### Finite expansion (host SSoT)
+
+The host monorepo keeps a **law-centric finite matrix** (core + explicit neighbors)
+and **long-tail utterances** for script authoring only — not a full cartesian product
+of product state, and never runtime routing vocabulary.
+
+| Artifact | Where |
+|----------|--------|
+| Method | Host finite-expansion epic (private monorepo) |
+| Matrix / utterances | Host finite-expansion package (private) |
+| Portable candidate author | `conjecture candidates author --example` · `templates/candidate_author/` |
+| Gap report | Host gap CLI (private) |
+
+When a portable seed lands here, the host matrix cell for that slug should move to
+`sealed` (or stay `host_only` only if no public seed is intended).
+
 ---
 
 ## How this relates to other docs
@@ -71,6 +87,7 @@ incidents/README.md           ← classify → capture → land pattern
 incidents/patterns/<slug>/    ← runnable seeds (folder name = slug)
 examples/                     ← demos (not full inventory)
 tests/                        ← package unit tests — NOT the inventory
+host: conjecture_expansion/   ← finite matrix + long-tail (monorepo)
 ```
 
 When you land `patterns/<slug>/` with `INCIDENT.md` + `script.json`, add a **portable seeds** row using **failure mode** + **slug** columns.

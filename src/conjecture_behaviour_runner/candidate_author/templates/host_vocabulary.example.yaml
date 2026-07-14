@@ -1,0 +1,35 @@
+# PLACEHOLDER host vocabulary — replace with your ledger kinds / leaves.
+# These strings are examples only (not a Conjecture product catalog).
+
+sole_continue_kinds:
+  - YOUR_INTAKE_KIND
+  - YOUR_REVIEW_KIND
+
+kinds_suppress_surface:
+  - YOUR_INTAKE_KIND
+  - YOUR_REVIEW_KIND
+
+foreign_capability_leaves:
+  - YOUR_ASSESSMENT_START
+  - YOUR_SIMULATE_LEAF
+  - YOUR_VALUE_SETUP
+
+foreign_library_leaves:
+  - list_records
+  - open_by_name
+  - inspect_saved
+
+kind_to_owner:
+  YOUR_INTAKE_KIND: YOUR_INTAKE_KIND
+  YOUR_REVIEW_KIND: YOUR_REVIEW_KIND
+
+hard_escape_intents:
+  - new_task
+  - abandon
+  - handoff
+
+soft_escape_intents:
+  - detour
+  - new_task
+  - abandon
+  - handoff

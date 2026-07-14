@@ -210,6 +210,107 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     p_ui.set_defaults(func=_cmd_ui)
 
+    # --- candidates author (portable Scenario precursor) ---
+    p_cand = sub.add_parser(
+        "candidates",
+        help="Author candidate Scenario YAML from host vocabulary / example template",
+    )
+    p_cand_sub = p_cand.add_subparsers(dest="candidates_cmd")
+    p_author = p_cand_sub.add_parser(
+        "author",
+        help="Code-seed candidates → write Conjecture Scenario YAML",
+    )
+    p_author.add_argument(
+        "--example",
+        action="store_true",
+        help="Use shipped placeholder vocabulary/matrix/residuals",
+    )
+    p_author.add_argument(
+        "--vocab",
+        default=None,
+        help="Path to host_vocabulary.yaml",
+    )
+    p_author.add_argument(
+        "--matrix",
+        default=None,
+        help="Path to matrix cells YAML",
+    )
+    p_author.add_argument(
+        "--residuals",
+        default=None,
+        help="Path to residual probes YAML",
+    )
+    p_author.add_argument(
+        "--out",
+        default="candidates/scenarios",
+        help="Output directory for Scenario YAML + manifest",
+    )
+    p_author.add_argument(
+        "--open-only",
+        action="store_true",
+        help="Only open + partial seals",
+    )
+    p_author.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Cap paths after priority sort",
+    )
+    p_author.add_argument(
+        "--markdown",
+        action="store_true",
+        help="Also print markdown summary to stdout",
+    )
+
+    def _cmd_candidates_author(ns: argparse.Namespace) -> int:
+        from conjecture_behaviour_runner.candidate_author import (
+            author_candidates,
+            format_candidates_markdown,
+            load_example_template_bundle,
+            load_matrix_yaml,
+            load_residuals_yaml,
+            load_vocabulary_yaml,
+            write_candidate_scenarios,
+        )
+
+        vocab = None
+        matrix = []
+        residuals = []
+        if ns.example or not (ns.vocab or ns.matrix or ns.residuals):
+            bundle = load_example_template_bundle()
+            vocab = bundle.get("vocabulary")
+            matrix = list(bundle.get("matrix_cells") or [])
+            residuals = list(bundle.get("residuals") or [])
+            print(f"Loaded example templates from {bundle.get('templates_dir')}")
+        if ns.vocab:
+            vocab = load_vocabulary_yaml(ns.vocab)
+        if ns.matrix:
+            matrix = load_matrix_yaml(ns.matrix)
+        if ns.residuals:
+            residuals = load_residuals_yaml(ns.residuals)
+
+        paths = author_candidates(
+            vocabulary=vocab,
+            matrix_cells=matrix,
+            residuals=residuals,
+            open_only=ns.open_only,
+            limit=ns.limit,
+        )
+        owner_map = dict(vocab.kind_to_owner) if vocab else {}
+        report = write_candidate_scenarios(
+            paths, ns.out, owner_for_kind=owner_map,
+        )
+        print(
+            f"Wrote {len(report)} Scenario files → {ns.out}\n"
+            f"  (Scenario = precursor to Script; open console with "
+            f"CONJECTURE_CANDIDATES_DIR={ns.out})"
+        )
+        if ns.markdown:
+            print(format_candidates_markdown(paths))
+        return 0
+
+    p_author.set_defaults(func=_cmd_candidates_author)
+
     # Back-compat: --demo / bare --version
     parser.add_argument(
         "--demo",
@@ -224,6 +325,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     if getattr(args, "demo", False) and not args.command:
         return _cmd_demo(args)
     if not args.command:
+        parser.print_help()
+        return 0
+    if args.command == "candidates" and not getattr(args, "candidates_cmd", None):
+        print("Usage: conjecture candidates author [--example] [--out DIR]", file=sys.stderr)
+        return 2
+    if not getattr(args, "func", None):
         parser.print_help()
         return 0
     return int(args.func(args))

@@ -1,0 +1,36 @@
+# Finite expansion cells (portable example).
+# status seed_pending | gap → become candidate Scenarios.
+
+cells:
+  - cell_id: owner_steal.intake.continue
+    mode_slug: owner_steal_mid_continue
+    failure_mode: Owner steal
+    kind: YOUR_INTAKE_KIND
+    phase: sole_continue
+    pin: record_id
+    move: continue
+    status: seed_pending
+    note: "Bare continue must keep exclusive owner"
+    probe_utterance: "continue"
+
+  - cell_id: owner_steal.intake.glossary_shaped
+    mode_slug: owner_steal_mid_continue
+    failure_mode: Owner steal
+    kind: YOUR_INTAKE_KIND
+    phase: sole_continue
+    pin: record_id
+    move: continue
+    status: gap
+    note: "Glossary-shaped continue must not steal owner"
+    probe_utterance: "what is a workflow?"
+
+  - cell_id: foreign_leaf.intake.assessment
+    mode_slug: missing_sole_continue
+    failure_mode: Owner steal
+    kind: YOUR_INTAKE_KIND
+    phase: sole_continue
+    pin: none
+    move: continue
+    status: seed_pending
+    note: "Foreign capability start mid intake"
+    probe_utterance: "start an assessment on this"

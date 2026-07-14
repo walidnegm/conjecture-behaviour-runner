@@ -3,8 +3,11 @@
   conjecture ui
   # open http://127.0.0.1:8765
 
-Shows the path-faithful sole-continue story, run results, and planted-bug proof
-in plain English. For contributors who want a visual before reading the SPEC.
+Shows the path-faithful sole-continue story, run results, planted-bug proof,
+and host-authored **candidate Scenarios** (precursor to Scripts) when a
+candidates directory is discoverable.
+
+For contributors who want a visual before reading the SPEC.
 """
 from __future__ import annotations
 
@@ -13,7 +16,7 @@ import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Optional
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 
 def _json_response(handler: BaseHTTPRequestHandler, code: int, payload: Any) -> None:
@@ -33,11 +36,11 @@ def _html_page() -> bytes:
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Conjecture — local runner</title>
+  <title>Conjecture — local console</title>
   <style>
     :root { font-family: ui-sans-serif, system-ui, sans-serif; color: #18181b; }
     body { margin: 0; background: #fafafa; }
-    main { max-width: 52rem; margin: 0 auto; padding: 1.5rem; }
+    main { max-width: 56rem; margin: 0 auto; padding: 1.5rem; }
     h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
     .muted { color: #52525b; font-size: .9rem; line-height: 1.5; }
     .card { background: #fff; border: 1px solid #e4e4e7; border-radius: .75rem;
@@ -50,20 +53,34 @@ def _html_page() -> bytes:
     .badge { font-size: .7rem; font-weight: 700; border-radius: 999px; padding: .15rem .5rem; }
     .pass { background: #ecfdf5; color: #047857; }
     .fail { background: #fef2f2; color: #b91c1c; }
+    .open { background: #fff7ed; color: #c2410c; }
+    .partial { background: #eff6ff; color: #1d4ed8; }
+    .reg { background: #f4f4f5; color: #3f3f46; }
     .turn { border: 1px solid #e4e4e7; border-radius: .6rem; padding: .75rem; margin: .6rem 0; }
     .turn.ok { border-color: #a7f3d0; background: #f0fdf4; }
     .turn.bad { border-color: #fecaca; background: #fef2f2; }
+    .cand { cursor: pointer; }
+    .cand:hover { border-color: #a1a1aa; }
+    .cand.active { border-color: #3b82f6; background: #eff6ff; }
+    .cand a { color: #1d4ed8; text-decoration: none; font-weight: 600; }
+    .cand a:hover { text-decoration: underline; }
+    .cand-tab.active { background: #18181b; color: #fff; border-color: #18181b; }
+    .deep-link { font-size: .8rem; padding: .25rem .5rem; border: 1px solid #d4d4d8;
+      border-radius: .35rem; background: #fafafa; color: #1d4ed8; text-decoration: none; }
+    .deep-link:hover { background: #eff6ff; }
     code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .75rem; }
     ul { margin: .35rem 0; padding-left: 1.2rem; }
     pre { background: #18181b; color: #f4f4f5; padding: .75rem; border-radius: .5rem;
           overflow: auto; font-size: .7rem; max-height: 18rem; }
+    select, input[type=search] { font: inherit; font-size: .85rem; padding: .4rem .55rem;
+      border: 1px solid #d4d4d8; border-radius: .4rem; background: #fff; }
     .grid2 { display: grid; gap: .75rem; }
     @media (min-width: 640px) { .grid2 { grid-template-columns: 1fr 1fr; } }
   </style>
 </head>
 <body>
 <main>
-  <h1>Conjecture local runner</h1>
+  <h1>Conjecture local console</h1>
   <p class="muted">
     Catch state-law breaks that still look fine in chat. The model may
     <em>propose</em> continue / detour / new task; your coded ledger and handoff
@@ -84,8 +101,66 @@ def _html_page() -> bytes:
     <p class="muted" style="margin:0">
       <strong>Script</strong> · <strong>Turn</strong> · <strong>Driver</strong> ·
       <strong>Observation</strong> · <strong>Invariant</strong>.
-      Everything else (Scenario, ODD, multi-runner, Verdict) is advanced — see docs/SPEC.md.
+      <strong>Scenario</strong> = flexible description of twists (precursor to Script).
+      See docs/SPEC.md.
     </p>
+  </div>
+
+  <div class="card" id="candidatesCard">
+    <div class="row" style="justify-content:space-between">
+      <strong>Candidate failure modes</strong>
+      <span class="muted mono" id="candMeta"></span>
+    </div>
+    <p class="muted" style="margin:.35rem 0 .75rem">
+      Each row is a detected candidate failure mode. Open its link to see
+      <strong>Trajectory</strong> → <strong>Scenario</strong> → <strong>Script</strong>
+      (Scenario is the precursor; Script is the play-back form).
+    </p>
+    <div class="row" style="margin-bottom:.75rem">
+      <select id="candSeal" title="seal status">
+        <option value="">all seals</option>
+        <option value="open">open</option>
+        <option value="partial">partial</option>
+        <option value="regression_check">regression_check</option>
+      </select>
+      <select id="candPri" title="priority">
+        <option value="">all priority</option>
+        <option value="high">high</option>
+        <option value="medium">medium</option>
+        <option value="low">low</option>
+      </select>
+      <select id="candSrc" title="source">
+        <option value="">all sources</option>
+        <option value="residual_heuristic">residual</option>
+        <option value="sole_continue_x_foreign">sole×foreign</option>
+        <option value="matrix_queue">matrix</option>
+        <option value="steal_table">steal</option>
+      </select>
+      <input type="search" id="candQ" placeholder="filter id…" style="min-width:10rem" />
+      <button type="button" class="secondary" id="btnCandReload">Reload</button>
+    </div>
+    <div id="candList" class="muted">Loading candidates…</div>
+    <div id="candDetail" style="display:none; margin-top:1rem">
+      <div class="row" style="justify-content:space-between; margin-bottom:.5rem">
+        <div>
+          <a href="#/" class="muted" id="candBack" style="text-decoration:none">← all candidates</a>
+          <div class="row" style="margin-top:.35rem">
+            <strong id="candDetailTitle">—</strong>
+            <span class="badge" id="candDetailSeal"></span>
+          </div>
+          <p class="muted mono" id="candDetailPath" style="margin:.25rem 0"></p>
+        </div>
+      </div>
+      <div class="row" id="candTabs" style="margin-bottom:.75rem">
+        <button type="button" class="secondary cand-tab" data-tab="trajectory">Trajectory</button>
+        <button type="button" class="secondary cand-tab" data-tab="scenario">Scenario</button>
+        <button type="button" class="secondary cand-tab" data-tab="script">Script</button>
+      </div>
+      <div class="row" id="candDeepLinks" style="margin-bottom:.75rem"></div>
+      <div id="candPanelTrajectory" class="cand-panel"></div>
+      <div id="candPanelScenario" class="cand-panel" style="display:none"></div>
+      <div id="candPanelScript" class="cand-panel" style="display:none"></div>
+    </div>
   </div>
 
   <div class="card">
@@ -259,7 +334,208 @@ document.getElementById('btnProve').onclick = async () => {
   } catch (e) { st.textContent = String(e); }
   finally { b1.disabled = b2.disabled = false; }
 };
+function sealBadge(s) {
+  if (s === 'open') return 'open';
+  if (s === 'partial') return 'partial';
+  return 'reg';
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function parseHash() {
+  // #/candidate/<id>[/trajectory|scenario|script]
+  const h = (location.hash || '').replace(/^#/, '');
+  const parts = h.split('/').filter(Boolean);
+  if (parts[0] === 'candidate' && parts[1]) {
+    return { id: decodeURIComponent(parts[1]), tab: parts[2] || 'trajectory' };
+  }
+  return { id: null, tab: 'trajectory' };
+}
+function setHash(id, tab) {
+  const t = tab || 'trajectory';
+  location.hash = id ? ('/candidate/' + encodeURIComponent(id) + '/' + t) : '/';
+}
+function showTab(tab) {
+  ['trajectory','scenario','script'].forEach(name => {
+    const panel = document.getElementById('candPanel' + name.charAt(0).toUpperCase() + name.slice(1));
+    if (panel) panel.style.display = name === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.cand-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+  });
+}
+function renderTrajectory(traj) {
+  const steps = (traj && traj.steps) || [];
+  const goals = (traj && traj.goal_state) || [];
+  const init = (traj && traj.initial_state) || [];
+  let html = '<p class="muted"><strong>Trajectory</strong> — ordered twists for this failure mode.</p>';
+  if (init.length) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>Initial:</strong> '
+      + init.map(escapeHtml).join(' · ') + '</div>';
+  }
+  if (goals.length) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>Goal:</strong> '
+      + goals.map(escapeHtml).join(' · ') + '</div>';
+  }
+  html += steps.map(st => {
+    const inv = (st.invariants || []).map(x =>
+      (x.kind || '') + '=' + JSON.stringify(x.expected)).join(', ');
+    return `<div class="turn">
+      <div class="mono">twist ${st.index}: ${escapeHtml(st.id)} · ${escapeHtml(st.maneuver)}</div>
+      <div><strong>User:</strong> “${escapeHtml(st.user_text)}”</div>
+      <div class="muted mono">pin=${escapeHtml(JSON.stringify(st.pin || {}))}</div>
+      <div class="muted mono">invariants: ${escapeHtml(inv || '—')}</div>
+      ${(st.postconditions || []).length
+        ? '<div class="muted">must hold after: ' + st.postconditions.map(escapeHtml).join('; ') + '</div>'
+        : ''}
+    </div>`;
+  }).join('') || '<p class="muted">No twists</p>';
+  document.getElementById('candPanelTrajectory').innerHTML = html;
+}
+function renderScenarioPanel(data) {
+  const sc = data.scenario || {};
+  const scope = sc.scope || {};
+  let html = '<p class="muted"><strong>Conjecture Scenario</strong> — description language (precursor to Script).</p>';
+  html += `<div class="muted mono">scenario_id=${escapeHtml(sc.scenario_id || data.scenario_id)} · class=${escapeHtml(sc.scenario_class || '')}</div>`;
+  if ((scope.expected_refusal || []).length) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>expected_refusal:</strong><ul>'
+      + scope.expected_refusal.map(x => '<li>' + escapeHtml(x) + '</li>').join('')
+      + '</ul></div>';
+  }
+  html += '<pre style="margin-top:.75rem">' + escapeHtml(data.yaml || '') + '</pre>';
+  document.getElementById('candPanelScenario').innerHTML = html;
+}
+function renderScriptPanel(data) {
+  const sv = data.script_view || {};
+  let html = '<p class="muted"><strong>Conjecture Script</strong> — play-back form (compiled from Scenario when possible).</p>';
+  if (sv.ok === false && sv.error) {
+    html += '<div class="turn bad"><div class="muted">Compile note (payload fallback used if turns shown):</div>'
+      + '<div class="mono">' + escapeHtml(sv.error) + '</div></div>';
+  }
+  html += `<div class="muted mono">script_id=${escapeHtml(sv.script_id || '')} · turns=${(sv.turns||[]).length}</div>`;
+  html += (sv.turns || []).map(t => {
+    const inv = (t.invariants || []).map(x =>
+      (x.kind || '') + '=' + JSON.stringify(x.expected)).join(', ');
+    return `<div class="turn">
+      <div class="mono">turn ${t.index}${t.freeze_key ? ' · freeze=' + escapeHtml(t.freeze_key) : ''}</div>
+      <div><strong>User:</strong> “${escapeHtml(t.user_text)}”</div>
+      <div class="muted mono">pin=${escapeHtml(JSON.stringify(t.pin || {}))}</div>
+      <div class="muted mono">invariants: ${escapeHtml(inv || '—')}</div>
+    </div>`;
+  }).join('') || '<p class="muted">No script turns</p>';
+  if (sv.script) {
+    html += '<pre style="margin-top:.75rem">' + escapeHtml(JSON.stringify(sv.script, null, 2)) + '</pre>';
+  }
+  document.getElementById('candPanelScript').innerHTML = html;
+}
+async function loadCandidates() {
+  const seal = document.getElementById('candSeal').value;
+  const pri = document.getElementById('candPri').value;
+  const src = document.getElementById('candSrc').value;
+  const q = document.getElementById('candQ').value.trim();
+  const params = new URLSearchParams();
+  if (seal) params.set('seal', seal);
+  if (pri) params.set('priority', pri);
+  if (src) params.set('source', src);
+  if (q) params.set('q', q);
+  params.set('limit', '120');
+  const r = await fetch('/api/candidates?' + params.toString());
+  const data = await r.json();
+  const meta = document.getElementById('candMeta');
+  const list = document.getElementById('candList');
+  if (!data.dir) {
+    meta.textContent = 'none';
+    list.innerHTML = '<p class="muted">' + (data.hint || 'No candidates dir') + '</p>';
+    return;
+  }
+  meta.textContent = (data.count || 0) + '/' + (data.total_in_manifest || 0)
+    + ' · ' + (data.role || 'Scenario');
+  if (!(data.scenarios || []).length) {
+    list.innerHTML = '<p class="muted">No scenarios match filters.</p>';
+    return;
+  }
+  const active = parseHash().id;
+  list.innerHTML = (data.scenarios || []).map(s => {
+    const id = s.scenario_id;
+    const href = '#/candidate/' + encodeURIComponent(id) + '/trajectory';
+    return `<div class="turn cand ${active === id ? 'active' : ''}" data-id="${escapeHtml(id)}">
+      <div class="row">
+        <a href="${href}">${escapeHtml(id)}</a>
+        <span class="badge ${sealBadge(s.seal_status)}">${escapeHtml(s.seal_status || '?')}</span>
+        <span class="muted">${escapeHtml(s.priority || '')}</span>
+        <span class="muted mono">${escapeHtml(s.source || '')}</span>
+      </div>
+      <div class="muted mono">${escapeHtml(s.path_id || '')}</div>
+      <div class="row" style="margin-top:.35rem">
+        <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/trajectory">Trajectory</a>
+        <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/scenario">Scenario</a>
+        <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/script">Script</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function openCandidate(id, tab) {
+  tab = tab || 'trajectory';
+  const r = await fetch('/api/candidates/' + encodeURIComponent(id));
+  const data = await r.json();
+  if (!data.ok) {
+    document.getElementById('status').textContent = data.error || 'load failed';
+    return;
+  }
+  document.getElementById('candList').style.display = 'none';
+  document.getElementById('candDetail').style.display = 'block';
+  document.getElementById('candDetailTitle').textContent = data.scenario_id;
+  const seal = (data.meta && data.meta.seal_status) || '';
+  const b = document.getElementById('candDetailSeal');
+  b.textContent = seal || 'candidate';
+  b.className = 'badge ' + sealBadge(seal);
+  document.getElementById('candDetailPath').textContent = data.path || '';
+  const links = data.links || {};
+  document.getElementById('candDeepLinks').innerHTML = `
+    <a class="deep-link" href="${escapeHtml(links.trajectory || '#')}"># trajectory</a>
+    <a class="deep-link" href="${escapeHtml(links.scenario || '#')}"># scenario</a>
+    <a class="deep-link" href="${escapeHtml(links.script || '#')}"># script</a>
+    <a class="deep-link" href="${escapeHtml(links.api || '#')}" target="_blank" rel="noopener">API JSON</a>
+  `;
+  renderTrajectory(data.trajectory || {});
+  renderScenarioPanel(data);
+  renderScriptPanel(data);
+  showTab(tab);
+  window._candData = data;
+}
+function routeFromHash() {
+  const { id, tab } = parseHash();
+  if (id) {
+    openCandidate(id, tab);
+  } else {
+    document.getElementById('candDetail').style.display = 'none';
+    document.getElementById('candList').style.display = 'block';
+    loadCandidates();
+  }
+}
+document.getElementById('btnCandReload').onclick = () => loadCandidates();
+document.getElementById('candBack').onclick = (e) => {
+  e.preventDefault();
+  setHash(null);
+};
+document.querySelectorAll('.cand-tab').forEach(btn => {
+  btn.onclick = () => {
+    const tab = btn.getAttribute('data-tab');
+    const { id } = parseHash();
+    if (id) setHash(id, tab);
+    else showTab(tab);
+  };
+});
+['candSeal','candPri','candSrc'].forEach(id => {
+  document.getElementById(id).onchange = () => loadCandidates();
+});
+document.getElementById('candQ').oninput = () => {
+  clearTimeout(window._candT);
+  window._candT = setTimeout(loadCandidates, 200);
+};
+window.addEventListener('hashchange', routeFromHash);
 loadStory();
+routeFromHash();
 </script>
 </body>
 </html>
@@ -274,7 +550,9 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                 super().log_message(fmt, *args)
 
         def do_GET(self) -> None:  # noqa: N802
-            path = urlparse(self.path).path
+            parsed = urlparse(self.path)
+            path = parsed.path
+            qs = parse_qs(parsed.query or "")
             if path in ("/", "/index.html"):
                 body = _html_page()
                 self.send_response(200)
@@ -287,6 +565,37 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                 from conjecture_behaviour_runner.path_faithful import sole_continue_story
 
                 _json_response(self, 200, sole_continue_story())
+                return
+            if path == "/api/candidates":
+                from conjecture_behaviour_runner.candidates_ui import list_candidates
+
+                def _one(key: str) -> Optional[str]:
+                    vals = qs.get(key) or []
+                    return vals[0] if vals else None
+
+                limit_raw = _one("limit") or "200"
+                try:
+                    limit = int(limit_raw)
+                except ValueError:
+                    limit = 200
+                _json_response(
+                    self,
+                    200,
+                    list_candidates(
+                        seal=_one("seal"),
+                        priority=_one("priority"),
+                        source=_one("source"),
+                        q=_one("q"),
+                        limit=limit,
+                    ),
+                )
+                return
+            if path.startswith("/api/candidates/"):
+                from conjecture_behaviour_runner.candidates_ui import get_candidate
+
+                sid = unquote(path[len("/api/candidates/") :].strip("/"))
+                payload = get_candidate(sid)
+                _json_response(self, 200 if payload.get("ok") else 404, payload)
                 return
             _json_response(self, 404, {"error": "not_found"})
 
@@ -325,8 +634,8 @@ def serve_ui(
     handler = _make_handler()
     httpd = ThreadingHTTPServer((host, port), handler)
     url = f"http://{host}:{port}/"
-    print(f"Conjecture UI → {url}")
-    print("  Run healthy story · Prove planted bugs · story timeline")
+    print(f"Conjecture local console → {url}")
+    print("  Candidate Scenarios · healthy story · prove planted bugs")
     print("Ctrl+C to stop.")
     if open_browser:
         threading.Timer(0.4, lambda: webbrowser.open(url)).start()

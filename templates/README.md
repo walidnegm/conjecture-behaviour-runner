@@ -75,3 +75,18 @@ run_script(script, adapter=ControlPlaneStreamAdapter(), llm_mode=LlmMode.STUB)
 | Your product goldens | Host-private *instances* of templates |
 
 See also: `demo_scripts()` — two synthetic `demo_task` instances for CI smoke.
+
+---
+
+## Candidate author (Scenario precursor)
+
+Autonomously author **candidate Scenarios** from host vocabulary (no LLM):
+
+| | |
+|--|--|
+| **Template pack** | [`candidate_author/`](candidate_author/) |
+| **Python** | `conjecture_behaviour_runner.candidate_author` |
+| **CLI** | `conjecture candidates author --example --out DIR` |
+
+Host fills kinds/leaves; engine emits Scenario YAML for the local console
+(`CONJECTURE_CANDIDATES_DIR`). Product STEAL tables stay on the host.

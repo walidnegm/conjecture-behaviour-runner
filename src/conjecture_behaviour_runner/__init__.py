@@ -46,6 +46,8 @@ from conjecture_behaviour_runner.templates import (
     reorient_keeps_owner_script,
     sole_continue_script,
 )
+# candidate_author is a subpackage — import from
+# conjecture_behaviour_runner.candidate_author (host vocabulary stays outside).
 from conjecture_behaviour_runner.temporal import (
     TRAJECTORY_INVARIANT_KINDS,
     check_trajectory_invariant,

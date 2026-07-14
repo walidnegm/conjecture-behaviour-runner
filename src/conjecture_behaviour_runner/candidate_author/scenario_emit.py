@@ -6,9 +6,19 @@ import re
 from pathlib import Path
 from typing import Any, Sequence
 
-import yaml
-
 from conjecture_behaviour_runner.candidate_author.models import CandidatePath
+
+
+def _require_yaml():
+    """PyYAML is optional (``[scenarios]`` extra); only needed when dumping YAML."""
+    try:
+        import yaml  # type: ignore
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError(
+            "YAML scenario emit requires PyYAML — "
+            "pip install conjecture-behaviour-runner[scenarios]"
+        ) from exc
+    return yaml
 
 _HEADER = """\
 # Conjecture Scenario (CANDIDATE — authored by portable candidate_author)
@@ -190,6 +200,7 @@ def scenario_to_yaml(
     *,
     exclusive_owner: str | None = None,
 ) -> str:
+    yaml = _require_yaml()
     doc = candidate_to_scenario_dict(path, exclusive_owner=exclusive_owner)
     body = yaml.safe_dump(
         doc, sort_keys=False, default_flow_style=False, allow_unicode=True, width=100,

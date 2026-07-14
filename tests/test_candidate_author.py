@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from conjecture_behaviour_runner.candidate_author import (
     HostVocabulary,
     author_candidates,
@@ -11,6 +13,11 @@ from conjecture_behaviour_runner.candidate_author import (
     load_example_template_bundle,
     write_candidate_scenarios,
 )
+
+try:
+    import yaml  # noqa: F401
+except ImportError:  # pragma: no cover
+    yaml = None  # type: ignore
 
 
 def test_blocks_foreign_leaf_portable() -> None:
@@ -40,6 +47,8 @@ def test_blocks_foreign_leaf_portable() -> None:
 
 
 def test_example_template_authors_and_writes(tmp_path: Path) -> None:
+    if yaml is None:
+        pytest.skip("PyYAML not installed — pip install conjecture-behaviour-runner[scenarios]")
     bundle = load_example_template_bundle()
     assert bundle["vocabulary"] is not None
     paths = author_candidates(
@@ -61,6 +70,8 @@ def test_example_template_authors_and_writes(tmp_path: Path) -> None:
 
 
 def test_cli_candidates_author_example(tmp_path: Path) -> None:
+    if yaml is None:
+        pytest.skip("PyYAML not installed — pip install conjecture-behaviour-runner[scenarios]")
     from conjecture_behaviour_runner.cli import main
 
     out = tmp_path / "scen"

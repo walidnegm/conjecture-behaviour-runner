@@ -20,7 +20,8 @@ jobs:
       - name: Install package
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          # [scenarios] = PyYAML for candidate_author YAML emit/load + script I/O
+          pip install -e ".[dev,scenarios]"
       - name: Version integrity
         run: |
           V_PY=$(python -c "from conjecture_behaviour_runner._version import __version__; print(__version__)")

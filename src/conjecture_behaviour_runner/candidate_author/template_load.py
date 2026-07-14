@@ -4,14 +4,24 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Optional
 
-import yaml
-
 from conjecture_behaviour_runner.candidate_author.models import (
     HostIncident,
     HostVocabulary,
     MatrixCell,
     ResidualProbe,
 )
+
+
+def _require_yaml():
+    """PyYAML is optional (``[scenarios]`` extra); only needed when loading YAML templates."""
+    try:
+        import yaml  # type: ignore
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError(
+            "YAML template load requires PyYAML — "
+            "pip install conjecture-behaviour-runner[scenarios]"
+        ) from exc
+    return yaml
 
 # templates: package-local first, then extract repo templates/
 _PKG = Path(__file__).resolve().parent
@@ -28,6 +38,7 @@ def _templates_dir() -> Path:
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
+    yaml = _require_yaml()
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     return raw if isinstance(raw, dict) else {}
 

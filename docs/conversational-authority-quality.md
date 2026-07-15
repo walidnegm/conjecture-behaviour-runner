@@ -39,11 +39,18 @@ handoff law. In that world Conjecture is **over-engineered**: you would first ha
 pay the **control-plane design debt** (name owners, pins, yield rules) before any seed
 is meaningful. Guardrails + prompt hygiene may be enough until state becomes load-bearing.
 
-The package is honest that it targets complex stateful agents. What it often under-states
-is how much **upfront structural work** that implies: you are not “adding a test runner”;
-you are aligning product code to a **control plane shape** (or projecting one out of
-existing ledger state). If that shape is absent, adoption cost is a **refactor**, not a
-pip install.
+**Narrow by design today.** Even with honest “skip” guidance, this framework only
+*shines* if you have (or will build) something like a **conversation control plane**:
+exclusive ownership, entity pinning/locking, explicit handoff / yield rules. Free-form
+or heavily emergent multi-agent designs (vector search + tool soup, no durable owner)
+are not a soft fit — they are a **different architecture**. Forcing this package onto
+them means **imposing structure first**. That is a feature for the target audience and
+a non-starter for everyone else. The *ideas* (propose vs enforce, failure → law →
+proof) can travel; the *machinery* should not be bolted on as fashion.
+
+You are not “adding a test runner.” You are aligning product code to a **control-plane
+shape** (or projecting one out of existing ledger state). If that shape is absent,
+adoption cost is a **refactor**, not a pip install.
 
 ---
 
@@ -88,7 +95,7 @@ product design.
 ## What adoption actually costs
 
 The demo loop (plant a bug → FAIL → PASS) is clean in a mini-app. On a real backend it is
-**non-trivial busywork**, especially for a small team shipping weekly:
+an **ongoing tax**, not a one-time setup — especially for a small team shipping weekly:
 
 | Cost | What you do |
 |------|-------------|
@@ -99,8 +106,34 @@ The demo loop (plant a bug → FAIL → PASS) is clean in a mini-app. On a real 
 | **CI cognition** | Pin or freeze labels so goldens are deterministic (separate from live model quality) |
 
 If you already have exclusive owner + pins after each act, wiring a Driver is the main
-job. If you do **not**, the first bill is design, not YAML. Prefer **one** real law sealed
-on your path over a growing catalog of aspirational modes.
+job. If you do **not**, the first bill is design, not YAML.
+
+**Many teams will correctly decline.** The burn rate of authority failures may not
+justify the tax. That is a product judgment, not a moral failure. Prefer **one** real
+law sealed on your path over a growing catalog of aspirational modes. If you only need
+the vocabulary, steal **Failure → Law → Proof** and **LLM proposes · code enforces**
+without adopting Conjecture at all.
+
+---
+
+## Terminology (onboarding curve)
+
+Precise language reduces ambiguity; it also creates a **non-trivial learning cliff**.
+New readers will need a few terms before seeds and drivers make sense:
+
+| Term | Plain meaning |
+|------|----------------|
+| **Authority failure** | Reply looks fine; who owns / what is locked / what opened is wrong |
+| **Enforce half** | Coded rule-set after the model proposes a label |
+| **Observation** | Your post-turn state projected into owner · pins · outcome fields Conjecture can check |
+| **Pinned cognition** | Labels fixed for CI so the same golden fails for the same state break |
+| **Soft enforce** | Code that falls through / fails open so the model can steal while sounding helpful |
+| **CAQ-FM** | Named map of authority failure modes + laws + proofs |
+| **Seed** | Portable script + planted-bug proof under `patterns/` |
+| **Runnable / seed_pending / host_only** | This package can prove it / law named only / product host seals it |
+
+You do not need every term on day one. Start with **owner · pin · handoff** after a
+turn. Everything else is packaging around that check.
 
 ---
 
@@ -149,6 +182,7 @@ budget.
 | Domain math, pricing tables | Domain / product tests |
 | Prose tone and style | LLM eval |
 | Save rewritten by prompt/worker desync | Host substrate seals (`host_only` in catalog) |
+| True async / multi-writer races | See **Known gaps** below — not deep in this guide yet |
 
 ---
 
@@ -178,9 +212,10 @@ The full list of modes lives in:
 
 **Readiness (v0.1.x):** the **catalog is broader than the battery**. Today there are on
 the order of **six runnable portable seeds**. Most production bugs you will hit still
-land as **host_only** or **seed_pending**. That is normal for a young package: you are
-largely buying a **philosophy + shared vocabulary + a thin proven core**, not a
-battle-tested wall of every failure mode. Hosts still carry the long tail of seals.
+land as **host_only** or **seed_pending**. You are largely buying a **philosophy +
+shared vocabulary + a thin proven core + a harness**, not a comprehensive drop-in
+regression wall. Hosts still carry the long tail of seals. That is early-package
+reality, not a temporary doc footnote.
 
 ### Seed folders vs mode ids
 
@@ -199,10 +234,53 @@ Talk in plain failure language or declarative ids. Use folder names only for pat
 
 ---
 
+## Known gaps (honest, expandable)
+
+These are real production classes this guide and package do **not** yet treat deeply:
+
+| Gap | Why it matters | Where it might grow |
+|-----|----------------|---------------------|
+| **Concurrency / races** | Parallel turns, multi-writer agents, Temporal/async workers can break owner/pin law without any single-turn soft enforce | Host fencing (`expected_version` / claim), future Conjecture multi-actor scripts |
+| **Classifier half** | Wrong proposals + green enforce = silent UX decay | Separate evals; not folded into Conjecture goldens |
+| **Thin portable battery** | Map >> runnable seeds | Promote host seals when Observation-shaped |
+| **Lighter adoption** | Full scripts + drivers is heavy for small teams | Templates, thinner “minimum authority” projection (owner+pin only) |
+| **Terminology cliff** | Precise = dense | This glossary; more “plain English first” examples |
+
+Naming a gap is not a roadmap commitment. It is a place the **scope can expand** without
+diluting the core.
+
+---
+
+## Broader scope: what can expand (without diluting the core)
+
+The **current slice** is narrow on purpose: **authority after a turn** under pinned
+labels, for control-plane-shaped systems.
+
+The **portable core** is broader than the current battery, and is what should grow:
+
+| Layer | Today | Expandable toward |
+|-------|--------|-------------------|
+| **Doctrine** | LLM proposes · code enforces; Failure → Law → Proof | Same triad for other “code owns truth” surfaces (saves, tables, finite acts) — still not general product QA |
+| **Control plane** | Owner · pin · yield / handoff | Optimistic concurrency, multi-agent exclusivity, claim/TTL — still code-owned |
+| **Conjecture** | Scripted multi-turn enforce regression | More seeds; multi-actor / race scripts; richer Observations; still not LLM-as-judge |
+| **CAQ-FM map** | Named authority modes + status | Promote seed_pending → runnable; keep host_only honest |
+| **Half-story pair** | Enforce only | Sibling cognition quality (labels/prompts) without merging into enforce goldens |
+
+**What expansion is not:** turning this into “all agent reliability,” ChatGPT-style evals,
+or mandatory process for free-form bots. Breadth grows by **more sealed laws on the
+enforce path** and **clearer composition with other tools** — not by claiming every
+chat product needs a full CAQ stack.
+
+If you adopt only one idea from this document, take **Failure → Law → Proof** under
+**LLM proposes · code enforces**. Everything else (registry, seeds, drivers) is optional
+machinery for teams that already pay for state.
+
+---
+
 ## How a new reader should use this package
 
 1. **Decide fit** — stateful control plane vs free-form chatbot (see above).  
-2. **Read this guide** — state-law breaks, costs, half-story.  
+2. **Read this guide** — state-law breaks, costs, half-story, expansion horizon.  
 3. **Skim the [README](../README.md)** — install, demos, drivers.  
 4. **Open the [catalog](../incidents/CATALOG.md)** — map vs which modes are runnable.  
 5. **Run a planted-bug demo** — see FAIL then PASS on the mini-app.  
@@ -245,4 +323,5 @@ Optional deeper vocabulary inside such a monorepo:
 **Conjecture** fails CI when coded authority softens under pinned labels.  
 **CAQ-FM** names those failures and which ones this package can prove today.  
 Together they make “LLM proposes · code enforces” **testable** — for teams that already
-(or will) own a control plane. Everyone else can take the idea and skip the machinery.
+(or will) own a control plane. The core ideas travel farther than the current battery;
+the machinery should not be forced on products that do not earn it.

@@ -263,6 +263,12 @@ Implementers (SI, vendor, AI) may write scripts, projections, and drivers. Whoev
 accountable for outcomes **accepts** the laws and retains the PASS/FAIL evidence after
 handoff — the builder should not self-certify against weak criteria.
 
+Relinquishing *build* does not relinquish **governance of quality**. The SI, agent
+builder, or runtime still owes **multi-turn regression on the enforce half** — not
+“did the sentence sound smart?” Chat evals and demos can stay with the delivery team;
+**post-turn owner · active record · handoff** remains someone’s explicit
+responsibility, preferably with proofs the buyer can re-run after handoff.
+
 ---
 
 ## Terms

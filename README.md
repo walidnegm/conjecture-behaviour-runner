@@ -11,6 +11,9 @@ active record**, and clear rules for when **ownership may yield** — we are **n
 inventing** those; we are **asserting them after every turn** under LLM routing, when
 helpful detours often fail-open and chat evals only score the prose.
 
+Whether you build in-house or via an SI / agent builder / runtime: someone must own
+**multi-turn regression on the enforce half** — not “did the sentence sound smart?”
+
 **Why / how (conceptual home):**  
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md

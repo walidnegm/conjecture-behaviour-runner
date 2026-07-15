@@ -205,6 +205,7 @@ and invariants.
 |-----|------|
 | [README](../README.md) | Install, planted-bug demos, drivers |
 | [CATALOG](../incidents/CATALOG.md) | Full mode list + status |
+| [registry.yaml](../incidents/registry.yaml) | Machine mode list (`id` ↔ seed) |
 | [MATURITY.md](./MATURITY.md) | Stage / battery / known gaps |
 | [SPEC](./SPEC.md) | Normative package contract |
 | [incidents/README](../incidents/README.md) | Classify → land a seed |

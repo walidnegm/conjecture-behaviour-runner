@@ -292,7 +292,33 @@ def _html_page() -> bytes:
         <strong>Today in this console:</strong> invent/expand <em>Run</em> uses
         <span class="mono">GeometryHoldAdapter</span> (stub — not real product Act).
         Path-faithful mini-app demos use <span class="mono">MiniAppAdapter</span>.
-        Real Bot0 multi-turn = host Adapter that calls product chat/control APIs.
+        Real product multi-turn = host Adapter that calls product chat/control APIs
+        (never harness SQL into the system of record).
+      </p>
+      <p class="muted" style="margin:.65rem 0 .35rem; font-size:.85rem">
+        <strong>End-to-end against a real product (when wired)</strong>
+      </p>
+      <ul class="muted" style="margin:0; font-size:.85rem">
+        <li><strong>API-only Driver</strong> — Adapter talks to product HTTP/SSE/session/control
+          APIs. Path-faithful to user Act. No direct SQL from Conjecture or the Adapter.</li>
+        <li><strong>Test deployment / tenant</strong> — E2E will write SoR rows (messages, pins,
+          claims). That is expected. Isolate with a test env/account; cleanup/TTL is
+          <em>platform</em> policy (admin API or env job), not a harness DB backdoor.</li>
+        <li><strong>Token / cost / cold product</strong> — Live multi-turn can burn model spend.
+          Quotas, stub/freeze cognition, turn caps, and cheap test keys are
+          <em>platform</em> responsibilities the Driver must respect. Conjecture supplies
+          pinned-label CI mode when the product exposes it; it should not special-case a
+          vendor LLM API.</li>
+        <li><strong>Product-agnostic harness</strong> — Third parties implement the same plugin
+          (Adapter) against <em>their</em> APIs. Contract stays owner · pins · mode detection
+          · PASS/FAIL; only the Adapter changes.</li>
+        <li><strong>Start narrow</strong> — One exclusive surface + one stealer invent scenario
+          before expanding the matrix. Arrange should prefer seed mid-state over endless
+          cold discovery when the product allows.</li>
+      </ul>
+      <p class="muted" style="margin:.5rem 0 0; font-size:.85rem">
+        Invent/expand scenarios today prove discovery + stub enforce + evidence shape.
+        They do <em>not</em> hit real product Act until a host Adapter is plugged in.
       </p>
     </details>
     <div id="candTaxonomy" class="muted" style="margin:0 0 .75rem; font-size:.9rem"></div>

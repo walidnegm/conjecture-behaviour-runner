@@ -10,8 +10,13 @@ enforces**.
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
-That guide owns the full pitch (state-law breaks, the enforce half, CAQ-FM map). This
-README is the package face: install, demos, drivers, what gets checked after each turn.
+That guide owns the full pitch **and** the honest limits: control-plane design debt,
+setup cost, ~6 runnable seeds vs a broader catalog map, and that Conjecture is only the
+**enforce** half (classifier drift is separate). This README is the package face:
+install, demos, drivers, what gets checked after each turn.
+
+**Fit:** stateful multi-turn agents with owners/pins/handoffs. Free-form RAG / early
+prompt chaining can safely ignore the machinery until state is load-bearing.
 
 | Doc | What it is |
 |-----|------------|

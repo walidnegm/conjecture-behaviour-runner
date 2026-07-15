@@ -15,13 +15,35 @@ enforcement is soft, the model can **steal or hijack** the path and still produc
 helpful-looking answer. Conjecture is regression for the **enforce** half: after each
 scripted turn it checks that owner · pin · handoff law still hold.
 
-That is the whole quality problem this package is built around. **CAQ-FM**
+That is the quality problem this package is built around. **CAQ-FM**
 (**Conversational Authority Quality — Failure Modes**) names those breaks, their laws,
 and how you prove they stay sealed.
 
 This guide is the conceptual home for that pitch. The [README](../README.md) is the
 package face (install, demos, drivers). If you only read one conceptual doc, make it
 this one.
+
+---
+
+## Who this is for — and who should skip it
+
+**Worth studying / adopting when** you already run (or are committed to building) a
+**stateful multi-turn agent** with real records and handoffs: claims, tickets,
+workflows, multi-step planning, specialists that must not steal mid-flight. If wrong
+owner / silent pin drop / illegal restart would be a product incident, this vocabulary
+pays rent.
+
+**Safely ignore for now when** you are still “chain some prompts and see,” or ship a
+mostly free-form RAG / single-turn Q&A bot without exclusive ownership, entity locks, or
+handoff law. In that world Conjecture is **over-engineered**: you would first have to
+pay the **control-plane design debt** (name owners, pins, yield rules) before any seed
+is meaningful. Guardrails + prompt hygiene may be enough until state becomes load-bearing.
+
+The package is honest that it targets complex stateful agents. What it often under-states
+is how much **upfront structural work** that implies: you are not “adding a test runner”;
+you are aligning product code to a **control plane shape** (or projecting one out of
+existing ledger state). If that shape is absent, adoption cost is a **refactor**, not a
+pip install.
 
 ---
 
@@ -36,7 +58,8 @@ this one.
 |--------------------------------|----------------------------|
 | Fluent steals, silent pin drops, empty “success” | Brittle keyword routing, no real understanding |
 
-Viable products do both: **model for irregular language**, **code for authority**.
+Stateful products that hit authority failures usually need **both**: model for irregular
+language, code for authority. Simpler products may never need the full split.
 
 **Unit of institutional memory** when something breaks and you fix it:
 
@@ -46,13 +69,38 @@ Viable products do both: **model for irregular language**, **code for authority*
 
 A test with no law is not a seal. A law with no ratchet is not sealed.
 
-### Prevention still beats paperwork
+### Structure helps; it is not a religion
 
-The strongest fix is structural: early-return after real saves, exclusive owners, finite
-chips for code-owned choices, no fall-through into freestyle chat for authority paths.
+When authority is load-bearing, **prefer** structural ownership (early-return after real
+saves, exclusive owners, finite chips for code-owned choices, no soft fall-through into
+freestyle chat for mutative paths). That is where most production pain lives.
 
-Conjecture seeds and host ratchets **catch what structure missed**. They are not a
-substitute for making the right path the only easy path in product code.
+It is **not** a claim that every conversational product needs a full “authority quality”
+layer, registry, and seed library. Some domains are simple enough that a few guardrails
+and solid prompts suffice. Use this machinery when the failure class keeps burning money
+or trust — not because a doc said so.
+
+Conjecture seeds and host ratchets **catch what structure missed**. They do not replace
+product design.
+
+---
+
+## What adoption actually costs
+
+The demo loop (plant a bug → FAIL → PASS) is clean in a mini-app. On a real backend it is
+**non-trivial busywork**, especially for a small team shipping weekly:
+
+| Cost | What you do |
+|------|-------------|
+| **Scripts** | Multi-turn user messages + **expected state after each turn** |
+| **Projection** | Map your internal session / graph / workflow state into Observation (owner · pins · outcome) |
+| **Drivers** | Keep adapters current for LangGraph, Temporal, HTTP, custom stores, … |
+| **Catalog hygiene** | Registry rows, catalog status, seeds under `patterns/` when you promote a law |
+| **CI cognition** | Pin or freeze labels so goldens are deterministic (separate from live model quality) |
+
+If you already have exclusive owner + pins after each act, wiring a Driver is the main
+job. If you do **not**, the first bill is design, not YAML. Prefer **one** real law sealed
+on your path over a growing catalog of aspirational modes.
 
 ---
 
@@ -81,14 +129,35 @@ coded rule-set still seal the conversation?**
 
 ---
 
-## Failure modes: the catalog companion
+## Half the quality story (classifier drift)
+
+Conjecture is deliberately **only the enforce half**. That is a feature for CI
+repeatability and a **hard limit** in production:
+
+- If the model starts proposing the **wrong label** more often, enforcement goldens can
+  stay **green** while user experience degrades.  
+- The two halves are **coupled in the product** even when tests split them.  
+- You still need **separate classifier evals, prompt regression, and monitoring**.  
+
+Do not treat a green Conjecture suite as “conversation quality is fine.” It means:
+**given the labels you pinned, code did not soften.** Cognition drift is a different
+budget.
+
+| Not Conjecture’s job | Where that lives instead |
+|----------------------|---------------------------|
+| Free-text classifier quality / drift | Cognition tests, prompt evals, online monitoring |
+| Domain math, pricing tables | Domain / product tests |
+| Prose tone and style | LLM eval |
+| Save rewritten by prompt/worker desync | Host substrate seals (`host_only` in catalog) |
+
+---
+
+## Failure modes: map vs battery
 
 The full list of modes lives in:
 
-**[incidents/CATALOG.md](../incidents/CATALOG.md)** — comprehensive human index  
+**[incidents/CATALOG.md](../incidents/CATALOG.md)** — human index  
 **[incidents/registry.yaml](../incidents/registry.yaml)** — machine source of truth  
-
-Examples of modes (see catalog for the full set):
 
 | What the user hits | Mode id | Public seed? |
 |--------------------|---------|--------------|
@@ -101,21 +170,24 @@ Examples of modes (see catalog for the full set):
 | Glossary answers instead of the action | `packaging_steal` | Named; seed pending |
 | “Do X and tell me Y” loses half | `compound_act_loss` | Host prove-out today |
 
-**Status in the catalog** tells you honestly:
+**Status** is intentional honesty:
 
 - **runnable** — this package can FAIL/PASS it under `patterns/`  
-- **seed_pending** — law is named; public seed not landed yet  
-- **host_only** — product hosts seal it; not a mini-app seed (e.g. substrate save rewrite)
+- **seed_pending** — law named; no public seed yet  
+- **host_only** — product hosts seal it; not a portable mini-app seed  
 
-So the catalog is **not** “only six demos.” It is the **full map**, with honest status.
+**Readiness (v0.1.x):** the **catalog is broader than the battery**. Today there are on
+the order of **six runnable portable seeds**. Most production bugs you will hit still
+land as **host_only** or **seed_pending**. That is normal for a young package: you are
+largely buying a **philosophy + shared vocabulary + a thin proven core**, not a
+battle-tested wall of every failure mode. Hosts still carry the long tail of seals.
 
 ### Seed folders vs mode ids
 
-Some `patterns/` folder names are older than the declarative ids. That is intentional
-so CI paths stay stable:
+Some `patterns/` folder names are older than the declarative ids (CI path stability):
 
-| Mode id (prefer this in discussion) | Folder under `patterns/` |
-|-------------------------------------|---------------------------|
+| Mode id (prefer in discussion) | Folder under `patterns/` |
+|--------------------------------|---------------------------|
 | `owner_steal` | `owner_steal_mid_continue` |
 | `pin_drop` | `drop_pin_mid_continue` |
 | `illegal_restart` | `illegal_restart_mid_continue` |
@@ -129,46 +201,29 @@ Talk in plain failure language or declarative ids. Use folder names only for pat
 
 ## How a new reader should use this package
 
-1. **Read this guide** — state-law breaks, doctrine, what Conjecture proves.  
-2. **Skim the [README](../README.md)** — install, demos, drivers.  
-3. **Open the [catalog](../incidents/CATALOG.md)** — which modes exist and which are runnable.  
-4. **Run a planted-bug demo** from the README / examples — see FAIL then PASS.  
-5. **Land a law** only when you have a real multi-turn state break:
+1. **Decide fit** — stateful control plane vs free-form chatbot (see above).  
+2. **Read this guide** — state-law breaks, costs, half-story.  
+3. **Skim the [README](../README.md)** — install, demos, drivers.  
+4. **Open the [catalog](../incidents/CATALOG.md)** — map vs which modes are runnable.  
+5. **Run a planted-bug demo** — see FAIL then PASS on the mini-app.  
+6. **Land a law only when you have a real multi-turn state break** on *your* path:
    - classify (see [incidents/README.md](../incidents/README.md))  
-   - add registry row + `patterns/<seed>/` + catalog status  
+   - registry + seed when the law is Observation-shaped and reusable  
    - prove FAIL without the fix, PASS with it  
 
-You do **not** need a new public seed for every host bug. Prefer structural host fixes;
-promote to a portable seed when the law is Observation-shaped and reusable.
-
----
-
-## What Conjecture does *not* claim
-
-| Not Conjecture’s job | Where that lives instead |
-|----------------------|---------------------------|
-| Free-text classifier quality | Separate cognition / prompt tests |
-| Domain math, pricing tables | Domain / product tests |
-| Prose tone and style | LLM eval |
-| Save rewritten by prompt/worker desync | Host substrate seals (listed as host_only in catalog) |
-
-Conjecture pins cognition on purpose so CI is **deterministic**. Pair it with classifier
-tests if you care about “was the label right?”
+You do **not** need a new public seed for every host bug. Prefer a structural fix on the
+host; promote a portable seed when the law generalizes.
 
 ---
 
 ## Relationship to a full product host
 
-Product hosts (e.g. Bot0) may keep:
+Product hosts (e.g. Bot0) may keep more modes, STEAL incident tables, unit ratchets,
+deploy checks, and a longer private registry. This package ships the **portable
+companion**: shared doctrine, shared mode names, and the runnable seeds any host can
+adopt without product secrets.
 
-- more modes and STEAL incident tables  
-- unit ratchets and deploy checks  
-- a longer private registry  
-
-This package ships the **portable companion**: shared doctrine, shared mode names, and
-runnable seeds that any host can adopt without product secrets.
-
-Optional deeper vocabulary when you work inside such a monorepo:  
+Optional deeper vocabulary inside such a monorepo:  
 `docs/the-language-of-building-ai-products.md` (host repo — not copied here).
 
 ---
@@ -187,6 +242,7 @@ Optional deeper vocabulary when you work inside such a monorepo:
 
 ## In one sentence
 
-**Conjecture** runs multi-turn scripts that fail when coded authority softens.  
-**CAQ-FM** names those failures, their laws, and which ones this package can prove today.  
-Together they make “LLM proposes · code enforces” **testable**, not just a slogan.
+**Conjecture** fails CI when coded authority softens under pinned labels.  
+**CAQ-FM** names those failures and which ones this package can prove today.  
+Together they make “LLM proposes · code enforces” **testable** — for teams that already
+(or will) own a control plane. Everyone else can take the idea and skip the machinery.

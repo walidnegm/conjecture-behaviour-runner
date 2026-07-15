@@ -20,8 +20,9 @@ This is the human index for [Conversational Authority Quality](../docs/conversat
 | **n_a** | Intentional non-bug path (no seed needed) |
 | **host_only** | Documented here for the map; prove-out lives in product hosts (not this package) |
 
-Host monorepos may keep extra product-specific modes. This catalog is the **shared
-namespace** of known CAQ-FM modes, not “only the six demos.”
+Host monorepos may keep extra product-specific modes. This catalog is the **shared map**
+of known CAQ-FM modes. The **runnable battery** is still thin (count below); most rows are
+seed_pending / host_only — philosophy + vocabulary first, full portable coverage later.
 
 ---
 

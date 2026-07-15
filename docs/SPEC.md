@@ -6,13 +6,14 @@
 | **Document ID** | `CBR-SPEC` |
 | **Canonical path** | [`docs/SPEC.md`](./SPEC.md) |
 | **Title** | Conjecture Behaviour Runner Specification |
-| **Version** | **0.1.5** (alpha) — HTTP e2e proven; face claim frozen-cognition honesty; single version |
+| **Version** | **0.1.6** (alpha) — candidate discovery (expand + invent); optional env LLM propose |
 | **Status** | **Active** — authoritative for claim, Script/verifier contracts, scope |
 | **Audience** | Integrators, contributors, agent authors of goldens |
 | **Companion face** | [README](../README.md) — **lead with planted-bug demo**; use cases; trap line |
 | **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
 | **Prompt seed** | [prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) — trajectory + ODD → Script |
-| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.5** (see `_version.py`) |
+| **Candidate discovery** | [templates/candidate_author/README.md](../templates/candidate_author/README.md) — expand · invent · propose (§2.2) |
+| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.6** (see `_version.py`) |
 | **Claim hierarchy (locked)** | **Face (plain):** catch agent bugs that still look fine in chat · **Principle:** LLM proposes · code enforces (ledger/handoff rule-set) · **Precise:** freeze-safe state-law gates · **Technical:** envelopes / pin-freeze · **Gloss:** CCP-shaped conformance; ledger store agnostic — see §0 |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Inspiration / primary pattern** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) — hosts isomorphic to that format are the apt application |
@@ -398,12 +399,13 @@ Same stack as §0 (abbreviated execution view):
        → OBSERVED TRAJECTORY → Verifier → Report
 ```
 
-| Layer today (0.1.2) | Status |
+| Layer today (0.1.6) | Status |
 |---|---|
 | `ConjectureScript` / `run_script` / `RunResult` | **Stable** |
 | CognitionProvider + FreezeStore (stub / freeze / record) | **Shipped** — local/cloud still host-supplied |
 | Verifier: standard + temporal + outcome-specific | **Shipped** — richer temporal / domain kinds open |
-| CLI: `run`, `path-faithful`, JSON/JUnit, discovery | **Shipped** — shards/retries/timeouts open |
+| CLI: `run`, `path-faithful`, JSON/JUnit, script discovery | **Shipped** — shards/retries/timeouts open |
+| Candidate discovery (expand + invent + optional LLM propose) | **Shipped** — §2.2; Scenario precursor, not live chat routing |
 | Path-faithful mini-app + planted bugs | **Shipped** (credibility vertical) |
 | Experimental `Scenario` / `Trajectory` + compile bridge | **Partial** — compile + trajectory bridge; not full rich runner |
 | LangGraph / Crew / Temporal / HTTP / Playwright adapters | **Roadmap** — extension contract locked in §0 |
@@ -589,6 +591,7 @@ artifact today: pin + source + freeze_key + optional evidence.
 | **0.1.3** | Claim reframe: face = path-faithful state-law gates; CCP inspiration; high-stakes use cases; trap = not chat validator; vision quarantined | ✅ docs |
 | **1 next** | Playwright / LangGraph / Temporal / Crew adapters; agent synthesizer **with required expected**; fail closed if golden has no expected | open |
 | **0.1.5** | HttpJsonAdapter + loopback HTTP host e2e + planted bugs over HTTP; face frozen-cognition honesty | ✅ |
+| **0.1.6** | Candidate discovery: **inventor** (geometry) + **expander** (cross-product); optional env LLM propose; caps default 4 | ✅ |
 | **2** | Richer temporal ops; observation/domain ground truth; generation + shrink; production runner (shards, retries) | open |
 | **3** | ODD corpus / explorer / N-run **contract hold-rate** distributions | open |
 
@@ -604,8 +607,115 @@ artifact today: pin + source + freeze_key + optional evidence.
 | `protocol.py` | `ControlPlaneAdapter`, `TurnObservation` |
 | `path_faithful.py` | Mini-app Act path + planted-bug proof |
 | `compile_scenario.py` | Conjecture Scenario → Conjecture Script; `RunResult` → observed trajectory |
-| `discover.py` / `report.py` / `cli.py` | Discovery, JSON/JUnit, CLI |
+| `discover.py` | **Script** file discovery for `conjecture run` (paths on disk) |
+| `candidate_author/` | **Candidate** discovery: expand + invent + optional propose → Scenario YAML |
+| `report.py` / `cli.py` | JSON/JUnit, CLI (`run`, `candidates author`, `ui`, …) |
 | `contrib/control_plane.py` | Optional CCP binding + portable goldens |
+
+---
+
+## 2.2 Candidate discovery: expander + inventor (normative)
+
+**Job:** author **candidate Scenarios** (precursor to Scripts) from **host vocabulary** —
+without waiting only for production soaks, and without shipping product agents as package enums.
+
+This is **not** free live-LLM bug discovery of unknown product law. It is **finite, code-owned**
+candidate generation for failure classes the host already names (or proposes under code backcheck).
+
+### Two engines (do not conflate)
+
+| Engine | Name | What it multiplies | Finds | Misses |
+|--------|------|--------------------|-------|--------|
+| **Expander** | Expansive author | Known axes: sole-continue kind × foreign capability/library leaf; matrix cells | Volume of mid-flight steals already on the axes | Novel polarities & fine phases (armed picker vs soft-name) |
+| **Inventor** | Inventive author | Failure **geometry**: exclusive surface × typed reply act × pre-decide stealer | e.g. domain_picker + typed_label vs inventory_soft_name **before** the next live miss | Still needs host to declare surfaces/stealers |
+
+**Product rule:** prefer **inventive first**, expansive second when both apply.
+`author_candidates()` sorts invention ahead of pure expansion on priority ties.
+
+```text
+HostVocabulary
+  · sole_continue_kinds / foreign_*     → EXPANDER (cross-product)
+  · exclusive_owner_surfaces
+  · pre_decide_stealing_leaves
+  · typed_reply_acts
+  · sealed_exclusive_pairs              → INVENTOR (geometry)
+        │
+        ▼  author_candidates()
+  CandidatePath[]  (source=invention | sole_continue_x_foreign | matrix | residual | incident)
+        │  write_candidate_scenarios()
+        ▼
+  Scenario YAML  →  compile / human promote  →  Script (CI golden)
+```
+
+### Inventor (code geometry — default on)
+
+Portable module: `conjecture_behaviour_runner.candidate_author.invent`
+
+Invention rule (no product NL routing)::
+
+    for surface in exclusive_owner_surfaces:
+      for stealer in pre_decide_stealing_leaves:
+        for act in typed_reply_acts:
+          invent: "when {surface} armed, {act} must not yield to {stealer}"
+
+- Invents **conflict classes**, not English phrase laundry lists.
+- Caps inventive Scenario rows per author turn: `CONJECTURE_INVENT_MAX_SCENARIOS` (default **4**).
+- Sealed pairs (`surface|stealer`) mark `regression_check` or skip per host policy.
+
+### Expander (cross-product + matrix)
+
+Portable module: `conjecture_behaviour_runner.candidate_author.engine`
+
+- `paths_from_sole_continue_x_foreign` — kind × foreign leaf under continue / soft escape.
+- `paths_from_matrix_cells` — host finite-expansion cells (`seed_pending` / `gap` / …).
+- `paths_from_incidents` / `paths_from_residuals` — sealed or residual seeds.
+
+Host finite matrix (axes, long-tail utterances) may stay **host-private**; the public package
+ships **templates** only (`templates/candidate_author/`).
+
+### Optional LLM propose tier (opt-in)
+
+| Step | Owner |
+|------|--------|
+| Propose new surfaces / stealers | **LLM** (host injects `llm_complete`, or env OpenAI-compatible client) |
+| Law backcheck (ids, novelty, failure slugs, typed acts) | **Code** `check_laws` |
+| Physics backcheck (user can reach surface; no fantasy) | **Code** `check_physics` |
+| Merge accepted → invent geometry | **Code** `merge_proposals_into_vocab` → `invent_all` |
+
+Principle: **LLM proposes · code enforces.** Proposals never auto-route product chat and never
+replace host vocabulary as sole authority.
+
+CLI::
+
+    conjecture candidates author --example --out DIR
+    conjecture candidates author --example --invent-llm --out DIR
+    conjecture candidates author --example --invent-llm \
+      --max-invent-proposals 4 --max-invent-scenarios 4 --out DIR
+
+**Env (no product model hardcode):**
+
+| Variable | Default | Role |
+|----------|---------|------|
+| `CONJECTURE_INVENT_MAX_PROPOSALS` | **4** | Max LLM geometry proposals per invent turn |
+| `CONJECTURE_INVENT_MAX_SCENARIOS` | **4** | Max inventive Scenario paths per author run |
+| `CONJECTURE_INVENT_PROMPT_PATH` | package `prompts/geometry_propose.md` | Editable system prompt |
+| `CONJECTURE_INVENT_LLM_BASE_URL` | — | OpenAI-compatible API base |
+| `CONJECTURE_INVENT_LLM_MODEL` | — | Model id (adopter’s choice) |
+| `CONJECTURE_INVENT_LLM_API_KEY` | falls back to `OPENAI_API_KEY` | Secret; never logged |
+| `CONJECTURE_INVENT_LLM_TIMEOUT_S` | 60 | HTTP timeout |
+
+### Honest boundaries
+
+| This package does | This package does not |
+|-------------------|------------------------|
+| Code-seed candidates from host-declared geometry and axes | Runtime keyword routing of free-text user meaning |
+| Optional LLM propose of *test geometry* under code backcheck | Sole-arbitrate product NL intent in the chat path |
+| Emit Scenario YAML for review / console | Claim free discovery of unknown product law |
+| Cap invent volume (default 4) | Expand to unbounded cartesian fog of product state |
+
+Face docs: [README — Candidate author](../README.md#candidate-author-expand--invent--optional-llm-propose) ·  
+[templates/candidate_author/README.md](../templates/candidate_author/README.md) ·  
+Patterns inventory: [incidents/CATALOG.md](../incidents/CATALOG.md).
 
 ---
 
@@ -1207,6 +1317,7 @@ MIT: **use, fork, ship** Scenario language + Script + verifier + thin runner(s).
 | **Cognition providers** | Local/cloud wrappers; freeze tooling | CI freeze/replay |
 | **Verifier kinds** | Temporal packs, domain-neutral invariants | Deeper contracts |
 | **Agent interface** | Spec → validated `ConjectureScript` + repair | Agentic golden authoring |
+| **Candidate discovery** | Host vocabulary → expand + invent; better geometry laws/physics checks | §2.2 — not live chat routing |
 | **Ecosystem bridges** | Orchestrator adapters; optional path-seed import; trace → observation | Integrate, don’t clone |
 | **Corpus** | Portable sole-continue / detour / pin-stable goldens | Shared language |
 | **CLI / CI** | Sharding, timeouts, richer JUnit, rerun | Production runner |
@@ -1250,6 +1361,7 @@ OSS and commercial **do not block each other**.
 | Outcome-specific contracts | Landing A ⇒ invariant set A |
 | Temporal verifier pack | eventually / never / until / at-most-once |
 | Path-seed bridge, not sim core | External exploration may seed; Conjecture gates law |
+| Candidate invent before expand | Geometry invent finds polarities expansion misses (§2.2) |
 | Driver plugins | Same Scenario/Script envelopes over in-process / HTTP / Playwright / orchestrators |
 | Failure shrinking (later) | Minimal multi-turn counterexample |
 | Contract hold-rates (later) | N-run *invariant hold*, not preference |

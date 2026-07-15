@@ -32,14 +32,14 @@ table + chat-path scripts — public is the portable slice, not the whole memory
 ## Learning loop
 
 ```text
-live bug (chat / logs / ledger row)     OR     planned law (finite expand)
+live bug (chat / logs / ledger row)     OR     planned law (candidate discovery)
         │                                           │
         ▼                                           ▼
   Is it Conjecture-class?  ──no──► fix elsewhere (classifier, domain math, UI copy…)
         │ yes
         ▼
   Capture as Scenario (describe the twist + expected law)
-        │
+        │  optional: conjecture candidates author (expand + invent)
         ▼
   Compile / author Script (executable golden)
         │
@@ -50,13 +50,17 @@ live bug (chat / logs / ledger row)     OR     planned law (finite expand)
   Land under patterns/ + CATALOG.md  → forever regression
         │
         ▼
-  Finite expand: core + neighbors (same law, other kind/phase/move)
+  Candidate discovery (portable):
+    · INVENTOR — exclusive surface × typed act × pre-decide stealer
+    · EXPANDER — sole-continue × foreign leaf; matrix core + neighbors
+    · optional LLM propose of new geometry (code law+physics backcheck)
   + long-tail utterances for script variety (never product routing)
 ```
 
-Host monorepo keeps a private finite-expansion matrix + gap queue
-(`seed_pending` cells). Public portable author:
-`conjecture candidates author --example` · `templates/candidate_author/`.
+Public portable author (expand + invent):
+`conjecture candidates author --example` · [`templates/candidate_author/`](../templates/candidate_author/) ·
+normative [SPEC §2.2](../docs/SPEC.md). Hosts may also keep a private finite-expansion
+matrix + gap queue (`seed_pending` cells).
 
 ## 1. Classify: is this a Conjecture-type bug?
 

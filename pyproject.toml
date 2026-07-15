@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "conjecture-behaviour-runner"
-version = "0.1.5"
+version = "0.1.6"
 description = "LLM proposes · code enforces — multi-turn state-law regression (owner · pin · handoff) under pinned cognition; Script/Turn/Driver/Observation/Invariant"
 readme = "README.md"
 requires-python = ">=3.11"

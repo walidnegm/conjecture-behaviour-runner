@@ -61,18 +61,34 @@ Runnable public seeds exist only where Status says “portable seed.” Host dog
 
 **Honest count:** 6 runnable public seeds · **dozen+** plain failure modes · host tables often **10–20+** sealed incident rows.
 
-### Finite expansion (host SSoT)
+### Candidate discovery: expander + inventor (portable)
 
-The host monorepo keeps a **law-centric finite matrix** (core + explicit neighbors)
-and **long-tail utterances** for script authoring only — not a full cartesian product
-of product state, and never runtime routing vocabulary.
+Do **not** wait only for production soaks. Author **candidate Scenarios** from host
+vocabulary, then promote open paths to Scripts. Normative: [docs/SPEC.md §2.2](../docs/SPEC.md).
+
+| Engine | What it does | Package surface |
+|--------|--------------|-----------------|
+| **Inventor** (prefer first) | Geometry: exclusive surface × typed act × pre-decide stealer | `candidate_author.invent` · `invent_all` |
+| **Expander** | Cross-product: sole-continue kind × foreign leaf; matrix cells | `paths_from_sole_continue_x_foreign` · matrix YAML |
+| **Propose** (opt-in) | LLM suggests surfaces/stealers; code law + physics backcheck | `--invent-llm` · `CONJECTURE_INVENT_LLM_*` |
+
+```bash
+conjecture candidates author --example --out /tmp/cbr_candidates
+conjecture candidates author --example --invent-llm --out /tmp/cbr_candidates
+```
+
+Defaults: **4** inventive scenarios / **4** LLM proposals per author turn.  
+Templates: [`templates/candidate_author/`](../templates/candidate_author/).
+
+Host monorepos may keep a private **law-centric finite matrix** (core + neighbors) and
+long-tail utterances for script authoring only — never runtime routing vocabulary.
 
 | Artifact | Where |
 |----------|--------|
-| Method | Host finite-expansion epic (private monorepo) |
-| Matrix / utterances | Host finite-expansion package (private) |
-| Portable candidate author | `conjecture candidates author --example` · `templates/candidate_author/` |
-| Gap report | Host gap CLI (private) |
+| Portable candidate author | `conjecture candidates author` · `templates/candidate_author/` |
+| Invent prompt (editable) | `candidate_author/prompts/geometry_propose.md` |
+| Host matrix / utterances | Host-private (optional) |
+| Gap report | Host gap CLI (optional) |
 
 When a portable seed lands here, the host matrix cell for that slug should move to
 `sealed` (or stay `host_only` only if no public seed is intended).
@@ -85,9 +101,10 @@ When a portable seed lands here, the host matrix cell for that slug should move 
 incidents/CATALOG.md          ← YOU ARE HERE
 incidents/README.md           ← classify → capture → land pattern
 incidents/patterns/<slug>/    ← runnable seeds (folder name = slug)
+templates/candidate_author/   ← expand + invent host vocabulary templates
+docs/SPEC.md §2.2             ← normative expander + inventor
 examples/                     ← demos (not full inventory)
 tests/                        ← package unit tests — NOT the inventory
-host: conjecture_expansion/   ← finite matrix + long-tail (monorepo)
 ```
 
 When you land `patterns/<slug>/` with `INCIDENT.md` + `script.json`, add a **portable seeds** row using **failure mode** + **slug** columns.

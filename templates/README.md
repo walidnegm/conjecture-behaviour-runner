@@ -78,17 +78,19 @@ See also: `demo_scripts()` — two synthetic `demo_task` instances for CI smoke.
 
 ---
 
-## Candidate author (Scenario precursor)
+## Candidate discovery (Scenario precursor)
 
-Autonomously author **candidate Scenarios** from host vocabulary:
+Autonomously author **candidate Scenarios** from host vocabulary.
+Normative: [`docs/SPEC.md` §2.2](../docs/SPEC.md).
 
 | | |
 |--|--|
 | **Template pack** | [`candidate_author/`](candidate_author/) |
 | **Python** | `conjecture_behaviour_runner.candidate_author` |
 | **CLI** | `conjecture candidates author --example --out DIR` |
-| **Invent (code)** | exclusive surface × typed act × pre-decide stealer |
-| **Propose (optional LLM)** | `--invent-llm` + `CONJECTURE_INVENT_LLM_*` env; code law/physics backcheck |
+| **Inventor** (prefer first) | exclusive surface × typed act × pre-decide stealer |
+| **Expander** | sole-continue × foreign leaf; matrix / residual / incident seeds |
+| **Propose** (optional LLM) | `--invent-llm` + `CONJECTURE_INVENT_LLM_*` env; code law/physics backcheck |
 | **Prompt file** | `candidate_author/prompts/geometry_propose.md` (override via env) |
 | **Caps** | default **4** proposals / **4** inventive scenarios per turn |
 

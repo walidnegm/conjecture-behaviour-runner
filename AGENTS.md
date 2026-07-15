@@ -252,13 +252,47 @@ invent product rules; they **encode** stated rules into a Script. If the law is 
 ## 6. CLI cheatsheet
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev,scenarios]"
 python examples/e2e_multi_turn.py          # in-repo multi-turn demo
 conjecture path-faithful --prove-bugs     # same story via CLI
 conjecture run path/to/goldens/ --adapter path-faithful --json-report out.json
+
+# Candidate discovery (Scenario precursor — not live chat routing)
+conjecture candidates author --example --out /tmp/cbr_candidates
+# Optional LLM propose of new surfaces/stealers (code law+physics backcheck):
+#   CONJECTURE_INVENT_LLM_BASE_URL / _MODEL / _API_KEY
+conjecture candidates author --example --invent-llm --out /tmp/cbr_candidates
+CONJECTURE_CANDIDATES_DIR=/tmp/cbr_candidates conjecture ui
 ```
 
 Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
+
+---
+
+## 6.1 Candidate discovery: expander + inventor
+
+**Normative:** [docs/SPEC.md §2.2](docs/SPEC.md) · face:
+[templates/candidate_author/README.md](templates/candidate_author/README.md).
+
+| Engine | Role | Host inputs |
+|--------|------|-------------|
+| **Inventor** (prefer first) | Geometry: exclusive surface × typed act × pre-decide stealer | `exclusive_owner_surfaces`, `pre_decide_stealing_leaves`, `typed_reply_acts`, `sealed_exclusive_pairs` |
+| **Expander** | Cross-product: sole-continue kind × foreign leaf; matrix/residuals | `sole_continue_kinds`, `foreign_*`, matrix YAML, residuals |
+| **Propose** (opt-in LLM) | Suggests new surfaces/stealers; **code** `check_laws` + `check_physics` | `CONJECTURE_INVENT_LLM_*` or inject `llm_complete` |
+
+```text
+HostVocabulary → author_candidates() → CandidatePath[] → Scenario YAML
+                     │ invent_all (capped, default 4)
+                     │ paths_from_sole_continue_x_foreign
+                     │ matrix / residual / incident seeds
+```
+
+**Do:** encode host-declared geometry into candidates; promote open paths to Scripts.  
+**Do not:** treat invent output as product routing vocabulary; do not invent product owners/kinds
+without product confirmation (same rule as Script authoring).
+
+Default caps: `CONJECTURE_INVENT_MAX_PROPOSALS=4`, `CONJECTURE_INVENT_MAX_SCENARIOS=4`.  
+Prompt file: `candidate_author/prompts/geometry_propose.md` (override via env).
 
 ---
 
@@ -268,12 +302,14 @@ Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
 
 | Path | Why |
 |------|-----|
-| [docs/SPEC.md](docs/SPEC.md) | Normative CBR-SPEC |
+| [docs/SPEC.md](docs/SPEC.md) | Normative CBR-SPEC (incl. §2.2 candidate discovery) |
 | [prompts/conjecture_script_author.seed.md](prompts/conjecture_script_author.seed.md) | Seed prompt for script authoring agents |
 | [examples/e2e_multi_turn.py](examples/e2e_multi_turn.py) | Full E2E multi-turn conversation |
 | [src/conjecture_behaviour_runner/protocol.py](src/conjecture_behaviour_runner/protocol.py) | Adapter + observation contract |
 | [src/conjecture_behaviour_runner/path_faithful.py](src/conjecture_behaviour_runner/path_faithful.py) | Mini-app Act + planted bugs |
 | [src/conjecture_behaviour_runner/invariants.py](src/conjecture_behaviour_runner/invariants.py) | Portable verifier kinds |
+| [src/conjecture_behaviour_runner/candidate_author/](src/conjecture_behaviour_runner/candidate_author/) | Expand + invent + propose |
+| [templates/candidate_author/](templates/candidate_author/) | Host vocabulary / matrix templates + invent env |
 
 ### Patterns inventory (what failure classes we track)
 
@@ -283,7 +319,9 @@ Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
 | [incidents/README.md](incidents/README.md) | Classify → capture → land a pattern |
 | [incidents/patterns/](incidents/patterns/) | One folder per slug (`INCIDENT.md` + `script.json`) |
 
-**Not the inventory:** `tests/` (package unit tests only).
+**Not the inventory:** `tests/` (package unit tests only).  
+**Not free discovery:** invent/expand author **candidates** for known geometry/axes — not a claim
+that CI finds every unknown chat bug without host vocabulary.
 
 ---
 
@@ -293,3 +331,4 @@ Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
 - Keyword routing on free-text user meaning  
 - Softening fail-closed kinds “to make CI green”  
 - Host-private product goldens committed to this public tree  
+- Auto-merging LLM invent proposals into product routing without human/code law review  

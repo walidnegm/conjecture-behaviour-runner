@@ -27,16 +27,17 @@ HostVocabulary (your kinds · competing leaves · invent geometry)
 Package prompt (editable, out-of-code):  
 `src/conjecture_behaviour_runner/candidate_author/prompts/geometry_propose.md`
 
-## Invent vs expand
+## Inventor vs expander
 
-| Mode | What it does |
-|------|----------------|
-| **Expand** | Cross-product: sole-continue kind × foreign leaf (high volume, low novelty) |
-| **Invent** (code) | Geometry: exclusive surface × typed act × pre-decide stealer |
+| Engine | What it does |
+|--------|----------------|
+| **Inventor** (prefer first) | Geometry: exclusive surface × typed act × pre-decide stealer |
+| **Expander** | Cross-product: sole-continue kind × foreign leaf; matrix / residual / incident seeds |
 | **Propose** (optional LLM) | LLM suggests new surfaces/stealers; **code** runs law + physics backcheck |
 
 Principle: **LLM proposes · code enforces.** Proposals never auto-route product chat.
 Default invent caps: **4** proposals and **4** inventive scenarios per author turn.
+Normative: [`docs/SPEC.md` §2.2](../../docs/SPEC.md).
 
 ### Invent env
 

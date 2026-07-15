@@ -6,7 +6,7 @@ from a source tree without an editable install.
 from __future__ import annotations
 
 # Keep in lockstep with pyproject.toml [project].version
-__version__ = "0.1.5"
+__version__ = "0.1.6"
 
 
 def get_version() -> str:

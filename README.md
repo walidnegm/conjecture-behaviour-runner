@@ -41,7 +41,7 @@ The ledger can live anywhere (session DB, LangGraph, Temporal, Vercel AI session
 If you can project **your** owner/kind/pins after Act, you can import a Driver and get
 a **verdict**.
 
-MIT · **0.1.5** · [Bot0.ai](https://bot0.ai)
+MIT · **0.1.6** · [Bot0.ai](https://bot0.ai)
 
 ---
 
@@ -252,16 +252,16 @@ Everything else (Scenario, ODD, multi-runner, Verdict) is advanced — [`docs/SP
 
 Local browser UI (`conjecture ui`) is a **demo viewer**, not a second product.
 
-### Candidate author (expand · invent · optional LLM propose)
+### Candidate discovery (expander · inventor · optional LLM propose)
 
 Autonomously author **candidate Scenarios** from **your** host vocabulary — not a
-fixed product catalog:
+fixed product catalog. Normative detail: [`docs/SPEC.md` §2.2](docs/SPEC.md).
 
-| Mode | Role |
-|------|------|
-| **Expand** | kind × foreign leaf (finite matrix style) |
-| **Invent** | code geometry: exclusive surface × typed act × pre-decide stealer |
-| **Propose** | optional LLM suggests new surfaces/stealers; **code** law + physics backcheck |
+| Engine | Role |
+|--------|------|
+| **Inventor** (prefer first) | Code geometry: exclusive surface × typed act × pre-decide stealer |
+| **Expander** | kind × foreign leaf; matrix / residual / incident seeds |
+| **Propose** (opt-in) | LLM suggests new surfaces/stealers; **code** law + physics backcheck |
 
 ```bash
 conjecture candidates author --example --out /tmp/cbr_candidates
@@ -316,7 +316,7 @@ Classify → Scenario → Script → catalog:
 | Package unit tests | [`tests/`](tests/) — **not** the inventory |
 | Demos / E2E scripts | [`examples/`](examples/) |
 | Script shapes (any host kind) | [`templates/README.md`](templates/README.md) |
-| Candidate author / invent | [`templates/candidate_author/README.md`](templates/candidate_author/README.md) |
+| Candidate discovery (expand + invent) | [`templates/candidate_author/README.md`](templates/candidate_author/README.md) · SPEC §2.2 |
 | Normative spec | [`docs/SPEC.md`](docs/SPEC.md) |
 | Agent coder files-first | [`AGENTS.md`](AGENTS.md) §7 |
 

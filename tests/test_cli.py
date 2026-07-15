@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_source_version_locked() -> None:
-    assert SRC_VERSION == "0.1.5"
+    assert SRC_VERSION == "0.1.6"
     text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert f'version = "{SRC_VERSION}"' in text
     assert conjecture_behaviour_runner.__version__ == SRC_VERSION

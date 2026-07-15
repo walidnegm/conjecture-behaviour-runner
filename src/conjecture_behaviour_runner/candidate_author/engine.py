@@ -315,8 +315,8 @@ def format_candidates_markdown(paths: Iterable[CandidatePath]) -> str:
     lines = [
         "# Candidate paths (portable Conjecture author)",
         "",
-        "Host vocabulary × incidents × matrix × residuals. "
-        "**Not** product routing. **Not** LLM discovery.",
+        "Host vocabulary × invent geometry × expansion × incidents × matrix × residuals. "
+        "**Not** product routing. Optional LLM propose is geometry-only (code backcheck).",
         "",
         f"**count:** {len(paths)}  by_seal={by_seal}  by_source={by_src}",
         "",

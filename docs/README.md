@@ -4,6 +4,7 @@
 |----------|------|------|
 | **Conjecture Behaviour Runner Specification** | **Specification** (`CBR-SPEC`) | [SPEC.md](./SPEC.md) |
 | Project face (hero = planted-bug demo) | README | [../README.md](../README.md) |
+| **Candidate discovery** (expand + invent) | Templates + env | [../templates/candidate_author/README.md](../templates/candidate_author/README.md) · SPEC §2.2 |
 | **Patterns inventory** (failure classes) | Catalog | [../incidents/CATALOG.md](../incidents/CATALOG.md) |
 | **Incident → pattern playbook** | Learning loop | [../incidents/README.md](../incidents/README.md) |
 | **Agent coder guide** | Integration + golden authoring | [../AGENTS.md](../AGENTS.md) |
@@ -52,9 +53,10 @@ Local UI: `conjecture ui`. Contributor guide: [../CONTRIBUTING.md](../CONTRIBUTI
 
 **Maturity:** control-plane Script + `run_script` + verifier is usable now; full Scenario multi-runner stack is early. Collinear and peers are **seeds**, not rivals we out-feature.
 
-- **CBR-SPEC §0** finalized claim · **§2** architecture · **§4.1** Script fields  
-- **AGENTS.md** host adapter + agent workflow  
+- **CBR-SPEC §0** finalized claim · **§2** architecture · **§2.2** expander + inventor · **§4.1** Script fields  
+- **AGENTS.md** host adapter + agent workflow + candidate discovery  
 - **Prompt seed** STEP A (trajectory + ODD) → STEP B (Script JSON)  
+- **Candidate author:** [templates/candidate_author/](../templates/candidate_author/) — invent first, expand second  
 - **Examples:** [Scenario YAML](../examples/scenario_sole_continue.yaml) · [authored Script trajectory](../examples/trajectory_authored_sole_continue.json) · [observed PASS/FAIL](../examples/)  
 
 Legacy URL `conjecture-behaviour-runner.md` → [SPEC.md](./SPEC.md).

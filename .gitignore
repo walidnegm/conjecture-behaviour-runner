@@ -1,3 +1,11 @@
 *.egg-info/
 __pycache__/
 .pytest_cache/
+
+# Generated author/run artifacts (file-based console)
+**/candidates/**/evidence/
+**/candidates/**/invent_run.json
+**/candidates/**/last_author_run.json
+**/scenarios/evidence/
+**/scenarios/invent_run.json
+**/scenarios/last_author_run.json

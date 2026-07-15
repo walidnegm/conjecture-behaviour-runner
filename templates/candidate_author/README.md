@@ -32,6 +32,24 @@ Authoring order:
 **Twist 0** = test-harness setup (arm surface) — not end-user chat.  
 **Twist 1+** = real user free-chat under that surface.
 
+### Console runs (file-based)
+
+The local console can **run** a candidate via a stub `GeometryHoldAdapter` and write
+**execution evidence** under:
+
+```text
+candidates/scenarios/evidence/<scenario_id>/<timestamp>_healthy.json
+candidates/scenarios/evidence/<scenario_id>/latest.json
+```
+
+That directory is **gitignored**. Evidence JSON uses the working taxonomy:
+
+`failure_mode` · `candidate_scenario` · `user_trajectory` · `scenario_geometry` ·
+`mode_detection` · pass/fail.
+
+Planted steal (`?steal=1`) yields ownership to the stealer so detection can FAIL.
+A real host Driver is still required for path-faithful product Act.
+
 ```text
 📍 Discovery path: Host vocab → Invent → Expand → Scenario → Script → Sealed
    (same tracker contract as Prose → Draft IR → Staffed IR → Compile/save)

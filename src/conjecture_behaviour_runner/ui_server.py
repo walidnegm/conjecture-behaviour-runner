@@ -253,11 +253,18 @@ def _html_page() -> bytes:
         <button type="button" class="secondary cand-tab" data-tab="trajectory">Trajectory</button>
         <button type="button" class="secondary cand-tab" data-tab="scenario">Scenario</button>
         <button type="button" class="secondary cand-tab" data-tab="script">Script</button>
+        <button type="button" class="secondary cand-tab" data-tab="evidence">Evidence</button>
       </div>
       <div class="row" id="candDeepLinks" style="margin-bottom:.75rem"></div>
+      <div class="row" style="margin-bottom:.75rem">
+        <button type="button" id="btnCandRun">Run (geometry hold)</button>
+        <button type="button" class="secondary" id="btnCandSteal">Run planted steal</button>
+        <span class="muted" style="font-size:.8rem">File-based: writes <span class="mono">evidence/&lt;id&gt;/</span> (gitignored). Stub adapter — not full host Driver.</span>
+      </div>
       <div id="candPanelTrajectory" class="cand-panel"></div>
       <div id="candPanelScenario" class="cand-panel" style="display:none"></div>
       <div id="candPanelScript" class="cand-panel" style="display:none"></div>
+      <div id="candPanelEvidence" class="cand-panel" style="display:none"></div>
     </div>
   </div>
 
@@ -454,13 +461,71 @@ function setHash(id, tab) {
   location.hash = id ? ('/candidate/' + encodeURIComponent(id) + '/' + t) : '/';
 }
 function showTab(tab) {
-  ['trajectory','scenario','script'].forEach(name => {
+  ['trajectory','scenario','script','evidence'].forEach(name => {
     const panel = document.getElementById('candPanel' + name.charAt(0).toUpperCase() + name.slice(1));
     if (panel) panel.style.display = name === tab ? 'block' : 'none';
   });
   document.querySelectorAll('.cand-tab').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
   });
+}
+function renderEvidence(ev) {
+  const panel = document.getElementById('candPanelEvidence');
+  if (!panel) return;
+  if (!ev || ev.ok === false && !ev.run) {
+    panel.innerHTML = '<p class="muted">' + escapeHtml((ev && ev.error) || 'No run yet. Use Run buttons above.') + '</p>';
+    return;
+  }
+  const tax = ev.taxonomy || {};
+  const split = ev.candidate_split || {};
+  const run = ev.run || {};
+  const passed = run.passed;
+  let html = '<p class="muted"><strong>Execution evidence</strong> — taxonomy-shaped; under '
+    + '<span class="mono">evidence/</span> (gitignored). Stub GeometryHoldAdapter unless host Driver is wired.</p>';
+  html += '<div class="row"><span class="badge ' + (passed ? 'pass' : 'fail') + '">'
+    + (passed ? 'PASS' : 'FAIL') + '</span>'
+    + '<span class="muted mono">' + escapeHtml(ev.evidence_path || '') + '</span></div>';
+  html += '<table class="muted" style="width:100%;font-size:.85rem;margin:.75rem 0;border-collapse:collapse">';
+  html += '<tr><td style="padding:.25rem"><strong>Failure-mode mapping</strong></td><td class="mono">'
+    + escapeHtml(tax.failure_mode || split.failure_mode_mapping || '') + '</td></tr>';
+  html += '<tr><td style="padding:.25rem"><strong>Candidate scenario</strong></td><td class="mono">'
+    + escapeHtml(tax.candidate_scenario || ev.scenario_id || '') + '</td></tr>';
+  html += '<tr><td style="padding:.25rem"><strong>User trajectory</strong></td><td>'
+    + escapeHtml(split.user_trajectory || '—') + '</td></tr>';
+  html += '<tr><td style="padding:.25rem"><strong>Scenario geometry</strong></td><td class="mono">'
+    + escapeHtml(JSON.stringify(split.scenario_geometry || {})) + '</td></tr>';
+  html += '<tr><td style="padding:.25rem"><strong>Mode detection</strong></td><td><ul style="margin:0">'
+    + (split.mode_detection || []).map(x => '<li>' + escapeHtml(x) + '</li>').join('')
+    + '</ul></td></tr>';
+  html += '<tr><td style="padding:.25rem"><strong>Adapter</strong></td><td class="mono">'
+    + escapeHtml((run.adapter || '') + (run.planted_steal ? ' · planted_steal' : ' · healthy'))
+    + '</td></tr>';
+  html += '</table>';
+  if ((run.failures || []).length) {
+    html += '<div class="turn bad"><strong>Failures</strong><ul>'
+      + run.failures.map(f => '<li class="mono">' + escapeHtml(f) + '</li>').join('')
+      + '</ul></div>';
+  }
+  html += '<pre style="margin-top:.75rem">' + escapeHtml(JSON.stringify(ev, null, 2)) + '</pre>';
+  panel.innerHTML = html;
+}
+async function runCandidate(steal) {
+  const id = (window._candData && window._candData.scenario_id) || parseHash().id;
+  if (!id) return;
+  const st = document.getElementById('status');
+  st.textContent = steal ? 'running planted steal…' : 'running candidate…';
+  try {
+    const r = await fetch('/api/candidates/' + encodeURIComponent(id) + '/run'
+      + (steal ? '?steal=1' : ''), { method: 'POST' });
+    const data = await r.json();
+    window._candEvidence = data;
+    renderEvidence(data);
+    showTab('evidence');
+    st.textContent = data.ok === false ? (data.error || 'run failed')
+      : ((data.run && data.run.passed) ? 'PASS' : 'FAIL');
+  } catch (e) {
+    st.textContent = String(e);
+  }
 }
 function renderTrajectory(traj) {
   const steps = (traj && traj.steps) || [];
@@ -715,9 +780,21 @@ async function openCandidate(id, tab) {
   renderTrajectory(data.trajectory || {});
   renderScenarioPanel(data);
   renderScriptPanel(data);
+  // load latest evidence if any
+  fetch('/api/candidates/' + encodeURIComponent(id) + '/evidence')
+    .then(r => r.json())
+    .then(evlist => {
+      if (evlist && evlist.runs && evlist.runs[0]) {
+        renderEvidence(evlist.runs[0]);
+      } else {
+        renderEvidence(null);
+      }
+    }).catch(() => renderEvidence(null));
   showTab(tab);
   window._candData = data;
 }
+document.getElementById('btnCandRun').onclick = () => runCandidate(false);
+document.getElementById('btnCandSteal').onclick = () => runCandidate(true);
 function routeFromHash() {
   const { id, tab } = parseHash();
   if (id) {
@@ -806,16 +883,25 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                 )
                 return
             if path.startswith("/api/candidates/"):
+                rest = unquote(path[len("/api/candidates/") :].strip("/"))
+                if rest.endswith("/evidence"):
+                    from conjecture_behaviour_runner.candidate_run import list_evidence
+
+                    sid = rest[: -len("/evidence")].strip("/")
+                    payload = list_evidence(sid)
+                    _json_response(self, 200 if payload.get("ok") else 404, payload)
+                    return
                 from conjecture_behaviour_runner.candidates_ui import get_candidate
 
-                sid = unquote(path[len("/api/candidates/") :].strip("/"))
-                payload = get_candidate(sid)
+                payload = get_candidate(rest)
                 _json_response(self, 200 if payload.get("ok") else 404, payload)
                 return
             _json_response(self, 404, {"error": "not_found"})
 
         def do_POST(self) -> None:  # noqa: N802
-            path = urlparse(self.path).path
+            parsed = urlparse(self.path)
+            path = parsed.path
+            qs = parse_qs(parsed.query or "")
             try:
                 if path == "/api/run-healthy":
                     from conjecture_behaviour_runner.path_faithful import (
@@ -830,6 +916,21 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                     )
 
                     _json_response(self, 200, prove_planted_bugs())
+                    return
+                if path.startswith("/api/candidates/") and path.rstrip("/").endswith(
+                    "/run"
+                ):
+                    from conjecture_behaviour_runner.candidate_run import run_candidate
+
+                    mid = path[len("/api/candidates/") :].strip("/")
+                    if mid.endswith("/run"):
+                        mid = mid[: -len("/run")].strip("/")
+                    sid = unquote(mid)
+                    steal = (qs.get("steal") or [""])[0] in ("1", "true", "yes")
+                    payload = run_candidate(sid, steal=steal, write=True)
+                    _json_response(
+                        self, 200 if payload.get("ok") is not False else 400, payload
+                    )
                     return
             except Exception as exc:  # noqa: BLE001
                 _json_response(self, 500, {"error": str(exc)})

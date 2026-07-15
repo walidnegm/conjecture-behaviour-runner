@@ -1,0 +1,201 @@
+# Portable CAQ-FM registry (public Conjecture).
+# Doctrine: docs/conversational-authority-quality.md
+# Host monorepos may keep a fuller private CAQ-FM registry (not shipped here).
+# Proofs: patterns/<portable_seed>/
+#
+# id = declarative mode; portable_seed = patterns/ folder (may differ).
+# legacy_id = previous tribal name when renamed.
+
+version: 1
+title: Conjecture portable failure-mode registry
+doctrine: LLM proposes · code enforces
+dimension: D1 — cognition ↔ deterministic execution (conversational authority)
+entries:
+- id: owner_steal
+  failure_mode: Owner steal
+  portable_seed: owner_steal_mid_continue
+  law: Mid-flight continue keeps exclusive owner; packaging/concept must not steal.
+  plane: ownership
+  family: ownership
+  parent_id: null
+  portability: portable
+  seed_status: runnable
+  law_shape:
+  - exclusive_owner
+  - active_kind
+  - pin
+  legacy_id: missing_sole_continue
+- id: pin_drop
+  failure_mode: Pin drop
+  portable_seed: drop_pin_mid_continue
+  law: Mid-flight continue keeps identity pin.
+  plane: ownership
+  family: ownership
+  parent_id: null
+  portability: portable
+  seed_status: runnable
+  law_shape:
+  - pin
+  legacy_id: drop_pin_mid_continue
+- id: illegal_restart
+  failure_mode: Illegal restart
+  portable_seed: illegal_restart_mid_continue
+  law: Continue must not wipe active task.
+  plane: ownership
+  family: ownership
+  parent_id: null
+  portability: portable
+  seed_status: runnable
+  law_shape:
+  - active_kind
+  - exclusive_owner
+  legacy_id: illegal_restart_mid_continue
+- id: hollow_open
+  failure_mode: Hollow open
+  portable_seed: pin_without_open
+  law: Identity pin is routing only; delivery must open product surface.
+  plane: delivery
+  family: hollow_delivery
+  parent_id: null
+  portability: portable
+  seed_status: runnable
+  law_shape:
+  - pin
+  - blocks_resolve
+  - open_surface
+  legacy_id: pin_without_open
+- id: hollow_advance
+  failure_mode: Hollow advance
+  portable_seed: hollow_async_advance
+  law: Authoring advance / async job success must open surface (not empty succeed).
+  plane: delivery
+  family: hollow_delivery
+  parent_id: null
+  portability: portable
+  seed_status: runnable
+  law_shape:
+  - open_surface
+  - reply_nonempty
+  legacy_id: hollow_async_advance
+- id: cold_start_collapse
+  failure_mode: Cold-start authoring collapse
+  portable_seed: cold_system_suggest_miss
+  law: Cold system-suggest open → authoring sketch + domain sticky on short re-ask.
+  plane: authoring
+  family: authoring
+  parent_id: null
+  portability: portable
+  seed_status: runnable
+  law_shape:
+  - exclusive_owner
+  - sketch_produced
+  - domain_label
+  legacy_id: cold_system_suggest_miss
+- id: packaging_steal
+  failure_mode: Packaging steal
+  portable_seed: null
+  law: Glossary / product_knowledge must not package over action or inventory.
+  plane: packaging
+  family: packaging
+  parent_id: null
+  portability: partial
+  seed_status: seed_pending
+  law_shape:
+  - exclusive_owner
+  legacy_id: packaging_too_wide
+- id: lost_activity_recall
+  failure_mode: Lost activity recall
+  portable_seed: null
+  law: Session / waiting-on / activities → ledger leaf, not glossary.
+  plane: ownership
+  family: ownership
+  parent_id: null
+  portability: partial
+  seed_status: seed_pending
+  law_shape:
+  - exclusive_owner
+  legacy_id: missing_state_leaf
+- id: wrong_delivery_leaf
+  failure_mode: Wrong delivery leaf
+  portable_seed: null
+  law: Wrong code leaf must not win the turn (coarse bucket).
+  plane: delivery
+  family: delivery_ownership
+  parent_id: null
+  portability: partial
+  seed_status: partial
+  law_shape:
+  - exclusive_owner
+  notes: Fine modes below are first-class; do not count only this bucket.
+  legacy_id: delivery_order_gap
+- id: named_item_misresolve
+  failure_mode: Named-item misresolution
+  portable_seed: null
+  law: Known inventory name → code open/pick, not LLM stream dump.
+  plane: delivery
+  family: delivery_ownership
+  parent_id: wrong_delivery_leaf
+  portability: host
+  seed_status: seed_pending
+  law_shape:
+  - exclusive_owner
+  - open_surface
+  legacy_id: inventory_name_exclusive
+- id: soft_name_misresolve
+  failure_mode: Soft-name misresolution
+  portable_seed: null
+  law: Partial name → tenant inventory, not platform glossary.
+  plane: delivery
+  family: delivery_ownership
+  parent_id: wrong_delivery_leaf
+  portability: host
+  seed_status: seed_pending
+  law_shape:
+  - exclusive_owner
+  legacy_id: inventory_soft_name
+- id: ambient_pin_hijack
+  failure_mode: Context-pin hijack
+  portable_seed: null
+  law: Ambient last_read / pin must not steal the wrong activity.
+  plane: delivery
+  family: delivery_ownership
+  parent_id: wrong_delivery_leaf
+  portability: host
+  seed_status: seed_pending
+  law_shape:
+  - exclusive_owner
+  - pin
+  legacy_id: context_pin_hijack
+- id: fall_through_fabrication
+  failure_mode: Fall-through trap
+  portable_seed: null
+  law: Code-owned turn must not fall into freestyle LLM fabrication.
+  plane: cognition
+  family: cognition
+  parent_id: null
+  portability: host
+  seed_status: seed_pending
+  law_shape:
+  - exclusive_owner
+  legacy_id: fall_through_trap
+- id: intentional_glossary
+  failure_mode: Intentional glossary detour
+  portable_seed: null
+  law: Definitional answer when packaging should run is OK — not a bug.
+  plane: packaging
+  family: packaging
+  parent_id: null
+  portability: n_a
+  seed_status: n_a
+  law_shape: []
+  notes: OK path — no seed required.
+  legacy_id: true_glossary_detour
+out_of_scope:
+- id: success_payload_rewrite
+  reason: Substrate tool→model→prompt→worker authority drop — host unit + deploy seals
+- id: false_save_claim
+  reason: Substrate false-save claim — host hallucination gate
+- id: compound_act_loss
+  reason: Host cognition delivery; promote when Observation-shaped seed exists
+- id: domain_pick_misbound
+  reason: Host armed-pick exclusivity; promote when portable seed exists

@@ -7,7 +7,10 @@
 | **Candidate discovery** (expand + invent) | Templates + env | [../templates/candidate_author/README.md](../templates/candidate_author/README.md) · SPEC §2.2 |
 | **Discovery path diagram** | SVG ladder | [images/discovery-pipeline.svg](./images/discovery-pipeline.svg) |
 | **Pipeline stage tracker** | Portable contract | `pipeline_tracker` — same strip shape as Prose → Draft IR → Save |
-| **Patterns inventory** (failure classes) | Catalog | [../incidents/CATALOG.md](../incidents/CATALOG.md) |
+| **Conversational Authority Quality** (portable) | Doctrine | [conversational-authority-quality.md](./conversational-authority-quality.md) |
+| **Portable failure-mode registry** | Machine SoT | [../incidents/registry.yaml](../incidents/registry.yaml) |
+| **Portable catalog** (failure modes) | Human index | [../incidents/CATALOG.md](../incidents/CATALOG.md) |
+| **Lexicon** (optional depth) | Host monorepo vocabulary | Host path `docs/the-language-of-building-ai-products.md` — not vendored here |
 | **Incident → pattern playbook** | Learning loop | [../incidents/README.md](../incidents/README.md) |
 | **Agent coder guide** | Integration + golden authoring | [../AGENTS.md](../AGENTS.md) |
 | **Script author prompt seed** | Trajectory + ODD → Conjecture Script | [../prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) |

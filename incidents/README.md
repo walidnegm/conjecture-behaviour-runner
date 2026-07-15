@@ -10,22 +10,24 @@ implementation** bugs — and many of them are exactly what Conjecture is for.
 
 | Need | Open |
 |------|------|
-| **Patterns inventory (listed + described)** | [`CATALOG.md`](CATALOG.md) — portable seeds **and** broader class list |
+| **Public Conversational Authority Quality** | [`../docs/conversational-authority-quality.md`](../docs/conversational-authority-quality.md) — doctrine + control loop |
+| **Machine SoT (portable modes)** | [`registry.yaml`](registry.yaml) — `id` ↔ `portable_seed` join |
+| **Human catalog** | [`CATALOG.md`](CATALOG.md) — runnable seeds + broader laws |
 | **This playbook** (classify → capture → land) | this file |
-| **One runnable pattern** | `patterns/<slug>/INCIDENT.md` + `script.json` |
+| **One runnable pattern** | `patterns/<portable_seed>/INCIDENT.md` + `script.json` |
 | **Copy template** | [`_template/`](_template/) |
 | **Package face / planted-bug demo** | [`../README.md`](../README.md) |
 | **Normative package spec** | [`../docs/SPEC.md`](../docs/SPEC.md) |
-| **Agent coder on-ramp** | [`../AGENTS.md`](../AGENTS.md) §7 |
-| **Host term lexicon** (Bot0 dogfood) | Host repo vocabulary doc (not shipped in this package) |
+| **Agent coder on-ramp** | [`../AGENTS.md`](../AGENTS.md) |
+| **Vocabulary** | CAQ-FM + CATALOG tables in this package; optional host monorepo lexicon `docs/the-language-of-building-ai-products.md` for full dialect depth |
 
-**Important:** Only **four** folders under `patterns/` are runnable mini-app seeds today.
-`CATALOG.md` also lists **broader failure classes** (packaging_too_wide, inventory soft
-token, missing_state_leaf, …). Host dogfood keeps a **much larger** sealed incident
-table + chat-path scripts — public is the portable slice, not the whole memory.
+**Important:** Six folders under `patterns/` are runnable mini-app seeds today.
+`registry.yaml` / `CATALOG.md` also list **broader laws** (packaging, inventory soft
+name, missing_state_leaf, …). Host dogfood keeps a **much larger** sealed D1 registry +
+STEAL + substrate seals — public is the portable slice, not the whole memory.
 
-**`tests/` is not the inventory** — those are package unit tests.  
-**The inventory is `CATALOG.md` + `patterns/`.**
+**`tests/` is not the catalog** — those are package unit tests.  
+**The portable control surface is `registry.yaml` + `CATALOG.md` + `patterns/`.**
 
 ---
 
@@ -47,7 +49,7 @@ live bug (chat / logs / ledger row)     OR     planned law (candidate discovery)
   Prove FAIL on the broken path, PASS after the fix
         │
         ▼
-  Land under patterns/ + CATALOG.md  → forever regression
+  Land under patterns/ + registry.yaml + CATALOG.md  → forever regression
         │
         ▼
   Candidate discovery (portable):
@@ -57,10 +59,14 @@ live bug (chat / logs / ledger row)     OR     planned law (candidate discovery)
   + long-tail utterances for script variety (never product routing)
 ```
 
+**Land order:** (1) `registry.yaml` row with `id` + `portable_seed` + law  
+(2) `patterns/<portable_seed>/`  
+(3) `CATALOG.md` tables.
+
 Public portable author (expand + invent):
 `conjecture candidates author --example` · [`templates/candidate_author/`](../templates/candidate_author/) ·
 normative [SPEC §2.2](../docs/SPEC.md). Hosts may also keep a private finite-expansion
-matrix + gap queue (`seed_pending` cells).
+matrix + gap queue (`seed_pending` cells) joined to their private D1 registry.
 
 ## 1. Classify: is this a Conjecture-type bug?
 

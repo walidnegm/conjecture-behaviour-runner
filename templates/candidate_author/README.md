@@ -7,14 +7,20 @@ This pack is the **template engine** for autonomously authored **Conjecture Scen
 Conjecture enums.
 
 ```text
+📍 Discovery path: Host vocab → Invent → Expand → Scenario → Script → Sealed
+   (same tracker contract as Prose → Draft IR → Staffed IR → Compile/save)
+
 HostVocabulary (your kinds · competing leaves · invent geometry)
         │
-        ▼  author_candidates()  (+ invent_all when geometry declared)
+        ▼  author_candidates()  (invent first, then expand)
   CandidatePath[]
         │  write_candidate_scenarios()
         ▼
-  Scenario YAML  →  compile_scenario_to_script()  →  Script
+  Scenario YAML  →  compile_scenario_to_script()  →  Script  →  Sealed pattern
 ```
+
+Pretty diagram: [`docs/images/discovery-pipeline.svg`](../../docs/images/discovery-pipeline.svg) ·  
+Python strip: `pipeline_tracker.render_discovery_lifecycle_diagram("scenario")`
 
 ## Files
 

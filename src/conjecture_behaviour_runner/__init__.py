@@ -48,6 +48,7 @@ from conjecture_behaviour_runner.templates import (
 )
 # candidate_author is a subpackage — import from
 # conjecture_behaviour_runner.candidate_author (host vocabulary stays outside).
+# pipeline_tracker: shared stage ladder for discovery / IR dialogue progress.
 from conjecture_behaviour_runner.temporal import (
     TRAJECTORY_INVARIANT_KINDS,
     check_trajectory_invariant,

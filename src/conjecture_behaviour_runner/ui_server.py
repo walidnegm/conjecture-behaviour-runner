@@ -76,6 +76,17 @@ def _html_page() -> bytes:
       border: 1px solid #d4d4d8; border-radius: .4rem; background: #fff; }
     .grid2 { display: grid; gap: .75rem; }
     @media (min-width: 640px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+    /* Pipeline tracker — same contract as product Prose → Draft IR → Save */
+    .pipe { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem;
+            margin: .5rem 0 .85rem; font-size: .7rem; }
+    .pipe-stage { border-radius: .35rem; padding: .2rem .45rem; border: 1px solid #e4e4e7;
+                  background: #fff; color: #71717a; white-space: nowrap; }
+    .pipe-stage.current { border-color: #a5b4fc; background: #e0e7ff; color: #312e81;
+                          font-weight: 700; }
+    .pipe-stage.complete { background: #fafafa; color: #a1a1aa; text-decoration: line-through; }
+    .pipe-stage.upcoming { color: #71717a; }
+    .pipe-arrow { color: #d4d4d8; }
+    .pipe-caption { font-size: .72rem; color: #71717a; margin: 0 0 .35rem; }
   </style>
 </head>
 <body>
@@ -108,13 +119,28 @@ def _html_page() -> bytes:
 
   <div class="card" id="candidatesCard">
     <div class="row" style="justify-content:space-between">
-      <strong>Candidate failure modes</strong>
+      <strong>Candidate discovery</strong>
       <span class="muted mono" id="candMeta"></span>
     </div>
+    <p class="pipe-caption">Discovery path — same tracker idea as Prose → Draft IR → Staffed IR → Save</p>
+    <div class="pipe" id="discoveryPipe" role="list" aria-label="Discovery path">
+      <span class="pipe-stage complete" role="listitem" title="kinds · surfaces · stealers">✓ Host vocab</span>
+      <span class="pipe-arrow" aria-hidden>→</span>
+      <span class="pipe-stage complete" role="listitem" title="surface × act × stealer">✓ Invent</span>
+      <span class="pipe-arrow" aria-hidden>→</span>
+      <span class="pipe-stage complete" role="listitem" title="kind × foreign leaf">✓ Expand</span>
+      <span class="pipe-arrow" aria-hidden>→</span>
+      <span class="pipe-stage current" role="listitem" title="candidate YAML">● Scenario</span>
+      <span class="pipe-arrow" aria-hidden>→</span>
+      <span class="pipe-stage upcoming" role="listitem" title="CI golden">○ Script</span>
+      <span class="pipe-arrow" aria-hidden>→</span>
+      <span class="pipe-stage upcoming" role="listitem" title="forever regression">○ Sealed</span>
+    </div>
     <p class="muted" style="margin:.35rem 0 .75rem">
-      Each row is a detected candidate failure mode. Open its link to see
+      <strong>Invent</strong> (geometry) runs first; <strong>Expand</strong> (cross-product)
+      second. Each row is a candidate failure mode. Open
       <strong>Trajectory</strong> → <strong>Scenario</strong> → <strong>Script</strong>
-      (Scenario is the precursor; Script is the play-back form).
+      (Scenario is the precursor; Script is the play-back form → promote to Sealed).
     </p>
     <div class="row" style="margin-bottom:.75rem">
       <select id="candSeal" title="seal status">
@@ -131,10 +157,11 @@ def _html_page() -> bytes:
       </select>
       <select id="candSrc" title="source">
         <option value="">all sources</option>
+        <option value="invention">invention</option>
+        <option value="sole_continue_x_foreign">expand (sole×foreign)</option>
         <option value="residual_heuristic">residual</option>
-        <option value="sole_continue_x_foreign">sole×foreign</option>
         <option value="matrix_queue">matrix</option>
-        <option value="steal_table">steal</option>
+        <option value="host_incident">incident</option>
       </select>
       <input type="search" id="candQ" placeholder="filter id…" style="min-width:10rem" />
       <button type="button" class="secondary" id="btnCandReload">Reload</button>

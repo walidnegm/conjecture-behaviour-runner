@@ -257,6 +257,26 @@ Local browser UI (`conjecture ui`) is a **demo viewer**, not a second product.
 Autonomously author **candidate Scenarios** from **your** host vocabulary — not a
 fixed product catalog. Normative detail: [`docs/SPEC.md` §2.2](docs/SPEC.md).
 
+Same **progress tracker** idea as product authoring
+(Prose → Draft IR → Staffed IR → Compile/save) — one ordered ladder, current stage
+highlighted, completed stages struck. Reusable contract:
+`conjecture_behaviour_runner.pipeline_tracker`.
+
+![Candidate discovery path](docs/images/discovery-pipeline.svg)
+
+```text
+📍 Discovery path: Host vocab → Invent → Expand → Scenario → Script → Sealed
+```
+
+| Stage | What happens |
+|-------|----------------|
+| **Host vocab** | Your kinds · exclusive surfaces · pre-decide stealers · typed acts |
+| **Invent** | Geometry: surface × typed act × stealer (prefer first) |
+| **Expand** | Cross-product: kind × foreign leaf · matrix / residual seeds |
+| **Scenario** | Candidate YAML (console review — not CI yet) |
+| **Script** | Executable golden (pins · invariants · freeze) |
+| **Sealed** | Pattern catalog / host ratchet — forever regression |
+
 | Engine | Role |
 |--------|------|
 | **Inventor** (prefer first) | Code geometry: exclusive surface × typed act × pre-decide stealer |

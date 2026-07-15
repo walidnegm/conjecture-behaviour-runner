@@ -312,8 +312,23 @@ def format_candidates_markdown(paths: Iterable[CandidatePath]) -> str:
     for p in paths:
         by_seal[p.seal_status] = by_seal.get(p.seal_status, 0) + 1
         by_src[p.source] = by_src.get(p.source, 0) + 1
+    # Progress strip — same tracker contract as Prose → Draft IR → Save
+    try:
+        from conjecture_behaviour_runner.pipeline_tracker import (
+            render_discovery_lifecycle_diagram,
+        )
+
+        # Author output lands at Scenario stage of the discovery ladder
+        strip = render_discovery_lifecycle_diagram("scenario")
+    except Exception:  # noqa: BLE001
+        strip = (
+            "📍 **Discovery path:** ~~Host vocab~~ → ~~Invent~~ → ~~Expand~~ → "
+            "**Scenario** → Script → Sealed"
+        )
     lines = [
         "# Candidate paths (portable Conjecture author)",
+        "",
+        strip,
         "",
         "Host vocabulary × invent geometry × expansion × incidents × matrix × residuals. "
         "**Not** product routing. Optional LLM propose is geometry-only (code backcheck).",

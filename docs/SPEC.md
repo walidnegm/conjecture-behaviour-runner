@@ -609,6 +609,7 @@ artifact today: pin + source + freeze_key + optional evidence.
 | `compile_scenario.py` | Conjecture Scenario → Conjecture Script; `RunResult` → observed trajectory |
 | `discover.py` | **Script** file discovery for `conjecture run` (paths on disk) |
 | `candidate_author/` | **Candidate** discovery: expand + invent + optional propose → Scenario YAML |
+| `pipeline_tracker.py` | Reusable stage ladder (`complete`/`current`/`upcoming`) for discovery & IR pipelines |
 | `report.py` / `cli.py` | JSON/JUnit, CLI (`run`, `candidates author`, `ui`, …) |
 | `contrib/control_plane.py` | Optional CCP binding + portable goldens |
 
@@ -621,6 +622,43 @@ without waiting only for production soaks, and without shipping product agents a
 
 This is **not** free live-LLM bug discovery of unknown product law. It is **finite, code-owned**
 candidate generation for failure classes the host already names (or proposes under code backcheck).
+
+### Progress tracker (standard contract)
+
+Multi-step dialogue and IR pipelines share one **stage tracker** shape — the same idea as
+product authoring (Prose → Draft IR → Staffed IR → Compile/save):
+
+| Field | Meaning |
+|-------|---------|
+| `key` | Stable id (`vocab`, `invent`, `expand`, …) |
+| `label` | Short box title |
+| `hint` | One-line meaning |
+| `state` | `complete` · `current` · `upcoming` |
+
+Portable module: `conjecture_behaviour_runner.pipeline_tracker`  
+(`lifecycle_payload`, `render_lifecycle_diagram`, `DISCOVERY_LADDER_STAGES`,
+`AUTHORING_LADDER_STAGES` as an isomorphic example). Host FE strips should render
+this payload, not recompute stage order in markdown.
+
+**Discovery ladder (this package):**
+
+![Candidate discovery path](images/discovery-pipeline.svg)
+
+```text
+📍 Discovery path: Host vocab → Invent → Expand → Scenario → Script → Sealed
+```
+
+| Stage | Role |
+|-------|------|
+| Host vocab | Kinds · surfaces · stealers (host-owned strings) |
+| Invent | Geometry engine (prefer first) |
+| Expand | Cross-product / matrix engine |
+| Scenario | Candidate YAML (review) |
+| Script | CI golden |
+| Sealed | Pattern / ratchet |
+
+Hosts may define additional ladders (authoring IR, multi-turn setup IR, …) with the
+**same** `lifecycle_payload` contract so progress UI stays one component.
 
 ### Two engines (do not conflate)
 
@@ -644,7 +682,7 @@ HostVocabulary
   CandidatePath[]  (source=invention | sole_continue_x_foreign | matrix | residual | incident)
         │  write_candidate_scenarios()
         ▼
-  Scenario YAML  →  compile / human promote  →  Script (CI golden)
+  Scenario YAML  →  compile / human promote  →  Script (CI golden) → Sealed
 ```
 
 ### Inventor (code geometry — default on)

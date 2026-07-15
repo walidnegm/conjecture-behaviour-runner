@@ -272,7 +272,17 @@ Modes: `stub` (default) · `freeze` / `record` need `--freeze-dir`.
 ## 6.1 Candidate discovery: expander + inventor
 
 **Normative:** [docs/SPEC.md §2.2](docs/SPEC.md) · face:
-[templates/candidate_author/README.md](templates/candidate_author/README.md).
+[templates/candidate_author/README.md](templates/candidate_author/README.md) ·
+diagram: [docs/images/discovery-pipeline.svg](docs/images/discovery-pipeline.svg).
+
+**Progress tracker (standard):** ordered stages with `complete | current | upcoming`
+— same shape as product IR authoring (Prose → Draft IR → Staffed IR → Save).
+Module: `pipeline_tracker` (`discovery_lifecycle_payload`, `render_discovery_lifecycle_diagram`).
+Use this contract for any multi-step dialogue / IR pipeline strip in host UIs.
+
+```text
+📍 Discovery path: Host vocab → Invent → Expand → Scenario → Script → Sealed
+```
 
 | Engine | Role | Host inputs |
 |--------|------|-------------|

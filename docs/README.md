@@ -5,6 +5,8 @@
 | **Conjecture Behaviour Runner Specification** | **Specification** (`CBR-SPEC`) | [SPEC.md](./SPEC.md) |
 | Project face (hero = planted-bug demo) | README | [../README.md](../README.md) |
 | **Candidate discovery** (expand + invent) | Templates + env | [../templates/candidate_author/README.md](../templates/candidate_author/README.md) · SPEC §2.2 |
+| **Discovery path diagram** | SVG ladder | [images/discovery-pipeline.svg](./images/discovery-pipeline.svg) |
+| **Pipeline stage tracker** | Portable contract | `pipeline_tracker` — same strip shape as Prose → Draft IR → Save |
 | **Patterns inventory** (failure classes) | Catalog | [../incidents/CATALOG.md](../incidents/CATALOG.md) |
 | **Incident → pattern playbook** | Learning loop | [../incidents/README.md](../incidents/README.md) |
 | **Agent coder guide** | Integration + golden authoring | [../AGENTS.md](../AGENTS.md) |

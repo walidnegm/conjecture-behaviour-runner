@@ -119,7 +119,7 @@ def _html_page() -> bytes:
 
   <div class="card" id="candidatesCard">
     <div class="row" style="justify-content:space-between">
-      <strong>Candidate discovery</strong>
+      <strong>Candidate scenarios / incidents</strong>
       <span class="muted mono" id="candMeta"></span>
     </div>
     <p class="pipe-caption">Discovery path — same tracker idea as Prose → Draft IR → Staffed IR → Save</p>
@@ -440,7 +440,7 @@ function renderTrajectory(traj) {
   const steps = (traj && traj.steps) || [];
   const goals = (traj && traj.goal_state) || [];
   const init = (traj && traj.initial_state) || [];
-  let html = '<p class="muted"><strong>Trajectory</strong> — ordered twists for this failure mode.</p>';
+  let html = '<p class="muted"><strong>Trajectory</strong> — ordered twists for this candidate scenario (one path; mode slug is the class it stresses).</p>';
   if (init.length) {
     html += '<div class="muted" style="margin:.5rem 0"><strong>Initial:</strong> '
       + init.map(escapeHtml).join(' · ') + '</div>';
@@ -584,10 +584,10 @@ async function loadCandidates() {
   const groups = data.groups || {};
   const order = ['invention', 'expansion', 'incident', 'other'];
   const labels = {
-    invention: 'Invention (geometry — not cross-product expand)',
-    expansion: 'Expansion (sole×foreign · matrix · residual)',
-    incident: 'Host incident seeds',
-    other: 'Other',
+    invention: 'Invention scenarios (geometry — not cross-product expand)',
+    expansion: 'Expansion scenarios (sole×foreign · matrix · residual)',
+    incident: 'Incident-seeded scenarios',
+    other: 'Other scenarios',
   };
   let html = '';
   let usedGrouped = false;

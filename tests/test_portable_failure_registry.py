@@ -30,10 +30,12 @@ class PortableFailureRegistryTests(unittest.TestCase):
         self.assertIn("LLM proposes", text)
         self.assertIn("code enforces", text)
         self.assertIn("registry.yaml", text)
-        # Mechanics + who owns laws (not pure sales / pure skip)
+        # Engineering-first: mechanics + AI grind / recursion (not enterprise white paper)
         self.assertIn("Observation", text)
-        self.assertIn("pinned", text.lower())
+        self.assertIn("Pinned cognition", text)
+        self.assertIn("Planted-bug", text)
         self.assertIn("AI can grind", text)
+        self.assertIn("Recursion risk", text)
 
     def test_runnable_seeds_have_pattern_folders(self) -> None:
         data = yaml.safe_load(_REGISTRY.read_text(encoding="utf-8"))

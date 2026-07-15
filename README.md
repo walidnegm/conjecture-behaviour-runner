@@ -10,15 +10,15 @@ enforces**.
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
-That doc is the conceptual home: state-law breaks, **LLM proposes · code enforces**,
-how Conjecture checks owner · pin · handoff, plus a short note on who owns laws vs grind
-(AI/SI may implement; buyer accepts). Readiness and seed battery:
-[**MATURITY.md**](docs/MATURITY.md). This README is install, demos, and drivers.
+That doc is the conceptual home: state-law breaks, doctrine, and **how proofs work**
+(pinned cognition → Observation → invariants → planted FAIL). Short notes on AI grind
+(and recursion risk) and who accepts laws. Battery/stage: [**MATURITY.md**](docs/MATURITY.md).
+This README is install, demos, and drivers.
 
 | Doc | What it is |
 |-----|------------|
-| [**CAQ-FM**](docs/conversational-authority-quality.md) | Problem + doctrine + mechanics (one conceptual home) |
-| [**MATURITY**](docs/MATURITY.md) | Readiness, battery size, gaps |
+| [**CAQ-FM**](docs/conversational-authority-quality.md) | Problem + doctrine + mechanics |
+| [**MATURITY**](docs/MATURITY.md) | Stage, battery size, gaps |
 | [**Mode catalog**](incidents/CATALOG.md) | Full list of modes (runnable / pending / host_only) |
 | [**Registry**](incidents/registry.yaml) | Machine SoT (`id` ↔ `portable_seed`) |
 | [**Land playbook**](incidents/README.md) | Classify → capture → patterns/ |

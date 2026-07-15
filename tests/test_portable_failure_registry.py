@@ -39,7 +39,8 @@ class PortableFailureRegistryTests(unittest.TestCase):
         self.assertIn("integration-free", text)
         self.assertIn("multi-turn agent systems", text.lower())
         self.assertIn("mutex", text.lower())
-        self.assertIn("not inventing", text.lower())
+        self.assertIn("inventing", text.lower())
+        self.assertIn("asserting them after every turn", text.lower())
         self.assertIn("correctly decline", text)
 
     def test_runnable_seeds_have_pattern_folders(self) -> None:

@@ -1,46 +1,62 @@
 # Conversational Authority Quality (CAQ-FM)
 
-**How Conjecture relates to named failure modes — and why that matters.**
+## Catch state-law breaks that still look fine in chat
 
-This is the portable quality guide for [conjecture-behaviour-runner](https://github.com/walidnegm/conjecture-behaviour-runner).  
-If you only read one conceptual doc beyond the README, make it this one.
+In multi-turn agents, the reply can sound correct while the **conversation machine**
+underneath is wrong: the wrong specialist owns the turn, the locked record silently
+changed, or a mid-flight task was illegally restarted. Those failures are **ledger and
+handoff bugs**, not “bad writing.” Ordinary unit tests and LLM-as-judge evals usually
+miss them.
 
----
+The design principle is **LLM proposes · code enforces**. The model may emit
+labels—continue, detour, new task, abandon—but **deterministic code** (your rule-set)
+must decide exclusive owner, pin identity, and when ownership may yield. If that
+enforcement is soft, the model can **steal or hijack** the path and still produce a
+helpful-looking answer. Conjecture is regression for the **enforce** half: after each
+scripted turn it checks that owner · pin · handoff law still hold.
 
-## Why this exists
+That is the whole quality problem this package is built around. **CAQ-FM**
+(**Conversational Authority Quality — Failure Modes**) names those breaks, their laws,
+and how you prove they stay sealed.
 
-Multi-turn agents fail in a distinctive way: the **reply can look fine** while the
-**conversation machine underneath is wrong**.
-
-Examples users actually hit:
-
-- They say “continue,” and a *different* specialist takes over (wrong owner).
-- They refer to “this workflow,” but the system silently switched records (pin dropped).
-- They open a saved scenario and get “Pinned scenario…” with nothing useful to work on
-  (pin without an open surface).
-- Advance/continue reports success, but the UI shows an empty step (hollow advance).
-
-Those are not “bad writing.” They are **authority failures**: who owns the turn, what is
-locked, whether delivery opened a real surface, whether a save was real.
-
-Ordinary unit tests and LLM-as-judge evals often miss them, because the **prose** still
-passes. Conjecture is built for the cases where **state law** is broken.
+This guide is the conceptual home for that pitch. The [README](../README.md) is the
+package face (install, demos, drivers). If you only read one conceptual doc, make it
+this one.
 
 ---
 
-## Where Conjecture fits
-
-The design principle is simple:
-
-> **LLM proposes · code enforces.**
+## Doctrine
 
 | Side | Responsibility |
 |------|----------------|
 | **LLM** | Interpret the user; propose labels such as continue, detour, new task, abandon |
 | **Code** | Decide exclusive owner, pin identity, when ownership may yield, and that delivery actually opens |
 
-If enforcement is soft, the model can **steal or hijack** the path and still produce a
-helpful-looking answer. Conjecture regression-tests the **enforce** half:
+| If only the LLM owns the path… | If only code owns meaning… |
+|--------------------------------|----------------------------|
+| Fluent steals, silent pin drops, empty “success” | Brittle keyword routing, no real understanding |
+
+Viable products do both: **model for irregular language**, **code for authority**.
+
+**Unit of institutional memory** when something breaks and you fix it:
+
+1. **Failure** — what the user experienced (plain language)  
+2. **Law** — what must always hold after the turn  
+3. **Proof** — a seed or test that fails without the fix and passes with it  
+
+A test with no law is not a seal. A law with no ratchet is not sealed.
+
+### Prevention still beats paperwork
+
+The strongest fix is structural: early-return after real saves, exclusive owners, finite
+chips for code-owned choices, no fall-through into freestyle chat for authority paths.
+
+Conjecture seeds and host ratchets **catch what structure missed**. They are not a
+substitute for making the right path the only easy path in product code.
+
+---
+
+## What Conjecture checks (the enforce half)
 
 1. You write a short multi-turn **script** (user messages + expected state after each turn).  
 2. Cognition is **pinned or frozen** so CI is repeatable (this package does not score free-text classifiers).  
@@ -49,22 +65,6 @@ helpful-looking answer. Conjecture regression-tests the **enforce** half:
 
 So Conjecture is not “did the bot sound smart?” It is: **given these labels, did your
 coded rule-set still seal the conversation?**
-
----
-
-## What “Conversational Authority Quality” means
-
-**CAQ-FM** is the name for that quality program:  
-**Conversational Authority Quality — Failure Modes.**
-
-It answers:
-
-1. **What classes of authority failure exist?** (named modes, plain English)  
-2. **What law was broken?** (one sentence)  
-3. **How do we prove it stays fixed?** (portable seed and/or host tests)
-
-Conjecture is the **engine** that runs those proofs under pinned cognition.  
-CAQ-FM is the **map of failures** and how they relate to the engine.
 
 ```text
   User-visible authority failure
@@ -78,36 +78,6 @@ CAQ-FM is the **map of failures** and how they relate to the engine.
             ▼
   CI: FAIL on soft enforce, PASS when sealed
 ```
-
----
-
-## Doctrine in one page
-
-### The split (again, with stakes)
-
-| If only the LLM owns the path… | If only code owns meaning… |
-|--------------------------------|----------------------------|
-| Fluent steals, silent pin drops, empty “success” | Brittle keyword routing, no real understanding |
-
-Viable products do both: **model for irregular language**, **code for authority**.
-
-### Unit of institutional memory
-
-When something breaks and you fix it, capture:
-
-1. **Failure** — what the user experienced (plain language)  
-2. **Law** — what must always hold after the turn  
-3. **Proof** — a seed or test that fails without the fix and passes with it  
-
-That unit is more valuable than a test named `test_scenario_xyz` with no stated invariant.
-
-### Prevention still beats paperwork
-
-The strongest fix is structural: early-return after real saves, exclusive owners, finite
-chips for code-owned choices, no fall-through into freestyle chat for authority paths.
-
-Conjecture seeds and host ratchets **catch what structure missed**. They are not a
-substitute for making the right path the only easy path in product code.
 
 ---
 
@@ -159,8 +129,8 @@ Talk in plain failure language or declarative ids. Use folder names only for pat
 
 ## How a new reader should use this package
 
-1. **Read the [README](../README.md)** — what Conjecture checks after each turn.  
-2. **Skim this doc** — why authority failures matter and how CAQ-FM relates.  
+1. **Read this guide** — state-law breaks, doctrine, what Conjecture proves.  
+2. **Skim the [README](../README.md)** — install, demos, drivers.  
 3. **Open the [catalog](../incidents/CATALOG.md)** — which modes exist and which are runnable.  
 4. **Run a planted-bug demo** from the README / examples — see FAIL then PASS.  
 5. **Land a law** only when you have a real multi-turn state break:

@@ -2,30 +2,20 @@
 
 **Catch state-law breaks that still look fine in chat.**
 
-In multi-turn agents, the reply can sound correct while the **conversation machine**
-underneath is wrong: the wrong specialist owns the turn, the locked record silently
-changed, or a mid-flight task was illegally restarted. Those failures are **ledger and
-handoff bugs**, not “bad writing.” Ordinary unit tests and LLM-as-judge evals usually
-miss them.
+Regression for multi-turn **state law** (owner · pin · handoff) under **pinned
+cognition** — *looks fine in chat, broken underneath* — against **LLM proposes · code
+enforces**.
 
-The design principle is **LLM proposes · code enforces**. The model may emit
-labels—continue, detour, new task, abandon—but **deterministic code** (your rule-set)
-must decide exclusive owner, pin identity, and when ownership may yield. If that
-enforcement is soft, the model can **steal or hijack** the path and still produce a
-helpful-looking answer. Conjecture is regression for the **enforce** half: after each
-scripted turn it checks that owner · pin · handoff law still hold.
-
-### Failure modes & Conversational Authority Quality (CAQ-FM)
-
-**Start here if you want to understand *why* Conjecture exists and *which* failures it
-maps to:**  
-[**Conversational Authority Quality**](docs/conversational-authority-quality.md)  
+**Why this exists (doctrine + failure modes):**  
+[**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
-That guide is written for a new reader. Companion index of all modes:
+That guide owns the full pitch (state-law breaks, the enforce half, CAQ-FM map). This
+README is the package face: install, demos, drivers, what gets checked after each turn.
 
 | Doc | What it is |
 |-----|------------|
+| [**CAQ-FM guide**](docs/conversational-authority-quality.md) | Conceptual home — start here for *why* |
 | [**Mode catalog**](incidents/CATALOG.md) | Full list of modes (runnable / pending / host_only) |
 | [**Registry**](incidents/registry.yaml) | Machine SoT (`id` ↔ `portable_seed`) |
 | [**Land playbook**](incidents/README.md) | Classify → capture → patterns/ |
@@ -60,7 +50,7 @@ MIT · **0.1.6** · [Bot0.ai](https://bot0.ai)
 
 ---
 
-## What this is (plain English)
+## What this package checks
 
 **Not** “did steps run in the right order?” (ordinal / unit tests).  
 **Not** “did the bot write a good sentence?” (LLM eval).
@@ -69,14 +59,6 @@ MIT · **0.1.6** · [Bot0.ai](https://bot0.ai)
 the coded rule-set that says who owns the turn, what is pinned, and when ownership may
 yield — even when an LLM *proposes* something that would steal or hijack if code did not
 enforce?
-
-That is the principle:
-
-> **LLM proposes · code enforces.**  
-> Conjecture regression-tests the **enforce** half under **pinned** labels so CI is
-> repeatable. If application logic is soft (fall-through to chat, keyword routing,
-> missing sole-continue), a model can fool the path; Conjecture is built to fail those
-> steals.
 
 | Check | Meaning (host-defined values) |
 |-------|---------|
@@ -102,10 +84,6 @@ Conjecture:            ✅ exclusive_owner still equals the kind your ledger sta
 
 In the shipped mini-app that kind string is `cost_out` and the pin is `workflow_id=wf_1`
 — convenient dogfood, **not** a product enum.
-
-**One line:** regression for multi-turn **state law** (owner · pin · handoff) under
-**pinned cognition** — *looks fine in chat, broken underneath* — against the principle
-that **code, not the model, owns enforcement**.
 
 ### Who “deserves to go next”?
 
@@ -142,23 +120,9 @@ your adapter (or HTTP JSON paths), pin the labels, run the script → **verdict*
 (PASS/FAIL + which invariant broke). No need to rewrite the ledger into Conjecture’s
 types beyond that projection.
 
----
-
-## The pain (real, not only synthetic)
-
-In multi-turn control planes, the reply can look fine while **exclusive owner**, **entity
-pin**, or **handoff law** breaks — classic **steal/hijack** when the model’s proposal was
-not sealed by code. Dogfood on the Conversation Control Plane hit this class with one
-particular mid-flight kind (`cost_out`): discovery-shaped turns mid-flight looked
-helpful while sole-continue still owned the stream. The failure class is the same for
-**any** sole-continue kind your ledger defines. Evals score prose; they miss the
-rule-set.
-
-Conjecture freezes the classification for CI, runs the real Act path (or HTTP), and fails
-the build when **state law** breaks.
-
 > **Honest scope:** this gates **enforcement** given a pin/freeze — not “the classifier
 > was wrong.” Test cognition separately; use Conjecture for owner/pin/handoff regression.
+> Full doctrine: [CAQ-FM](docs/conversational-authority-quality.md).
 
 ---
 

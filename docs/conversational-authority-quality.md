@@ -186,7 +186,7 @@ Mini-app demos: [README](../README.md) (`conjecture path-faithful --prove-bugs`)
 ## Why not just pytest?
 
 You *can* assert `exclusive_owner` and pins in pytest, Cucumber, LangSmith, or an
-internal harness. See also the plain-systems table above: this is control state, not a
+internal harness. See also the multi-turn systems section above: this is control state, not a
 new CS primitive.
 
 Conjecture **standardizes the discipline** so the same shape can be shared, reviewed,

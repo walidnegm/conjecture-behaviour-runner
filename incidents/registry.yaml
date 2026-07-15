@@ -1,10 +1,11 @@
 # Portable CAQ-FM registry (public Conjecture).
+# Comprehensive mode namespace for authority failures; seed_status says what this
+# package can prove today (runnable vs seed_pending vs host_only).
 # Doctrine: docs/conversational-authority-quality.md
-# Host monorepos may keep a fuller private CAQ-FM registry (not shipped here).
+# Catalog: incidents/CATALOG.md
 # Proofs: patterns/<portable_seed>/
 #
 # id = declarative mode; portable_seed = patterns/ folder (may differ).
-# legacy_id = previous tribal name when renamed.
 
 version: 1
 title: Conjecture portable failure-mode registry
@@ -190,11 +191,55 @@ entries:
   law_shape: []
   notes: OK path — no seed required.
   legacy_id: true_glossary_detour
+- id: success_payload_rewrite
+  failure_mode: Success payload rewrite
+  portable_seed: null
+  law: Mutative tool success early-returns code message with ids/counts; no LLM rewrite.
+  plane: substrate
+  family: substrate
+  parent_id: null
+  portability: host
+  seed_status: host_only
+  law_shape: []
+  notes: Host unit + prompt/worker deploy — not mini-app Observation seed
+- id: false_save_claim
+  failure_mode: False save claim
+  portable_seed: null
+  law: Assistant must not claim saved when commit never ran.
+  plane: substrate
+  family: substrate
+  parent_id: null
+  portability: host
+  seed_status: host_only
+  law_shape: []
+  notes: Host hallucination gate
+- id: compound_act_loss
+  failure_mode: Compound-act loss
+  portable_seed: null
+  law: One primary exclusive act + secondary delivery only when asked.
+  plane: cognition
+  family: cognition
+  parent_id: null
+  portability: host
+  seed_status: host_only
+  law_shape: []
+  notes: Host cognition delivery; promote when Observation-shaped seed exists
+- id: domain_pick_misbound
+  failure_mode: Domain pick misbound
+  portable_seed: null
+  law: While domain picker open, typed label binds domain or re-prompts — not inventory.
+  plane: delivery
+  family: delivery_ownership
+  parent_id: wrong_delivery_leaf
+  portability: host
+  seed_status: host_only
+  law_shape: []
+  notes: Host armed-pick exclusivity; promote when portable seed exists
 out_of_scope:
 - id: success_payload_rewrite
-  reason: Substrate tool→model→prompt→worker authority drop — host unit + deploy seals
+  reason: Host unit + prompt/worker deploy — not mini-app Observation seed
 - id: false_save_claim
-  reason: Substrate false-save claim — host hallucination gate
+  reason: Host hallucination gate
 - id: compound_act_loss
   reason: Host cognition delivery; promote when Observation-shaped seed exists
 - id: domain_pick_misbound

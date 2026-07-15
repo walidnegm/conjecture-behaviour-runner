@@ -89,9 +89,29 @@ class PortableFailureRegistryTests(unittest.TestCase):
         text = _CATALOG.read_text(encoding="utf-8")
         self.assertIn("registry.yaml", text)
         self.assertIn("conversational-authority-quality.md", text)
+        self.assertIn("Full mode list", text)
         self.assertIn("owner_steal", text)
         self.assertIn("owner_steal_mid_continue", text)
         self.assertIn("named_item_misresolve", text)
+        self.assertIn("compound_act_loss", text)
+        self.assertIn("success_payload_rewrite", text)
+        self.assertIn("host_only", text)
+
+    def test_registry_lists_full_mode_namespace(self) -> None:
+        """Catalog companion registry covers the full CAQ-FM mode set (18)."""
+        data = yaml.safe_load(_REGISTRY.read_text(encoding="utf-8"))
+        ids = {e["id"] for e in data["entries"]}
+        # Core portable + documented + host_only map
+        for mid in (
+            "owner_steal",
+            "hollow_open",
+            "compound_act_loss",
+            "domain_pick_misbound",
+            "success_payload_rewrite",
+            "false_save_claim",
+        ):
+            self.assertIn(mid, ids)
+        self.assertGreaterEqual(len(ids), 18)
 
     def test_host_portable_modes_align_when_present(self) -> None:
         """When nested in a monorepo with a host CAQ-FM registry, ids align."""

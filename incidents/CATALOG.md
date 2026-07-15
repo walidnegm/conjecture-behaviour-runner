@@ -3,11 +3,17 @@
 **Comprehensive list of authority failure modes** under **LLM proposes · code enforces**.  
 This is the human index for [Conversational Authority Quality](../docs/conversational-authority-quality.md).
 
+Each **mode id** is a **slug**: the unique Conjecture/CAQ-FM registry id for a *class*
+(e.g. `owner_steal`). That is not an incident id and not a candidate scenario id.
+Many incidents and trajectories map to one slug. Full walking taxonomy:
+[CAQ § Walking taxonomy](../docs/conversational-authority-quality.md#walking-taxonomy-not-fmea)
+(not a full FMEA product).
+
 | Need | Open |
 |------|------|
-| **Thesis** | [docs/conversational-authority-quality.md](../docs/conversational-authority-quality.md) |
+| **Thesis + taxonomy** | [docs/conversational-authority-quality.md](../docs/conversational-authority-quality.md) |
 | **Maturity / battery honesty** | [docs/MATURITY.md](../docs/MATURITY.md) |
-| **Machine SoT** | [registry.yaml](registry.yaml) |
+| **Machine SoT** | [registry.yaml](registry.yaml) (`id` = slug) |
 | **Land a seed** | [README.md](README.md) |
 | **Runnable proofs** | `patterns/<portable_seed>/` |
 

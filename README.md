@@ -23,12 +23,16 @@ relinquish that governance.
 **Conceptual home:** [**CAQ-FM**](docs/conversational-authority-quality.md) ·
 [MATURITY](docs/MATURITY.md) · This README: install and demos.
 
+**Walking taxonomy** (not FMEA): **failure mode slug** = unique registry `id` (class) →
+many **incidents** / **candidate scenarios** (trajectories) → optional **sealed script**
+under `patterns/`. Console Help spells this out; list rows are scenarios, not modes.
+
 | Doc | What it is |
 |-----|------------|
-| [**CAQ-FM**](docs/conversational-authority-quality.md) | Problem + doctrine + concrete loop |
+| [**CAQ-FM**](docs/conversational-authority-quality.md) | Problem + doctrine + taxonomy + loop |
 | [**MATURITY**](docs/MATURITY.md) | Stage, battery size, gaps |
-| [**Mode catalog**](incidents/CATALOG.md) | Full list of modes (runnable / pending / host_only) |
-| [**Registry**](incidents/registry.yaml) | Machine SoT (`id` ↔ `portable_seed`) |
+| [**Mode catalog**](incidents/CATALOG.md) | Full list of mode **slugs** (runnable / pending / host_only) |
+| [**Registry**](incidents/registry.yaml) | Machine SoT (`id` slug ↔ `portable_seed`) |
 | [**Land playbook**](incidents/README.md) | Classify → capture → patterns/ |
 
 **Owners and kinds are yours, not Conjecture’s.** The package does not ship a fixed

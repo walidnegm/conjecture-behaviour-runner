@@ -6,6 +6,12 @@ This pack is the **template engine** for autonomously authored **Conjecture Scen
 (precursor to Scripts). Fill **your** vocabulary — do not ship product agents as
 Conjecture enums.
 
+**Taxonomy (walking, not FMEA):** failure mode **slug** = unique registry `id` (class) →
+many **incidents** / **candidate scenarios** (trajectories you author here) → optional
+**sealed script**. Rows you emit are scenarios, not modes. See CAQ
+[Walking taxonomy](../../docs/conversational-authority-quality.md#walking-taxonomy-not-fmea)
+and the local console Help panel.
+
 ```text
 📍 Discovery path: Host vocab → Invent → Expand → Scenario → Script → Sealed
    (same tracker contract as Prose → Draft IR → Staffed IR → Compile/save)

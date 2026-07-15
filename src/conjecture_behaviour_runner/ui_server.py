@@ -136,12 +136,53 @@ def _html_page() -> bytes:
       <span class="pipe-arrow" aria-hidden>→</span>
       <span class="pipe-stage upcoming" role="listitem" title="forever regression">○ Sealed</span>
     </div>
-    <p class="muted" style="margin:.35rem 0 .75rem">
-      <strong>Invent</strong> (geometry) vs <strong>Expand</strong> (sole×foreign / matrix /
-      residual). Each row is a <em>candidate scenario</em> (one trajectory) — not a
-      failure-mode class. Many scenarios can map to one failure mode (taxonomy id).
-      Open <strong>Trajectory</strong> → <strong>Scenario</strong> → <strong>Script</strong>.
-    </p>
+    <details class="card" style="margin:.5rem 0 1rem; padding:.75rem 1rem; box-shadow:none; border:1px solid var(--line,#333)">
+      <summary style="cursor:pointer; font-weight:600">Help — walking taxonomy (not FMEA reinvention)</summary>
+      <p class="muted" style="margin:.5rem 0">
+        We use a small layered map so discovery stays consistent. This is <em>not</em>
+        a full FMEA product — only enough structure to connect laws, incidents, and proofs.
+      </p>
+      <table class="muted" style="width:100%; border-collapse:collapse; font-size:.9rem; margin:.5rem 0">
+        <thead>
+          <tr style="text-align:left; border-bottom:1px solid var(--line,#444)">
+            <th style="padding:.25rem .4rem">Layer</th>
+            <th style="padding:.25rem .4rem">What it is</th>
+            <th style="padding:.25rem .4rem">Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--line,#2a2a2a)">
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Failure mode</strong><br/><span class="mono">id / slug</span></td>
+            <td style="padding:.35rem .4rem">Named law in CAQ-FM / <span class="mono">registry.yaml</span>.
+              <strong>Slug = unique mode id</strong> Conjecture uses internally
+              (e.g. <span class="mono">owner_steal</span>) — one id per class, not per incident.</td>
+            <td style="padding:.35rem .4rem" class="mono">owner_steal, hollow_open, packaging_steal</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line,#2a2a2a)">
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Incident</strong></td>
+            <td style="padding:.35rem .4rem">One real production/soak hit that instantiated the mode.</td>
+            <td style="padding:.35rem .4rem">“glossary stole mid claim C-1042 on 2026-07-01”</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line,#2a2a2a)">
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Candidate scenario</strong></td>
+            <td style="padding:.35rem .4rem">One authored multi-turn <em>trajectory</em> (path) that can stress a mode.
+              Rows in this list are scenarios, not modes. Many scenarios → one mode.</td>
+            <td style="padding:.35rem .4rem" class="mono">invent_…_glossary_concept, matrix.hollow_open.…</td>
+          </tr>
+          <tr>
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Script / sealed pattern</strong></td>
+            <td style="padding:.35rem .4rem">CI-runnable proof for a trajectory
+              (<span class="mono">patterns/&lt;portable_seed&gt;/</span> ↔ registry <span class="mono">portable_seed</span>).</td>
+            <td style="padding:.35rem .4rem" class="mono">patterns/owner_steal_mid_continue/</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted" style="margin:.5rem 0 0">
+        <strong>Invent</strong> = geometry candidates (surface × act × stealer).
+        <strong>Expand</strong> = sole×foreign / matrix / residual.
+        Open <strong>Trajectory</strong> → <strong>Scenario</strong> → <strong>Script</strong>.
+      </p>
+    </details>
     <div id="candTaxonomy" class="muted" style="margin:0 0 .75rem; font-size:.9rem"></div>
     <div id="candInventRun" class="muted" style="margin:0 0 .75rem; display:none"></div>
     <div class="row" style="margin-bottom:.75rem">

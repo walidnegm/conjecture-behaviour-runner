@@ -32,6 +32,22 @@ Install: [README](../README.md) · Modes: [CATALOG](../incidents/CATALOG.md) · 
 [MATURITY](./MATURITY.md). **“Authority” ≠ IAM** — who may act, which record stays
 active, when ownership may yield, whether claimed success produced the promised effect.
 
+### Walking taxonomy (not FMEA)
+
+We do **not** reinvent failure-mode analysis as a product. We use a small layered map
+so laws, incidents, and proofs stay consistent:
+
+| Layer | What it is | Example |
+|-------|------------|---------|
+| **Failure mode** (`id` / **slug**) | Named law in CAQ-FM / `registry.yaml`. **Slug = unique mode id** Conjecture uses internally — one id per *class*, not per incident. | `owner_steal`, `hollow_open` |
+| **Incident** | One real production/soak hit of that mode | “glossary stole mid claim C-1042 on …” |
+| **Candidate scenario** | One authored multi-turn **trajectory** that can stress a mode (console rows) | `invent_…_glossary_concept`, `matrix.hollow_open.…` |
+| **Script / sealed pattern** | CI-runnable proof; `patterns/<portable_seed>/` joins via registry | `patterns/owner_steal_mid_continue/` |
+
+**Several incidents and trajectories map to one failure mode.** Folder names under
+`patterns/` may differ from the declarative slug (CI stability); join with
+`portable_seed` / `registry_id`.
+
 ---
 
 ## Doctrine

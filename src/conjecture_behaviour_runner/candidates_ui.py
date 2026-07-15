@@ -253,9 +253,9 @@ def list_candidates(
         "generator": man.get("generator"),
         "scenarios": filtered,
         "taxonomy_note": (
-            "Failure mode = class/category (taxonomy). "
-            "Candidate scenario = one trajectory that maps to a class; "
-            "several incidents/trajectories can share one failure mode."
+            "Failure mode slug = unique registry id (e.g. owner_steal). "
+            "Candidate scenario = one trajectory; many scenarios/incidents → one mode. "
+            "Not a full FMEA — walking map only. See console Help."
         ),
     }
 

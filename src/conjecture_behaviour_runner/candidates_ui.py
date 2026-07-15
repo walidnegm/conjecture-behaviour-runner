@@ -137,8 +137,9 @@ def list_candidates(
             ),
             "role": "Scenario precursor to Script",
             "taxonomy_note": (
-                "Failure mode = class/category (e.g. owner_steal). "
-                "Candidate scenario = one multi-turn trajectory that may map to that class."
+                "Failure mode slug = unique registry id (e.g. owner_steal). "
+                "Candidate scenario = one trajectory; many scenarios/incidents → one mode. "
+                "Not a full FMEA — walking map only. See console Help."
             ),
         }
     man = _load_manifest(cdir)

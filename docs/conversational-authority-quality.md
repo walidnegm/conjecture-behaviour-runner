@@ -1,28 +1,27 @@
 # Conversational Authority Quality (CAQ-FM)
 
-**Category thesis** for Conjecture Behaviour Runner.  
-Install and demos: [README](../README.md). Package maturity and battery size: [MATURITY.md](./MATURITY.md).
+**Conceptual home** for Conjecture Behaviour Runner.  
+Install / demos: [README](../README.md). Package stage and seed battery: [MATURITY.md](./MATURITY.md).
 
 ---
 
-## The failure class
+## Catch state-law breaks that still look fine in chat
 
-In multi-turn agents, the **reply can look successful** while the system has violated
-**ownership, identity, continuity, or handoff**. Examples:
+In multi-turn agents, the reply can sound correct while the **conversation machine**
+underneath is wrong: wrong specialist owns the turn, locked record silently changed,
+mid-flight work illegally restarted, or a “success” that opens nothing useful.
 
-- Wrong specialist still owns the turn after “continue”
-- Locked customer / claim / ticket / account silently changes
-- Mid-flight work is illegally restarted
-- A “success” opens nothing useful
+Those are **ledger / handoff / delivery** failures — not “bad writing.” Surface evals and
+LLM-as-judge score prose. They do not prove ownership, identity, continuity, or handoff
+still held.
 
-Those are **state-integrity and handoff** failures — not “bad writing.” LLM-as-judge and
-surface evals score prose; they do not prove the machine underneath stayed lawful.
+**“Authority” here is not IAM.** It means conversation and workflow authority: who may
+act, what record stays pinned, when control may yield, what must open after a claimed
+success. Familiar labels: agent state integrity, workflow integrity, invalid handoff,
+unauthorized state mutation.
 
-**“Authority” here is not IAM.** It is *conversation and workflow authority*: who may act,
-what record stays pinned, when control may yield, and what must be delivered after a
-claimed success. Closest enterprise categories: **agent state integrity**, **workflow
-integrity**, **transaction continuity**, **invalid handoff**, **unauthorized state
-mutation**.
+**CAQ-FM** (Conversational Authority Quality — Failure Modes) names those breaks, their
+laws, and how they are proven. **Conjecture** runs the proofs.
 
 ---
 
@@ -32,15 +31,15 @@ mutation**.
 
 | Side | Role |
 |------|------|
-| **Cognition (LLM)** | Interprets the user; proposes labels (continue, detour, new task, abandon, …) |
-| **Code** | Exclusive owner, pinned entity, when ownership may yield, that delivery actually opens |
+| **LLM** | Interprets the user; proposes labels (continue, detour, new task, abandon, …) |
+| **Code** | Exclusive owner, pin identity, when ownership may yield, that delivery actually opens |
 
 If enforcement is soft, the model can steal or hijack the path and still sound helpful.
-Conjecture regression-tests the **enforce** side: after each scripted turn, **owner · pin
-· handoff law** still hold under **pinned** labels (so CI is deterministic). It does not
-score free-text classifiers; pair it with separate cognition evals.
+Conjecture regression-tests the **enforce** half under **pinned** labels so CI is
+repeatable. It does not score free-text classifiers — pair it with separate cognition
+evals. Green enforce + wrong live labels is still a bad product.
 
-**Institutional memory** for each sealed defect:
+**Institutional memory** when something breaks and you seal it:
 
 1. **Failure** — what the user experienced  
 2. **Law** — what must always hold after the turn  
@@ -48,104 +47,82 @@ score free-text classifiers; pair it with separate cognition evals.
 
 A test with no law is not a seal. A law with no proof is not sealed.
 
-**Why not “just pytest”?** You *can* assert owner and pin in ad-hoc tests. What ordinary
-tooling does **not** provide by default is a **shared authority model**, an
-**incident-derived taxonomy**, a **portable observation contract**, and a **vendor-neutral
-proof discipline** (healthy PASS + planted FAIL, reproducible across stacks). Conjecture
-exists to institutionalize that contract — not to invent asserting fields.
+When authority is load-bearing, prefer structural ownership (exclusive owner, real pins,
+early-return after real saves, finite chips for code-owned acts). Seeds and ratchets
+catch what structure missed; they do not replace product design.
+
+**Why not only ad-hoc unit tests?** You *can* assert owner and pin in pytest. Ordinary
+tooling does not, by default, give a **shared authority model**, **incident-derived
+taxonomy**, **portable observation contract**, or **healthy PASS + planted FAIL**
+discipline reusable across hosts. That institutionalization is the point.
 
 ---
 
-## Enterprise wedge: who owns the law
+## What Conjecture checks (the how)
 
-Enterprises increasingly **outsource agent implementation** (SI, software vendor, cloud
-partner, managed service) while **orchestration and observability** sit on platforms
-(Microsoft, AWS, ServiceNow, Salesforce, LangChain, Temporal, …). That does not move
-accountability.
+After each turn of a multi-turn **script**:
 
-| Role | Typical party |
-|------|----------------|
-| Defines business-acceptable behavior and authority laws | **Enterprise** process / product owner |
-| Security and governance requirements | Enterprise architecture / risk / security |
-| Builds the agent | SI, vendor, or partner |
-| Operates the agent | Enterprise or managed provider |
-| Supplies orchestration / observability | Platform vendors |
-| Accepts whether implementation is good enough | **Enterprise** — not the implementer alone |
-
-**Companies will offload the machinery. They should not offload the law.**
-
-Implementation providers may draft scripts, projections, drivers, and catalog entries.
-AI agents can accelerate that grind. **The enterprise must own and accept the authority
-contract** — what counts as correct ownership, pinning, mutation, yield, and delivery.
-Otherwise an SI can define weak criteria, implement against them, run its own suite, and
-self-certify.
-
-That is the durable reason for a **vendor-neutral** layer:
-
-> **Buyer-owned conformance tests for vendor-built AI agents.**  
-> A portable, executable definition of who may act, what must remain pinned, and when
-> control may transfer — even when someone else builds and operates the agent.
-
-Adjacent platforms will add multi-turn scripts, invariants, and dashboards. The
-differentiator is not “we also test state.” It is that the **acceptance contract stays
-owned by the buyer**, portable across implementers, frameworks, and migrations.
-
-### Operating model
-
-| Activity | Enterprise | Delivery provider | Conjecture / independent QA |
-|----------|------------|-------------------|-----------------------------|
-| Surface experienced failure | Accountable | Consulted | Structures taxonomy |
-| Decide the authority **law** | **Accountable** | Consulted | Structures Failure → Law → Proof |
-| Implement enforcement | Reviews | **Accountable** | Independent of vendor stack |
-| Draft scripts & projections | **Approves** | Performs (or AI-assisted) | Automates / validates shape |
-| Planted-failure proof | Reviews | Performs | Verifies PASS/FAIL discipline |
-| Production readiness accept | **Accountable** | Cannot self-approve | Supplies reproducible evidence |
-| Maintain after platform change | Owns requirement | Performs | Detects weakening |
-
----
-
-## What Conjecture is
-
-**Not primarily:** “a test runner for teams who already built a control plane.”
-
-**Primarily:** a **vendor-neutral acceptance-contract layer** for stateful multi-turn
-systems — client-owned laws, portable observations, framework-independent seeds, and
-FAIL/PASS evidence the buyer can keep when the SI or stack changes.
-
-In practice, after each turn of a script:
-
-1. Labels are **pinned** (cognition frozen for the run)  
-2. The host projects **Observation** (owner · pins · outcome — your vocabulary)  
-3. Invariants are checked  
-4. Soft enforcement must **FAIL**; healthy path must **PASS**
+1. User messages run through your **Driver** (in-process or HTTP).  
+2. Cognition is **pinned or frozen** (labels fixed for the run — not a live model roll).  
+3. Your host projects an **Observation**: owner · pins · outcome (your vocabulary).  
+4. Invariants check **owner · pin · open surface · handoff law**.  
+5. A planted soft-enforce bug must **FAIL**; the healthy path must **PASS**.
 
 ```text
   Experienced authority failure
             │
             ▼
-  Named mode + law   (CAQ-FM catalog / registry)
+  Named mode + law   (catalog / registry)
             │
             ▼
-  Script + invariants  (Conjecture)
+  Script + Observation + invariants
             │
             ▼
-  Evidence: PASS healthy · FAIL planted violation
+  PASS healthy · FAIL planted violation
 ```
 
-Named modes and seeds: [CATALOG.md](../incidents/CATALOG.md) ·
-[registry.yaml](../incidents/registry.yaml).
+Modes and status: [CATALOG.md](../incidents/CATALOG.md) ·
+[registry.yaml](../incidents/registry.yaml).  
+Seed folders may keep older names; prefer declarative mode ids in discussion (see
+catalog).
 
-**CAQ-FM** = Conversational Authority Quality — Failure Modes: the map of those failures,
-their laws, and how they are proven. Conjecture is the engine that runs the proofs.
+**Fit in one line:** pays rent when state is load-bearing (owners, pins, handoffs). Free-form
+single-turn Q&A without that shape does not need the machinery — take the doctrine if useful.
+Readiness and battery size: [MATURITY.md](./MATURITY.md).
 
 ---
 
-## Fit (one paragraph)
+## Who does the work
 
-This layer pays rent when **state is load-bearing**: multi-turn workflows, specialists,
-pinned records, handoffs. Free-form single-turn Q&A without ownership or pins does not
-need it. For package readiness, seed count, and known gaps, see
-[MATURITY.md](./MATURITY.md) — not this thesis.
+| Work | Who can perform it | Who must own acceptance |
+|------|--------------------|-------------------------|
+| Draft scripts, projections, drivers, catalog rows | Implementers, SIs, **AI agents** | — |
+| Decide the **law** (what must always hold) | Process / architecture proposes | **Buyer of the outcome** (product owner, not the implementer alone) |
+| Accept production readiness | Reviews evidence | **Buyer** — vendor should not self-certify against weak criteria |
+
+**AI can grind the tax** (script drafts from logs, projection patches, registry hygiene,
+driver stubs). That is pragmatic for small teams. **Law definition and seal sign-off**
+stay human-led (or extreme oversight). Wrong laws = false security. A nondeterministic
+agent that *maintains* the suite can inject flakiness into the layer that exists to catch
+flakiness — keep CI proofs deterministic even when drafts are AI-assisted.
+
+When delivery is **outsourced** (SI, vendor, managed service), the same split scales up:
+enterprise owns the authority contract; the provider implements and proves against it.
+Conjecture is useful as a **portable, vendor-neutral evidence layer** for that contract —
+not only as an in-house test harness. Adjacent platforms will add scripts and dashboards;
+the durable point is that **acceptance criteria stay owned by the party accountable for
+outcomes**, not only the party writing the agent.
+
+---
+
+## Terms (minimal)
+
+| Term | Meaning |
+|------|---------|
+| **Observation** | Post-turn state projected for checks (owner · pins · outcome) |
+| **Pinned cognition** | Labels fixed for CI so the same golden fails for the same state break |
+| **Soft enforce** | Code fails open so the model can steal while sounding helpful |
+| **Seed** | Portable script + planted-bug proof under `patterns/` |
 
 ---
 
@@ -154,16 +131,15 @@ need it. For package readiness, seed count, and known gaps, see
 | Doc | Role |
 |-----|------|
 | [README](../README.md) | Install, demos, drivers |
-| [MATURITY.md](./MATURITY.md) | Readiness, battery, gaps |
+| [MATURITY.md](./MATURITY.md) | Stage, battery, gaps |
 | [CATALOG](../incidents/CATALOG.md) | Mode list + status |
-| [SPEC](./SPEC.md) | Normative package contract |
+| [SPEC](./SPEC.md) | Normative contract |
 | [incidents/README](../incidents/README.md) | Classify → land a seed |
 
 ---
 
 ## One sentence
 
-Fluent answers can conceal broken coded authority. Enterprises may outsource the agent;
-they should not outsource the **definition and acceptance** of who may act, what stays
-pinned, and when control may transfer. Conjecture makes that contract **executable and
-portable**.
+Fluent answers can conceal broken coded authority. **LLM proposes · code enforces**;
+Conjecture proves the enforce half under pinned labels. Keep the **law** with whoever is
+accountable for the outcome — implementers and agents may do the grind.

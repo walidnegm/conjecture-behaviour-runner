@@ -32,7 +32,8 @@ Pays rent when the system has (or will have) **exclusive owner**, **entity pins*
 structure first — or only take the doctrine.
 
 Projection into Observation, multi-turn scripts, and driver maintenance are real work.
-SI/vendor/AI can perform the grind; **enterprise owns law acceptance** (see thesis).
+SI/vendor/AI can perform the grind; the party accountable for outcomes **accepts** the
+law (see CAQ § *Who does the work*).
 
 ---
 

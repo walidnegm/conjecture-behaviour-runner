@@ -10,14 +10,14 @@ enforces**.
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
-That doc is the conceptual home: fluent answers vs broken state, **LLM proposes · code
-enforces**, and the enterprise wedge — **buyer-owned acceptance contracts** when someone
-else builds the agent. Package readiness and seed battery live in
+That doc is the conceptual home: state-law breaks, **LLM proposes · code enforces**,
+how Conjecture checks owner · pin · handoff, plus a short note on who owns laws vs grind
+(AI/SI may implement; buyer accepts). Readiness and seed battery:
 [**MATURITY.md**](docs/MATURITY.md). This README is install, demos, and drivers.
 
 | Doc | What it is |
 |-----|------------|
-| [**CAQ-FM thesis**](docs/conversational-authority-quality.md) | Problem + architecture + enterprise operating model |
+| [**CAQ-FM**](docs/conversational-authority-quality.md) | Problem + doctrine + mechanics (one conceptual home) |
 | [**MATURITY**](docs/MATURITY.md) | Readiness, battery size, gaps |
 | [**Mode catalog**](incidents/CATALOG.md) | Full list of modes (runnable / pending / host_only) |
 | [**Registry**](incidents/registry.yaml) | Machine SoT (`id` ↔ `portable_seed`) |

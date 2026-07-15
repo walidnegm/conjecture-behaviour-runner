@@ -10,14 +10,13 @@ enforces**.
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
-That doc is the conceptual home: state-law breaks, doctrine, and **how proofs work**
-(pinned cognition → Observation → invariants → planted FAIL). Short notes on AI grind
-(and recursion risk) and who accepts laws. Battery/stage: [**MATURITY.md**](docs/MATURITY.md).
-This README is install, demos, and drivers.
+That doc is the practical conceptual home: failure class, doctrine, and the full loop
+(script → pinned cognition → Observation → invariants → planted FAIL), plus AI grind /
+when to skip. Stage: [**MATURITY.md**](docs/MATURITY.md). This README is install and demos.
 
 | Doc | What it is |
 |-----|------------|
-| [**CAQ-FM**](docs/conversational-authority-quality.md) | Problem + doctrine + mechanics |
+| [**CAQ-FM**](docs/conversational-authority-quality.md) | Problem + doctrine + concrete loop |
 | [**MATURITY**](docs/MATURITY.md) | Stage, battery size, gaps |
 | [**Mode catalog**](incidents/CATALOG.md) | Full list of modes (runnable / pending / host_only) |
 | [**Registry**](incidents/registry.yaml) | Machine SoT (`id` ↔ `portable_seed`) |

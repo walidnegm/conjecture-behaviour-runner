@@ -55,12 +55,12 @@ authority is load-bearing; proofs catch what structure missed.
 
 ### In multi-turn systems (plain terms)
 
-In multi-turn agent systems, exclusive owner ≈ a mutex, active record ≈ a foreign key,
-and handoff rules ≈ when the lock may release — we are **not inventing** those; we are
-**asserting them after every turn** under LLM routing, when helpful detours often
-fail-open and chat evals only score the prose.
+In multi-turn agent systems, you need an **exclusive owner** for the turn, a **stable
+active record**, and clear rules for when **ownership may yield** — we are **not
+inventing** those; we are **asserting them after every turn** under LLM routing, when
+helpful detours often fail-open and chat evals only score the prose.
 
-Same mapping, shorter:
+For readers who prefer classical systems vocabulary:
 
 | Our phrasing | Familiar systems idea |
 |--------------|------------------------|

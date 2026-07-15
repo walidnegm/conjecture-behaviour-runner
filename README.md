@@ -6,10 +6,10 @@ Regression for multi-turn **state law** (owner · pin · handoff) under **pinned
 cognition** — *looks fine in chat, broken underneath* — against **LLM proposes · code
 enforces**.
 
-In multi-turn agent systems, exclusive owner ≈ a mutex, active record ≈ a foreign key,
-and handoff rules ≈ when the lock may release — we are **not inventing** those; we are
-**asserting them after every turn** under LLM routing, when helpful detours often
-fail-open and chat evals only score the prose.
+In multi-turn agent systems, you need an **exclusive owner** for the turn, a **stable
+active record**, and clear rules for when **ownership may yield** — we are **not
+inventing** those; we are **asserting them after every turn** under LLM routing, when
+helpful detours often fail-open and chat evals only score the prose.
 
 **Why / how (conceptual home):**  
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  

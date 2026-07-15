@@ -1,10 +1,29 @@
 # Conversational Authority Quality (CAQ-FM)
 
-How Conjecture catches **state-law breaks that still look fine in chat** — doctrine plus
-the concrete loop (scripts, pinned cognition, Observations, invariants, planted bugs).
+## Why you are here
 
-Install / demos: [README](../README.md) · Mode map: [CATALOG.md](../incidents/CATALOG.md) ·
-Package stage: [MATURITY.md](./MATURITY.md)
+Multi-turn AI agents do not only fail by writing a bad sentence. They also fail when
+**state law** breaks under a reply that still *sounds* successful: the wrong specialist
+keeps talking, the wrong customer or ticket is “current,” mid-flight work restarts, or a
+claimed success opens nothing the user can act on.
+
+That class of bug is easy to miss. Product demos look fine. Chat transcripts look fine.
+LLM-as-judge often scores the prose. Ordinary unit tests may only check that *something*
+returned. The conversation machine underneath — who owns the turn, what is pinned, when
+ownership may yield — can still be wrong.
+
+**This document** is the conceptual home for that problem and how Conjecture addresses it:
+
+| Piece | Role |
+|-------|------|
+| **CAQ-FM** | Names the failure modes (the map): wrong owner, pin drop, illegal restart, hollow open, … |
+| **Conjecture** | Runs multi-turn scripts that **PASS** when enforce holds and **FAIL** when soft enforce steals |
+| **Doctrine** | **LLM proposes · code enforces** — model suggests labels; deterministic code owns owner · pin · handoff |
+| **Memory** | **Failure → Law → Proof** — seal each class so it cannot silently return |
+
+Read this for *why* and *how the proofs work*. Install, demos, and drivers live in the
+[README](../README.md). Mode list: [CATALOG.md](../incidents/CATALOG.md). Package stage
+and seed battery: [MATURITY.md](./MATURITY.md).
 
 ---
 

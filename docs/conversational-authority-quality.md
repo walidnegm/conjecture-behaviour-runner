@@ -2,30 +2,35 @@
 
 ## Why you are here
 
-Multi-turn AI agents fail not only by writing a bad sentence. They also fail when
-**state law** breaks under a reply that still *sounds* successful: the wrong specialist
-keeps talking, the wrong customer or ticket is “current,” mid-flight work restarts, or a
-claimed success opens nothing the user can act on.
+Multi-turn agents don’t only fail by writing a bad answer. They fail when the reply
+looks right and **state law** underneath is wrong: wrong owner, wrong active record,
+illegal restart, hollow “done.”
 
-Demos and chat transcripts can look fine. LLM-as-judge often scores the prose. Ordinary
-tests may only check that *something* returned. The machine underneath — **who owns the
-turn, which record is active, when ownership may yield** — can still be wrong.
+**Applies to** agentic / LLM products with **durable workflows, real records, and real
+handoffs**—claims, tickets, cases, multi-step operations. Free-form Q&A often does not
+need this machinery.
 
-**This document** is the conceptual home for that problem and how Conjecture addresses it.
+**What conversational authority regression must provide:**
+
+- a shared multi-turn script shape  
+- a portable post-turn Observation  
+- deterministic enforcement tests with fixed labels  
+- separate router and enforcement evaluation  
+- a healthy-PASS / planted-FAIL discipline  
+- a named taxonomy of authority failures  
+- discoverability of hard multi-turn paths  
+- trajectory invention that plausibly creates edge conditions (then human-accepted laws)  
 
 | Piece | Role |
 |-------|------|
-| **CAQ-FM** | Named failure modes (the map): wrong owner, pin drop, illegal restart, hollow open, … |
-| **Conjecture** | Multi-turn scripts that **PASS** when enforcement holds and **FAIL** when it is soft |
-| **Doctrine** | **LLM proposes · code enforces** |
-| **Memory** | **Failure → Law → Proof** so a class cannot silently return |
+| **CAQ-FM** | Named failure modes (the map) |
+| **Conjecture** | Runs the proofs: PASS healthy · FAIL planted soft enforcement |
+| **Doctrine** | **LLM proposes · policy validates · code commits** |
+| **Memory** | **Failure → Law → Proof** |
 
-Install and demos: [README](../README.md). Mode map: [CATALOG.md](../incidents/CATALOG.md).
-Stage and seed battery: [MATURITY.md](./MATURITY.md).
-
-**“Authority” ≠ IAM.** Here it means conversation and workflow authority: who may act,
-which record stays active (pinned), when control may yield, and what must open after a
-claimed success.
+Install: [README](../README.md) · Modes: [CATALOG](../incidents/CATALOG.md) · Stage:
+[MATURITY](./MATURITY.md). **“Authority” ≠ IAM** — who may act, which record stays
+active, when ownership may yield, whether claimed success produced the promised effect.
 
 ---
 
@@ -190,37 +195,17 @@ Mini-app demos: [README](../README.md) (`conjecture path-faithful --prove-bugs`)
 
 ## Why not just pytest?
 
-You *can* assert `exclusive_owner` and pins in pytest, Cucumber, LangSmith, or an
-internal harness. See also the multi-turn systems section above: this is control state, not a
-new CS primitive.
+You *can* assert owner and active record in pytest. That is control state, not a new
+primitive. What most suites still miss is the **full list above**: shared multi-turn
+shape, portable Observation, fixed-label enforce CI, router vs enforcement split,
+planted-FAIL, taxonomy, **discoverability**, and **trajectory invention**.
 
-Conjecture **standardizes the discipline** so the same shape can be shared, reviewed,
-and promoted. Most suites do **not** provide by default:
+Happy-path tests check what the engineer remembered. Authority bugs live on compound
+turns and soft handoffs nobody scripted until a soak or generator surfaces them.
+Invention without acceptance is noise; acceptance without discovery is a thin battery.
 
-| Convention | What you get |
-|------------|----------------|
-| Shared multi-turn **script** shape | Expected state after *each* turn, not a single endpoint check |
-| Portable post-turn **Observation** | Owner · active record · outcome fields after Act |
-| Deterministic enforcement tests | **Fixed labels** so CI isolates the enforce layer |
-| Separate router vs enforcement eval | Did the model propose the right label? vs given that label, did policy hold? |
-| Healthy-**PASS** / planted-**FAIL** | Soft-enforcement must fail; green alone is not enough |
-| Named **taxonomy** of authority failures | Steal, pin drop, hollow open, illegal restart, … (CAQ-FM) |
-| **Discoverability** of hard paths | Find multi-turn trajectories that *plausibly* break owner · pin · handoff |
-| **Trajectory invention** | LLM- or soak-authored scripts that create edge conditions humans under-sample |
-| **Seed packaging** + drivers | Promote host laws; run the same shape over mini-app, HTTP, host adapters |
-
-**Discoverability and invented trajectories.** Integration tests often cover the happy
-path the engineer remembered. Authority bugs show up on *compound* turns (“continue,
-but what does deductible mean?”), detours mid-flight, restarts, and soft handoffs.
-A useful suite does not only assert state — it **surfaces trajectories** that can create
-those edges: from production soaks, candidate discovery, or LLM-proposed multi-turn
-scripts that a human then **accepts as laws** and seals with planted FAIL. Invention
-without acceptance is noise; acceptance without discovery is a thin battery.
-
-If you only need the ideas, steal **LLM proposes · code enforces** and
-**Failure → Law → Proof** without the package. Adopt Conjecture when you want that
-discipline as a **shared, reviewable artifact** — not another one-off assert in a private
-test file.
+Steal the doctrine without the package if you want. Adopt Conjecture when you want that
+discipline as a **shared, reviewable artifact**.
 
 ---
 
@@ -242,11 +227,9 @@ reuse the *proof shape* and, when a law is general, a public seed.
 
 ## Fit (once)
 
-Pays rent when **state is load-bearing**: exclusive owners, real records, pins, handoffs.
-Free-form single-turn Q&A without that shape does not need the machinery. Adoption cost
-is real (scripts, projection, drivers, catalog). Prefer **one** sealed law on your path
-over a large aspirational catalog. Battery size and stage: [MATURITY.md](./MATURITY.md)
-(~**six** runnable public seeds today; map is broader — see [CATALOG](../incidents/CATALOG.md)).
+Same as the opener: durable workflows + real records + real handoffs. Free-form Q&A:
+skip. Prefer **one** sealed law over a large aspirational catalog. Battery:
+[MATURITY.md](./MATURITY.md) (~six runnable public seeds; [CATALOG](../incidents/CATALOG.md)).
 
 ---
 

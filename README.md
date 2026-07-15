@@ -2,25 +2,26 @@
 
 **Catch state-law breaks that still look fine in chat.**
 
-Regression for multi-turn **state law** (owner · pin · handoff) under **pinned
-cognition** — *looks fine in chat, broken underneath* — against **LLM proposes · code
-enforces**.
+Applies to agentic / LLM products with **durable workflows, real records, and real
+handoffs**—claims, tickets, cases, multi-step ops. Free-form Q&A often does not need
+this. **LLM proposes · policy validates · code commits** (shorthand: code enforces).
 
-In multi-turn systems, each governed workflow transition needs one **authoritative
-owner**, a **stable active record**, and rules for when **authority may yield** — even
-when several agents contribute to the turn. We are **not inventing** those primitives;
-we are **asserting them after every turn** under LLM routing.
+What conversational authority regression must provide:
 
-Whether you build in-house or via an SI, builder, or runtime: relinquishing the build
-does not relinquish quality governance. You still need **multi-turn regression on the
-enforcement layer** — not “did the sentence sound smart?”
+- shared multi-turn script shape  
+- portable post-turn Observation (owner · active record)  
+- fixed labels so enforcement CI is deterministic  
+- separate router vs enforcement evaluation  
+- healthy-PASS / planted-FAIL discipline  
+- named taxonomy of authority failures  
+- discoverability + trajectory invention for edge paths humans under-sample  
 
-**Why / how (conceptual home):**  
-[**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
-https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
+We are not inventing exclusive owner / active record / yield rules — we **assert them
+after every turn** under LLM routing. Relinquishing the build (SI / runtime) does not
+relinquish that governance.
 
-Doctrine, worked example, full proof loop, and the plain-systems reading live there.
-Stage / battery: [**MATURITY.md**](docs/MATURITY.md). This README is install and demos.
+**Conceptual home:** [**CAQ-FM**](docs/conversational-authority-quality.md) ·
+[MATURITY](docs/MATURITY.md) · This README: install and demos.
 
 | Doc | What it is |
 |-----|------------|

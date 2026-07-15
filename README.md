@@ -10,9 +10,10 @@ enforces**.
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
-That doc is the practical conceptual home: failure class, doctrine, and the full loop
-(script → pinned cognition → Observation → invariants → planted FAIL), plus AI grind /
-when to skip. Stage: [**MATURITY.md**](docs/MATURITY.md). This README is install and demos.
+That doc is the practical conceptual home: failure class, doctrine, worked example, full
+loop, and a plain-systems reading (owner/pin/yield ≈ mutex/FK/handoff — value is
+post-turn discipline under LLM routing, not inventing locks). Stage:
+[**MATURITY.md**](docs/MATURITY.md). This README is install and demos.
 
 | Doc | What it is |
 |-----|------------|

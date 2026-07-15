@@ -53,23 +53,49 @@ wrong live labels is still a bad product.
 No law → not sealed. No FAIL/PASS pair → not sealed. Prefer structural ownership when
 authority is load-bearing; proofs catch what structure missed.
 
+### Same ideas in plain systems terms
+
+Skeptical readers often reduce this correctly:
+
+| Our phrasing | Familiar systems idea |
+|--------------|------------------------|
+| Who owns the turn? | Exclusive owner / mutex for the active workflow |
+| Which record stays active? | Stable foreign key / entity pin |
+| When may ownership yield? | Lock-release / handoff condition |
+| Failure → Law → Proof | Bug → invariant → regression test |
+| LLM proposes · code enforces | Nondeterministic text must not mutate critical state without validation |
+
+We are **not** claiming to invent locks, foreign keys, or regression tests.
+
+What is under-tested in multi-turn LLM products is the **failure class**: free-form
+routing fail-opens into a helpful path (glossary, FAQ, another specialist), the **prose
+looks fine**, and owner / active record / handoff were never checked. Chat evals score
+sentences. Conjecture standardizes **post-turn state asserts**, **intentional handoff vs
+informational detour**, and **planted soft-enforcement must FAIL**.
+
+One-line product truth:
+
+> After every turn, assert that the correct owner and active record remain intact.
+> Test intentional handoffs separately from informational detours. Plant a steal and
+> require the suite to catch it.
+
 ---
 
 ## Worked example (end-to-end)
 
 **Conversation**
 
-1. User starts a claim with the claims specialist. Claim **C-1042** is the active record.  
+1. Claims Agent owns the thread mid-flight. Active record: claim **C-1042**.  
 2. User: *“Continue — but what does deductible mean?”*  
-3. A glossary / help path answers helpfully (definition is correct).  
-4. Soft enforcement lets the glossary path **take ownership** (or drop the claim pin).  
-5. The visible answer looks good. Underneath, the wrong owner or pin is now active.
+3. Glossary answers helpfully. The definition is correct.  
+4. Fail-open routing **overwrites** exclusive owner (or clears `claim_id`) — not a coup,
+   an orchestration bug.  
+5. A human reading the chat: “Nice explanation.” Business continuity is already wrong.
 
 **Law**
 
-> A definitional detour must not transfer exclusive ownership or unpin the active claim.
-> After the turn: owner remains claims, pin remains C-1042, delivery is glossary *or*
-> claims surface per product rules — but not “claims work abandoned without abandon.”
+> A definitional detour must not transfer exclusive ownership or clear the active claim.
+> After the turn: owner remains claims, pin remains C-1042.
 
 **Pinned cognition (CI)**
 
@@ -82,18 +108,16 @@ turn N label = continue   # or detour-with-return — fixed for the run, not re-
 ```text
 exclusive_owner: "claims"
 pins: { claim_id: "C-1042" }
-# handoff: none  (detour answered without yielding mid-flight claim)
 ```
 
 **Proof**
 
 | Path | Expected |
 |------|----------|
-| Healthy enforce (detour answers, owner+pin held) | **PASS** |
-| Planted soft enforcement (glossary steals owner / drops pin) | **FAIL** |
+| Healthy (detour answers; owner + pin held) | **PASS** |
+| Planted bug (owner overwritten / pin cleared) | **FAIL** |
 
-That is the whole product idea in one incident: helpful prose, broken state law, sealed
-with a planted failure.
+Helpful prose, broken state, regression that catches the overwrite.
 
 ---
 
@@ -162,10 +186,11 @@ Mini-app demos: [README](../README.md) (`conjecture path-faithful --prove-bugs`)
 ## Why not just pytest?
 
 You *can* assert `exclusive_owner` and pins in pytest, Cucumber, LangSmith, or an
-internal harness. Conjecture does not invent new assertion primitives.
+internal harness. See also the plain-systems table above: this is control state, not a
+new CS primitive.
 
-It **standardizes the discipline** so the same shape can be shared, reviewed, and
-promoted:
+Conjecture **standardizes the discipline** so the same shape can be shared, reviewed,
+and promoted:
 
 | Convention | What you get |
 |------------|----------------|

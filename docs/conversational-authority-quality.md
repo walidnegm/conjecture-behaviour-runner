@@ -2,227 +2,241 @@
 
 ## Why you are here
 
-Multi-turn AI agents do not only fail by writing a bad sentence. They also fail when
+Multi-turn AI agents fail not only by writing a bad sentence. They also fail when
 **state law** breaks under a reply that still *sounds* successful: the wrong specialist
 keeps talking, the wrong customer or ticket is “current,” mid-flight work restarts, or a
 claimed success opens nothing the user can act on.
 
-That class of bug is easy to miss. Product demos look fine. Chat transcripts look fine.
-LLM-as-judge often scores the prose. Ordinary unit tests may only check that *something*
-returned. The conversation machine underneath — who owns the turn, what is pinned, when
-ownership may yield — can still be wrong.
+Demos and chat transcripts can look fine. LLM-as-judge often scores the prose. Ordinary
+tests may only check that *something* returned. The machine underneath — **who owns the
+turn, which record is active, when ownership may yield** — can still be wrong.
 
-**This document** is the conceptual home for that problem and how Conjecture addresses it:
+**This document** is the conceptual home for that problem and how Conjecture addresses it.
 
 | Piece | Role |
 |-------|------|
-| **CAQ-FM** | Names the failure modes (the map): wrong owner, pin drop, illegal restart, hollow open, … |
-| **Conjecture** | Runs multi-turn scripts that **PASS** when enforce holds and **FAIL** when soft enforce steals |
-| **Doctrine** | **LLM proposes · code enforces** — model suggests labels; deterministic code owns owner · pin · handoff |
-| **Memory** | **Failure → Law → Proof** — seal each class so it cannot silently return |
+| **CAQ-FM** | Named failure modes (the map): wrong owner, pin drop, illegal restart, hollow open, … |
+| **Conjecture** | Multi-turn scripts that **PASS** when enforcement holds and **FAIL** when it is soft |
+| **Doctrine** | **LLM proposes · code enforces** |
+| **Memory** | **Failure → Law → Proof** so a class cannot silently return |
 
-Read this for *why* and *how the proofs work*. Install, demos, and drivers live in the
-[README](../README.md). Mode list: [CATALOG.md](../incidents/CATALOG.md). Package stage
-and seed battery: [MATURITY.md](./MATURITY.md).
+Install and demos: [README](../README.md). Mode map: [CATALOG.md](../incidents/CATALOG.md).
+Stage and seed battery: [MATURITY.md](./MATURITY.md).
 
----
-
-## Catch state-law breaks that still look fine in chat
-
-In multi-turn agents, the reply can sound correct while the **conversation machine**
-underneath is wrong: the wrong specialist owns the turn, the locked record silently
-changed, or a mid-flight task was illegally restarted. Those failures are **ledger and
-handoff bugs**, not “bad writing.” Ordinary unit tests and LLM-as-judge evals usually
-miss them — the prose still passes.
-
-The design principle is **LLM proposes · code enforces**. The model may emit
-labels—continue, detour, new task, abandon—but **deterministic code** (your rule-set)
-must decide exclusive owner, pin identity, and when ownership may yield. If that
-enforcement is soft, the model can **steal or hijack** the path and still produce a
-helpful-looking answer. Conjecture is regression for the **enforce** half: after each
-scripted turn it checks that owner · pin · handoff law still hold, under **pinned**
-labels so CI is repeatable.
-
-| Looks fine in chat | Broken underneath |
-|--------------------|-------------------|
-| Helpful “continue” answer | Wrong specialist owns the turn |
-| Talks about “this record” | Pin dropped / switched mid-flight |
-| Fresh start after a change | Illegal restart wiped mid-flight work |
-| “Done” / “saved” / “pinned” | Nothing useful opened; empty advance |
-
-```text
-User: "start mid-flight work on record R"
-User: "change a field mid-flight"     ← reply can still sound fine
-
-Unit / ordinal tests:  ✅ something returned
-LLM eval:              ✅ text looks helpful
-Conjecture:            ✅ exclusive_owner still the kind your ledger started
-                       ✅ pin still the same record id
-                       ❌ FAIL if continue stole or dropped the pin
-```
-
-Unit tests *can* assert owner and pin in isolation. What they usually lack by default is a
-shared authority model, an incident taxonomy, a portable **Observation** contract, and a
-**healthy PASS + planted FAIL** discipline. That institutionalization is the point.
-
-**“Authority” ≠ IAM.** Here it means who may act, what stays pinned, when ownership may
-yield, and what must open after a claimed success.
-
-**CAQ-FM** names the failure modes. **Conjecture** runs the proofs.
+**“Authority” ≠ IAM.** Here it means conversation and workflow authority: who may act,
+which record stays active (pinned), when control may yield, and what must open after a
+claimed success.
 
 ---
 
 ## Doctrine
 
+**LLM proposes · code enforces.**
+
 | Side | Responsibility |
 |------|----------------|
-| **LLM** | Labels: continue, detour, new task, abandon, … |
-| **Code** | Exclusive owner, pin identity, yield/handoff, open surface |
+| **LLM** | Irregular language; labels such as continue, detour, new task, abandon |
+| **Code** | Exclusive owner, active record pin, yield/handoff, that delivery actually opens |
 
-Pair with separate classifier evals — green enforce + wrong live labels is still a bad
-product.
+If enforcement fails open (**soft enforcement**), the model can steal or hijack the path
+and still sound helpful. Conjecture regression-tests the **enforce half** under **pinned
+cognition** (labels fixed for CI — not a live model roll). It does not prove the
+classifier picked the right label; pair with separate cognition evals. Green enforce +
+wrong live labels is still a bad product.
 
 **Failure → Law → Proof**
 
-1. **Failure** — plain user experience  
-2. **Law** — what must hold after the turn  
-3. **Proof** — script that **FAIL**s without the fix and **PASS**es with it  
+1. **Failure** — what the user experienced  
+2. **Law** — what must always hold after the turn  
+3. **Proof** — a script that **FAIL**s without the fix and **PASS**es with it  
 
-No law → not a seal. No FAIL/PASS pair → not sealed.
-
-Prefer structural ownership when authority is load-bearing; seeds catch what structure
-missed.
+No law → not sealed. No FAIL/PASS pair → not sealed. Prefer structural ownership when
+authority is load-bearing; proofs catch what structure missed.
 
 ---
 
-## How it works (concrete)
+## Worked example (end-to-end)
+
+**Conversation**
+
+1. User starts a claim with the claims specialist. Claim **C-1042** is the active record.  
+2. User: *“Continue — but what does deductible mean?”*  
+3. A glossary / help path answers helpfully (definition is correct).  
+4. Soft enforcement lets the glossary path **take ownership** (or drop the claim pin).  
+5. The visible answer looks good. Underneath, the wrong owner or pin is now active.
+
+**Law**
+
+> A definitional detour must not transfer exclusive ownership or unpin the active claim.
+> After the turn: owner remains claims, pin remains C-1042, delivery is glossary *or*
+> claims surface per product rules — but not “claims work abandoned without abandon.”
+
+**Pinned cognition (CI)**
+
+```text
+turn N label = continue   # or detour-with-return — fixed for the run, not re-sampled
+```
+
+**Observation after Act (healthy)**
+
+```text
+exclusive_owner: "claims"
+pins: { claim_id: "C-1042" }
+# handoff: none  (detour answered without yielding mid-flight claim)
+```
+
+**Proof**
+
+| Path | Expected |
+|------|----------|
+| Healthy enforce (detour answers, owner+pin held) | **PASS** |
+| Planted soft enforcement (glossary steals owner / drops pin) | **FAIL** |
+
+That is the whole product idea in one incident: helpful prose, broken state law, sealed
+with a planted failure.
+
+---
+
+## How Conjecture works
 
 ### Script
 
 Multi-turn user text + **expected post-turn state** (your vocabulary):
 
 ```text
-turn 1  user: "start cost work on record R"
-        expect: exclusive_owner = cost_out, pins.workflow_id = R
+turn 1  user: "start claims work on C-1042"
+        expect: exclusive_owner = claims, pins.claim_id = C-1042
 
-turn 2  user: "change a mid-flight field"     ← reply may still sound fine
-        expect: exclusive_owner still cost_out, pins.workflow_id still R
-                (not front_door, not a different id, not a restart)
+turn 2  user: "continue — what does deductible mean?"
+        expect: exclusive_owner still claims, pins.claim_id still C-1042
 ```
 
-Kinds and pin keys are **yours** (`cost_out` / `workflow_id` are mini-app dogfood only).
+Kinds and pin keys are **yours** (claims / claim_id here; mini-app demos use `cost_out` /
+`workflow_id` only as dogfood).
 
 ### Pinned cognition
 
-Each turn’s classification is **fixed** for the run (pin or freeze):
-
-```text
-turn 2 label = continue     # not sampled from a live model in CI
-```
-
-Question under test: *given this label, did code keep owner · pin · handoff law?*  
-Not: *did the model pick the right label?*
+Labels are **fixed** for the run. Question under test: *given this label, did code keep
+owner · pin · handoff law?* — not *did the model pick the right label?*
 
 ### Driver → Act → Observation
 
 1. **Driver** runs your real turn path (in-process, HTTP, LangGraph, Temporal, …).  
-2. After Act, project host state into an **Observation** Conjecture can check:
+2. Project host state into an **Observation**:
 
 ```text
 Observation
-  exclusive_owner: "cost_out"          # or idle / front_door / your kind
-  pins: { workflow_id: "R" }         # any pin map your host freezes
-  # optional: open/delivery signals your invariants care about
+  exclusive_owner: "…"     # your kind / idle / front door
+  pins: { … }              # active record map your host freezes
+  # optional delivery / open-surface signals
 ```
-
-Projection is the integration tax: map *your* session/graph/workflow blob → this shape.
-You do not rewrite the whole ledger into Conjecture types.
 
 ### Invariants
 
-Typical checks after each turn:
-
 | Check | Example fail |
 |-------|----------------|
-| Owner held | continue stole to `front_door` / another specialist |
-| Pin held | `workflow_id` became null or a different id |
-| No illegal restart | mid-flight task wiped and re-opened |
-| Handoff law | yield only when your rules allow (e.g. abandon / detour) |
-| Open surface | “pinned” / advance with empty delivery |
+| Owner held | continue stole to another specialist / front door |
+| Active record held | pin null or switched id |
+| No illegal restart | mid-flight work wiped |
+| Handoff law | yield only when rules allow |
+| Open surface | “success” with empty delivery |
 
-### Planted-bug proof
+### Planted-failure discipline
 
-| Implementation | Verdict required |
-|----------------|------------------|
-| Healthy enforce | **PASS** |
-| Soft enforce (planted steal / pin drop / illegal restart) | **FAIL** |
+| Implementation | Verdict |
+|----------------|---------|
+| Healthy enforcement | **PASS** |
+| Soft enforcement (planted steal / pin drop / restart) | **FAIL** |
 
-If the planted bug still PASSes, the invariant is decoration, not a seal.
+If the planted bug still PASSes, the check is decoration.
 
 ```text
-  script turns
-      │
-      ▼
-  pinned labels ──► Driver.Act ──► Observation ──► invariants
-                                                      │
-                                    healthy PASS · planted FAIL
+  script → pinned labels → Driver.Act → Observation → invariants
+                              healthy PASS · planted FAIL
 ```
 
-Run the mini-app planted demos from the [README](../README.md)
-(`conjecture path-faithful --prove-bugs`) to see FAIL then PASS.
-
-### Modes (what the catalog is for)
-
-| User-visible break | Mode id (examples) | Public seed today |
-|--------------------|--------------------|-------------------|
-| Wrong owner after continue | `owner_steal` | runnable |
-| Pin changes mid-flight | `pin_drop` | runnable |
-| Work wiped / restarted | `illegal_restart` | runnable |
-| Pinned but nothing opens | `hollow_open` | runnable |
-| Advance “succeeds” empty | `hollow_advance` | runnable |
-| Cold start collapses | `cold_start_collapse` | runnable |
-| …other modes | see catalog | seed_pending / host_only |
-
-Full list and status: [CATALOG.md](../incidents/CATALOG.md).  
-**Today:** on the order of **six runnable** portable seeds; most of the map is named but
-not yet a public battery ([MATURITY.md](./MATURITY.md)). Hosts still seal the long tail.
+Mini-app demos: [README](../README.md) (`conjecture path-faithful --prove-bugs`).
 
 ---
 
-## Cost, AI grind, and when to skip
+## Why not just pytest?
 
-**Adoption cost is real:** scripts with expected state, Observation projection, driver
-upkeep, catalog hygiene. Many teams will **correctly decline** if authority failures are
-rare — steal **Failure → Law → Proof** and **LLM proposes · code enforces** without the
-package. Prefer **one** sealed law on your path over a large aspirational catalog.
+You *can* assert `exclusive_owner` and pins in pytest, Cucumber, LangSmith, or an
+internal harness. Conjecture does not invent new assertion primitives.
 
-### What AI can do on the grind
+It **standardizes the discipline** so the same shape can be shared, reviewed, and
+promoted:
 
-A maintenance agent (or host loop) can usefully:
+| Convention | What you get |
+|------------|----------------|
+| Multi-turn **script** structure | Expected state after *each* turn, not a single endpoint check |
+| **Observation** contract | Portable owner · pins · outcome fields after Act |
+| **Pinned cognition** | Enforce tests isolated from live classifier drift |
+| **Planted-failure** evidence | Healthy PASS + intentional soft FAIL required to trust a law |
+| **Incident taxonomy** (CAQ-FM) | Shared names for steal, pin drop, hollow open, … |
+| **Seed packaging** | Promote a host law into a reusable `patterns/` proof when it generalizes |
+| **Drivers** | Same script shape over mini-app, HTTP, or host adapters |
 
-| Task | How it helps |
-|------|----------------|
-| Script drafting | From soak logs: emit turns + expected owner/pins when anomalies appear |
-| Planted variants | Mutate a healthy script into soft-enforce (steal owner, drop pin, restart) |
-| Projection stubs | Update Observation mapping when session fields rename |
-| Catalog hygiene | Suggest mode id, registry row, seed_pending → runnable after a real FAIL/PASS |
+If you only need the ideas, steal **LLM proposes · code enforces** and
+**Failure → Law → Proof** without the package. Adopt Conjecture when you want that
+discipline as a **shared, reviewable artifact** — not another one-off assert in a private
+test file.
 
-### What AI must not silently own
+---
+
+## What “portable” means
+
+**Portable** = the **law + conversation shape + Observation expectations + planted-failure
+pattern** can travel across hosts and vendors.
+
+**Not portable / always host-specific:**
+
+- projecting proprietary session/graph/workflow state into Observation  
+- Driver / adapter wiring  
+- many production laws that stay **host_only** (product secrets, substrate, UI)
+
+So: portable is **not** integration-free. You still pay projection and driver cost; you
+reuse the *proof shape* and, when a law is general, a public seed.
+
+---
+
+## Fit (once)
+
+Pays rent when **state is load-bearing**: exclusive owners, real records, pins, handoffs.
+Free-form single-turn Q&A without that shape does not need the machinery. Adoption cost
+is real (scripts, projection, drivers, catalog). Prefer **one** sealed law on your path
+over a large aspirational catalog. Battery size and stage: [MATURITY.md](./MATURITY.md)
+(~**six** runnable public seeds today; map is broader — see [CATALOG](../incidents/CATALOG.md)).
+
+---
+
+## Cost, AI grind, and ownership
+
+**Adoption cost is real.** Many teams correctly decline if authority failures are rare.
+
+### AI can grind the tax
+
+| Task | Role |
+|------|------|
+| Script drafts from soak logs | Propose turns + expected owner/pins |
+| Planted variants | Soft-enforcement mutants (steal owner, drop pin, restart) |
+| Projection stubs | Keep Observation mapping current when schema drifts |
+| Catalog hygiene | Suggest mode id / seed promotion after real FAIL/PASS |
+
+### AI must not silently own
 
 | Risk | Guard |
 |------|--------|
-| Wrong law accepted | Human (or explicit high-bar) **sign-off** on the invariant |
-| Flaky suite | Drafts only; **pinned** goldens + deterministic Driver in CI |
-| Auto-merge without proof | Require planted **FAIL** and healthy **PASS** before merge |
-| Recursive drift | Treat the maintainer agent like any LLM: **proposes**, does not own enforce |
+| Wrong law accepted | Human (or high-bar) sign-off on the invariant |
+| Flaky suite | Drafts only; pinned goldens + deterministic Driver in CI |
+| Auto-merge without proof | Require planted FAIL and healthy PASS |
+| Recursive drift | Maintainer agent **proposes**; code + acceptance **own** CI |
 
-Same doctrine one level up: the agent proposes scripts and laws; **code + seal** own what
-CI trusts. If the maintainer is nondeterministic, you poison the reliability layer.
+### When someone else builds the agent
 
-**When someone else builds the agent:** implementers (or AI) may write scripts, projections,
-and drivers. Whoever is accountable for outcomes still **accepts** the laws and the
-PASS/FAIL evidence — the builder should not self-certify against weak criteria. The
-engineering object stays scripts, Observations, and invariants.
+Implementers (SI, vendor, AI) may write scripts, projections, and drivers. Whoever is
+accountable for outcomes **accepts** the laws and retains the PASS/FAIL evidence after
+handoff — the builder should not self-certify against weak criteria.
 
 ---
 
@@ -232,8 +246,8 @@ engineering object stays scripts, Observations, and invariants.
 |------|---------|
 | **Pinned cognition** | Labels fixed for the CI run |
 | **Observation** | Post-turn owner · pins · outcome projection |
-| **Soft enforce** | Code fails open so the model can steal while sounding helpful |
-| **Seed** | Portable script + planted-bug proof under `patterns/` |
+| **Soft enforcement** | Code fails open so the model can steal while sounding helpful |
+| **Seed** | Portable script + planted-failure proof under `patterns/` |
 | **CAQ-FM** | Named modes + laws + proofs for this failure class |
 
 ---
@@ -254,4 +268,4 @@ engineering object stays scripts, Observations, and invariants.
 ## One sentence
 
 Pin the labels, project an Observation, require **PASS** on healthy and **FAIL** on
-planted soft enforce — so fluent chat cannot hide broken owner · pin · handoff law.
+planted soft enforcement — so fluent chat cannot hide broken owner · pin · handoff law.

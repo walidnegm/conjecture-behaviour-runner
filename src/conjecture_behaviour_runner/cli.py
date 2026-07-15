@@ -261,6 +261,26 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Also print markdown summary to stdout",
     )
+    p_author.add_argument(
+        "--invent-llm",
+        action="store_true",
+        help=(
+            "LLM proposes new surfaces/stealers (CONJECTURE_INVENT_LLM_* env); "
+            "code backchecks law+physics. Max proposals default 4."
+        ),
+    )
+    p_author.add_argument(
+        "--max-invent-scenarios",
+        type=int,
+        default=None,
+        help="Cap inventive scenarios this turn (default CONJECTURE_INVENT_MAX_SCENARIOS=4)",
+    )
+    p_author.add_argument(
+        "--max-invent-proposals",
+        type=int,
+        default=None,
+        help="Cap LLM proposals this turn (default CONJECTURE_INVENT_MAX_PROPOSALS=4)",
+    )
 
     def _cmd_candidates_author(ns: argparse.Namespace) -> int:
         from conjecture_behaviour_runner.candidate_author import (
@@ -271,6 +291,13 @@ def main(argv: Optional[list[str]] = None) -> int:
             load_residuals_yaml,
             load_vocabulary_yaml,
             write_candidate_scenarios,
+        )
+        from conjecture_behaviour_runner.candidate_author.invent_config import (
+            load_invent_config,
+        )
+        from conjecture_behaviour_runner.candidate_author.invent_propose import (
+            merge_proposals_into_vocab,
+            propose_geometry,
         )
 
         vocab = None
@@ -288,6 +315,40 @@ def main(argv: Optional[list[str]] = None) -> int:
             matrix = load_matrix_yaml(ns.matrix)
         if ns.residuals:
             residuals = load_residuals_yaml(ns.residuals)
+
+        cfg = load_invent_config()
+        if ns.max_invent_scenarios is not None:
+            import os
+
+            os.environ["CONJECTURE_INVENT_MAX_SCENARIOS"] = str(
+                max(1, ns.max_invent_scenarios),
+            )
+        if ns.max_invent_proposals is not None:
+            import os
+
+            os.environ["CONJECTURE_INVENT_MAX_PROPOSALS"] = str(
+                max(1, ns.max_invent_proposals),
+            )
+            cfg = load_invent_config()
+
+        if ns.invent_llm and vocab is not None:
+            result = propose_geometry(
+                vocab,
+                use_env_llm=True,
+                max_proposals=cfg.max_proposals,
+            )
+            if result.accepted:
+                vocab = merge_proposals_into_vocab(vocab, result.accepted)
+                print(
+                    f"Invent LLM: accepted={len(result.accepted)} "
+                    f"rejected={len(result.rejected)} "
+                    f"(max_proposals={cfg.max_proposals})",
+                )
+            else:
+                print(
+                    f"Invent LLM: no accepted proposals "
+                    f"(rejected={len(result.rejected)})",
+                )
 
         paths = author_candidates(
             vocabulary=vocab,

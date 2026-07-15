@@ -246,13 +246,29 @@ def author_candidates(
     matrix_cells: Sequence[MatrixCell] = (),
     residuals: Sequence[ResidualProbe] = (),
     include_cross_product: bool = True,
+    include_invention: bool = True,
     open_only: bool = False,
     limit: Optional[int] = None,
 ) -> list[CandidatePath]:
-    """Deterministic candidate author (no LLM)."""
+    """Deterministic candidate author (no LLM).
+
+    * **Invention** (default on): exclusive-surface × typed-act × pre-decide
+      stealer geometry — invents failures expansive cross-product misses.
+    * **Expansion** (``include_cross_product``): sole-continue × foreign leaves.
+    * Incidents / matrix / residuals: host seeds.
+    """
     paths: list[CandidatePath] = []
     if incidents:
         paths.extend(paths_from_incidents(incidents))
+    if include_invention and vocabulary is not None:
+        from conjecture_behaviour_runner.candidate_author.invent import invent_all
+        from conjecture_behaviour_runner.candidate_author.invent_config import (
+            load_invent_config,
+        )
+
+        # Cap inventive scenarios per author turn (default 4 via env).
+        invent_limit = load_invent_config().max_scenarios
+        paths.extend(invent_all(vocabulary, limit=invent_limit))
     if include_cross_product and vocabulary is not None:
         paths.extend(paths_from_sole_continue_x_foreign(vocabulary))
     if matrix_cells:
@@ -262,9 +278,24 @@ def author_candidates(
 
     pri = {"high": 0, "medium": 1, "low": 2}
     seal_rank = {"open": 0, "partial": 1, "sealed": 2, "regression_check": 3}
+    # Invention before pure expansion when priority ties
+    source_rank = {
+        "invention": 0,
+        "residual": 1,
+        "residual_heuristic": 1,
+        "host_incident": 2,
+        "matrix_queue": 3,
+        "sole_continue_x_foreign": 4,
+        "example": 5,
+    }
 
     def _key(p: CandidatePath) -> tuple:
-        return (pri.get(p.priority, 9), seal_rank.get(p.seal_status, 9), p.path_id)
+        return (
+            pri.get(p.priority, 9),
+            seal_rank.get(p.seal_status, 9),
+            source_rank.get(p.source, 9),
+            p.path_id,
+        )
 
     paths = sorted(paths, key=_key)
     if open_only:

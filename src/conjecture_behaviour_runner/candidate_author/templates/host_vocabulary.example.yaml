@@ -33,3 +33,21 @@ soft_escape_intents:
   - new_task
   - abandon
   - handoff
+
+# Invent geometry (optional) — invent_all emits exclusive-surface vs stealer probes.
+# Leave empty to skip inventive mode (expand-only from sole_continue × foreign).
+exclusive_owner_surfaces:
+  - YOUR_DOMAIN_PICKER
+  - YOUR_PATH_PICKER
+
+pre_decide_stealing_leaves:
+  - inventory_soft_name
+  - glossary_concept
+
+typed_reply_acts:
+  - typed_label
+  - ordinal
+  - chip_send_text
+
+# surface|stealer pairs already sealed (invention marks regression_check or skips)
+sealed_exclusive_pairs: []

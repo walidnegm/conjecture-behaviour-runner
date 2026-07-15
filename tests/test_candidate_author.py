@@ -80,3 +80,25 @@ def test_cli_candidates_author_example(tmp_path: Path) -> None:
     ])
     assert rc == 0
     assert list(out.glob("*.yaml"))
+
+
+def test_invention_geometry_not_only_expand() -> None:
+    from conjecture_behaviour_runner.candidate_author import (
+        HostVocabulary,
+        invent_exclusive_owner_conflicts,
+    )
+
+    vocab = HostVocabulary(
+        sole_continue_kinds=frozenset({"k"}),
+        kinds_suppress_surface=frozenset({"k"}),
+        foreign_capability_leaves=frozenset({"f"}),
+        exclusive_owner_surfaces=frozenset({"domain_picker"}),
+        pre_decide_stealing_leaves=frozenset({"inventory_soft_name"}),
+        typed_reply_acts=frozenset({"typed_label"}),
+    )
+    paths = invent_exclusive_owner_conflicts(vocab)
+    assert any(
+        "domain_picker" in p.path_id and "inventory_soft_name" in p.path_id
+        for p in paths
+    )
+    assert all(p.source == "invention" for p in paths)

@@ -80,13 +80,21 @@ See also: `demo_scripts()` — two synthetic `demo_task` instances for CI smoke.
 
 ## Candidate author (Scenario precursor)
 
-Autonomously author **candidate Scenarios** from host vocabulary (no LLM):
+Autonomously author **candidate Scenarios** from host vocabulary:
 
 | | |
 |--|--|
 | **Template pack** | [`candidate_author/`](candidate_author/) |
 | **Python** | `conjecture_behaviour_runner.candidate_author` |
 | **CLI** | `conjecture candidates author --example --out DIR` |
+| **Invent (code)** | exclusive surface × typed act × pre-decide stealer |
+| **Propose (optional LLM)** | `--invent-llm` + `CONJECTURE_INVENT_LLM_*` env; code law/physics backcheck |
+| **Prompt file** | `candidate_author/prompts/geometry_propose.md` (override via env) |
+| **Caps** | default **4** proposals / **4** inventive scenarios per turn |
 
-Host fills kinds/leaves; engine emits Scenario YAML for the local console
-(`CONJECTURE_CANDIDATES_DIR`). Product STEAL tables stay on the host.
+Host fills kinds/leaves **and** invent geometry (`exclusive_owner_surfaces`,
+`pre_decide_stealing_leaves`, …); engine emits Scenario YAML for the local
+console (`CONJECTURE_CANDIDATES_DIR`). Product STEAL tables stay on the host.
+
+See [`candidate_author/README.md`](candidate_author/README.md) for env table and
+Python API.

@@ -31,6 +31,28 @@ from conjecture_behaviour_runner.candidate_author.engine import (
     paths_from_residuals,
     paths_from_sole_continue_x_foreign,
 )
+from conjecture_behaviour_runner.candidate_author.invent import (
+    invent_all,
+    invent_exclusive_owner_conflicts,
+    invent_polarity_flips_from_seals,
+)
+from conjecture_behaviour_runner.candidate_author.invent_config import (
+    InventConfig,
+    load_geometry_propose_prompt,
+    load_invent_config,
+    make_env_llm_complete,
+)
+from conjecture_behaviour_runner.candidate_author.invent_propose import (
+    GeometryProposal,
+    ProposeResult,
+    backcheck_proposal,
+    build_propose_user_prompt,
+    check_laws,
+    check_physics,
+    merge_proposals_into_vocab,
+    parse_proposals,
+    propose_geometry,
+)
 from conjecture_behaviour_runner.candidate_author.models import (
     CandidatePath,
     HostIncident,
@@ -63,6 +85,22 @@ __all__ = [
     "blocks_foreign_leaf",
     "candidate_to_scenario_dict",
     "format_candidates_markdown",
+    "GeometryProposal",
+    "InventConfig",
+    "ProposeResult",
+    "backcheck_proposal",
+    "build_propose_user_prompt",
+    "check_laws",
+    "check_physics",
+    "invent_all",
+    "invent_exclusive_owner_conflicts",
+    "invent_polarity_flips_from_seals",
+    "load_geometry_propose_prompt",
+    "load_invent_config",
+    "make_env_llm_complete",
+    "merge_proposals_into_vocab",
+    "parse_proposals",
+    "propose_geometry",
     "load_example_template_bundle",
     "load_incidents_yaml",
     "load_matrix_yaml",

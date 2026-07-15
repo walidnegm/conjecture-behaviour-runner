@@ -16,6 +16,7 @@ Source = Literal[
     "matrix_queue",
     "residual",
     "residual_heuristic",  # host alias
+    "invention",  # geometry invent (not cross-product expand)
     "example",
 ]
 
@@ -52,11 +53,32 @@ class HostVocabulary:
     )
     """Escape for library leaves (detour allowed)."""
 
+    # --- Invention geometry (not sole-continue expansion) ---
+    exclusive_owner_surfaces: frozenset[str] = frozenset()
+    """Armed finite surfaces that must exclusive-own the next free-text reply
+    (domain_picker, path_picker, ir_gate, cost_fork, armed_list, …)."""
+
+    pre_decide_stealing_leaves: frozenset[str] = frozenset()
+    """Pre-decide / early leaves that steal when exclusive surface is armed
+    (inventory_soft_name, inventory_name_resolve, glossary, referential_list, …)."""
+
+    typed_reply_acts: frozenset[str] = frozenset(
+        {"typed_label", "ordinal", "chip_send_text"},
+    )
+    """How the user replies without a perfect chip click."""
+
+    sealed_exclusive_pairs: frozenset[str] = frozenset()
+    """Pairs already sealed as ``surface|stealer`` — invention skips or marks
+    regression_check (e.g. ``domain_picker|inventory_soft_name``)."""
+
     def owner_for(self, kind: str) -> str:
         k = (kind or "").strip()
         if not k:
             return "default"
         return str(self.kind_to_owner.get(k) or k)
+
+    def pair_key(self, surface: str, stealer: str) -> str:
+        return f"{(surface or '').strip()}|{(stealer or '').strip()}"
 
 
 @dataclass(frozen=True)

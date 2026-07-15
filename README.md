@@ -252,6 +252,30 @@ Everything else (Scenario, ODD, multi-runner, Verdict) is advanced — [`docs/SP
 
 Local browser UI (`conjecture ui`) is a **demo viewer**, not a second product.
 
+### Candidate author (expand · invent · optional LLM propose)
+
+Autonomously author **candidate Scenarios** from **your** host vocabulary — not a
+fixed product catalog:
+
+| Mode | Role |
+|------|------|
+| **Expand** | kind × foreign leaf (finite matrix style) |
+| **Invent** | code geometry: exclusive surface × typed act × pre-decide stealer |
+| **Propose** | optional LLM suggests new surfaces/stealers; **code** law + physics backcheck |
+
+```bash
+conjecture candidates author --example --out /tmp/cbr_candidates
+# Optional invent LLM (no product model hardcode — set your endpoint):
+#   CONJECTURE_INVENT_LLM_BASE_URL / _MODEL / _API_KEY
+conjecture candidates author --example --invent-llm --out /tmp/cbr_candidates
+CONJECTURE_CANDIDATES_DIR=/tmp/cbr_candidates conjecture ui
+```
+
+Defaults: **4** LLM proposals and **4** inventive scenarios per author turn
+(`CONJECTURE_INVENT_MAX_*`). Prompt is a file, not inline product prompts:
+`candidate_author/prompts/geometry_propose.md`. Full env table and vocabulary
+fields: [`templates/candidate_author/README.md`](templates/candidate_author/README.md).
+
 ---
 
 ## Planted-bug table (machinery)
@@ -292,6 +316,7 @@ Classify → Scenario → Script → catalog:
 | Package unit tests | [`tests/`](tests/) — **not** the inventory |
 | Demos / E2E scripts | [`examples/`](examples/) |
 | Script shapes (any host kind) | [`templates/README.md`](templates/README.md) |
+| Candidate author / invent | [`templates/candidate_author/README.md`](templates/candidate_author/README.md) |
 | Normative spec | [`docs/SPEC.md`](docs/SPEC.md) |
 | Agent coder files-first | [`AGENTS.md`](AGENTS.md) §7 |
 

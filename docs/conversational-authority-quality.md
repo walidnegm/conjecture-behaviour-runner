@@ -114,6 +114,32 @@ law sealed on your path over a growing catalog of aspirational modes. If you onl
 the vocabulary, steal **Failure → Law → Proof** and **LLM proposes · code enforces**
 without adopting Conjecture at all.
 
+### Who pays the tax — AI can grind; humans still own laws
+
+A fair meta-point: much of the “ongoing tax” is **mechanical**, and a well-scoped agent
+(or host supervisory loop) can absorb a large chunk of it. That makes Conjecture more
+practical for small teams — **if** the grind stays subordinate to human (or
+high-confidence) seal of the laws.
+
+| AI / agent can usefully own | Still human-led (or extreme oversight) |
+|-----------------------------|----------------------------------------|
+| Draft multi-turn scripts from logs / soaks | Decide the **law** (what must always hold after the turn) |
+| Propose planted-bug variants for soft enforce | Accept a seal (false law = false security) |
+| Keep Observation projection drafts in sync with schema | Architectural ownership of who *deserves* to own / pin |
+| Suggest registry rows, mode ids, seed_pending → runnable | Sign-off that a promotion is path-faithful |
+| Patch common drivers when host APIs drift | Edge cases under races, long idle, subtle product policy |
+
+**Why the split matters.** Conjecture’s value is **deterministic** regression on the
+enforce half under **pinned** cognition. If the agent that *maintains* the suite is
+itself drifting, you inject flakiness into the layer that exists to catch flakiness.
+Projection and driver quality still need an accurate model of your control plane —
+an agent helps; it does not remove the need for that model.
+
+**Realistic verdict:** offload the grind (scripts, catalog hygiene, projection
+drafts, driver patches). Keep **Failure → Law → Proof** judgment under human
+responsibility for the foreseeable future. The same doctrine applies recursively:
+**LLM proposes** candidate scripts and laws; **code + human seal** own what CI trusts.
+
 ---
 
 ## Terminology (onboarding curve)
@@ -243,8 +269,9 @@ These are real production classes this guide and package do **not** yet treat de
 | **Concurrency / races** | Parallel turns, multi-writer agents, Temporal/async workers can break owner/pin law without any single-turn soft enforce | Host fencing (`expected_version` / claim), future Conjecture multi-actor scripts |
 | **Classifier half** | Wrong proposals + green enforce = silent UX decay | Separate evals; not folded into Conjecture goldens |
 | **Thin portable battery** | Map >> runnable seeds | Promote host seals when Observation-shaped |
-| **Lighter adoption** | Full scripts + drivers is heavy for small teams | Templates, thinner “minimum authority” projection (owner+pin only) |
+| **Lighter adoption** | Full scripts + drivers is heavy for small teams | Templates; thinner projection; **agent-assisted grind** (scripts/catalog) with human law seal |
 | **Terminology cliff** | Precise = dense | This glossary; more “plain English first” examples |
+| **Who pays the tax** | Mechanical work vs law judgment | AI drafts; human seal (see adoption §) |
 
 Naming a gap is not a roadmap commitment. It is a place the **scope can expand** without
 diluting the core.

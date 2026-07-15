@@ -6,13 +6,14 @@ Regression for multi-turn **state law** (owner · pin · handoff) under **pinned
 cognition** — *looks fine in chat, broken underneath* — against **LLM proposes · code
 enforces**.
 
-In multi-turn agent systems, you need an **exclusive owner** for the turn, a **stable
-active record**, and clear rules for when **ownership may yield** — we are **not
-inventing** those; we are **asserting them after every turn** under LLM routing, when
-helpful detours often fail-open and chat evals only score the prose.
+In multi-turn systems, each governed workflow transition needs one **authoritative
+owner**, a **stable active record**, and rules for when **authority may yield** — even
+when several agents contribute to the turn. We are **not inventing** those primitives;
+we are **asserting them after every turn** under LLM routing.
 
-Whether you build in-house or via an SI / agent builder / runtime: someone must own
-**multi-turn regression on the enforce half** — not “did the sentence sound smart?”
+Whether you build in-house or via an SI, builder, or runtime: relinquishing the build
+does not relinquish quality governance. You still need **multi-turn regression on the
+enforcement layer** — not “did the sentence sound smart?”
 
 **Why / how (conceptual home):**  
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  

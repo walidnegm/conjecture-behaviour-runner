@@ -31,18 +31,21 @@ claimed success.
 
 ## Doctrine
 
-**LLM proposes · code enforces.**
+**LLM proposes · policy validates · code commits** (shorthand: **LLM proposes · code
+enforces**).
 
 | Side | Responsibility |
 |------|----------------|
-| **LLM** | Irregular language; labels such as continue, detour, new task, abandon |
-| **Code** | Exclusive owner, active record pin, yield/handoff, that delivery actually opens |
+| **LLM** | Irregular language; may propose continue, detour, new task, abandon, … |
+| **Policy / code** | Whether the transition is permitted; who may commit authoritative state; which record stays active; when ownership may yield; whether a claimed success produced the promised effect |
 
-If enforcement fails open (**soft enforcement**), the model can steal or hijack the path
-and still sound helpful. Conjecture regression-tests the **enforce half** under **pinned
-cognition** (labels fixed for CI — not a live model roll). It does not prove the
-classifier picked the right label; pair with separate cognition evals. Green enforce +
-wrong live labels is still a bad product.
+If enforcement fails open (**soft enforcement**), a plausible model decision can hijack
+the path while the reply still sounds helpful. Conjecture regression-tests the
+**enforcement layer** under **fixed labels** for CI (not a live model roll).
+
+**Router accuracy** (separate): did the model propose the correct label?  
+**Enforcement regression** (Conjecture): given that label, did policy preserve or
+transition state correctly? Green enforce + wrong live labels is still a bad product.
 
 **Failure → Law → Proof**
 
@@ -55,10 +58,11 @@ authority is load-bearing; proofs catch what structure missed.
 
 ### In multi-turn systems (plain terms)
 
-In multi-turn agent systems, you need an **exclusive owner** for the turn, a **stable
-active record**, and clear rules for when **ownership may yield** — we are **not
-inventing** those; we are **asserting them after every turn** under LLM routing, when
-helpful detours often fail-open and chat evals only score the prose.
+In multi-turn systems, each governed workflow transition needs one **authoritative
+owner**, a **stable active record**, and rules for when **authority may yield** — even
+when several agents contribute to the turn. We are **not inventing** those primitives;
+we are **asserting them after every turn** under LLM routing, when helpful detours often
+fail-open and chat evals only score the prose.
 
 For readers who prefer classical systems vocabulary:
 
@@ -85,17 +89,18 @@ handoff vs informational detour**, and **planted soft-enforcement must FAIL**.
 
 **Conversation**
 
-1. Claims Agent owns the thread mid-flight. Active record: claim **C-1042**.  
+1. Claims Agent owns the C-1042 workflow.  
 2. User: *“Continue — but what does deductible mean?”*  
-3. Glossary answers helpfully. The definition is correct.  
-4. Fail-open routing **overwrites** exclusive owner (or clears `claim_id`) — not a coup,
-   an orchestration bug.  
-5. A human reading the chat: “Nice explanation.” Business continuity is already wrong.
+3. Glossary Agent answers correctly as a **non-owning contributor**.  
+4. A fail-open handoff lets Glossary become **authoritative** — Claims loses ownership;
+   C-1042 may lose its pin. Orchestration bug, not a dramatic “coup.”  
+5. A human reading the chat: “Nice explanation.” An **executable invariant** is already
+   violated: after a definitional detour, Claims must still own the workflow and C-1042
+   must remain active.
 
 **Law**
 
-> A definitional detour must not transfer exclusive ownership or clear the active claim.
-> After the turn: owner remains claims, pin remains C-1042.
+> A definitional detour must not transfer authority or drop the active claim.
 
 **Pinned cognition (CI)**
 
@@ -263,11 +268,11 @@ Implementers (SI, vendor, AI) may write scripts, projections, and drivers. Whoev
 accountable for outcomes **accepts** the laws and retains the PASS/FAIL evidence after
 handoff — the builder should not self-certify against weak criteria.
 
-Relinquishing *build* does not relinquish **governance of quality**. The SI, agent
-builder, or runtime still owes **multi-turn regression on the enforce half** — not
-“did the sentence sound smart?” Chat evals and demos can stay with the delivery team;
-**post-turn owner · active record · handoff** remains someone’s explicit
-responsibility, preferably with proofs the buyer can re-run after handoff.
+Relinquishing *build* does not relinquish **governance of quality**. Whether you build
+in-house or via an SI, builder, or runtime, you still need **multi-turn regression on
+the enforcement layer** — not “did the sentence sound smart?” Chat evals can stay with
+delivery; post-turn **authoritative owner · active record · handoff** remains someone’s
+explicit responsibility, with proofs the buyer can re-run after handoff.
 
 ---
 

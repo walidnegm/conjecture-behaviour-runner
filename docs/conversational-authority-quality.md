@@ -195,17 +195,27 @@ internal harness. See also the multi-turn systems section above: this is control
 new CS primitive.
 
 Conjecture **standardizes the discipline** so the same shape can be shared, reviewed,
-and promoted:
+and promoted. Most suites do **not** provide by default:
 
 | Convention | What you get |
 |------------|----------------|
-| Multi-turn **script** structure | Expected state after *each* turn, not a single endpoint check |
-| **Observation** contract | Portable owner · pins · outcome fields after Act |
-| **Pinned cognition** | Enforce tests isolated from live classifier drift |
-| **Planted-failure** evidence | Healthy PASS + intentional soft FAIL required to trust a law |
-| **Incident taxonomy** (CAQ-FM) | Shared names for steal, pin drop, hollow open, … |
-| **Seed packaging** | Promote a host law into a reusable `patterns/` proof when it generalizes |
-| **Drivers** | Same script shape over mini-app, HTTP, or host adapters |
+| Shared multi-turn **script** shape | Expected state after *each* turn, not a single endpoint check |
+| Portable post-turn **Observation** | Owner · active record · outcome fields after Act |
+| Deterministic enforcement tests | **Fixed labels** so CI isolates the enforce layer |
+| Separate router vs enforcement eval | Did the model propose the right label? vs given that label, did policy hold? |
+| Healthy-**PASS** / planted-**FAIL** | Soft-enforcement must fail; green alone is not enough |
+| Named **taxonomy** of authority failures | Steal, pin drop, hollow open, illegal restart, … (CAQ-FM) |
+| **Discoverability** of hard paths | Find multi-turn trajectories that *plausibly* break owner · pin · handoff |
+| **Trajectory invention** | LLM- or soak-authored scripts that create edge conditions humans under-sample |
+| **Seed packaging** + drivers | Promote host laws; run the same shape over mini-app, HTTP, host adapters |
+
+**Discoverability and invented trajectories.** Integration tests often cover the happy
+path the engineer remembered. Authority bugs show up on *compound* turns (“continue,
+but what does deductible mean?”), detours mid-flight, restarts, and soft handoffs.
+A useful suite does not only assert state — it **surfaces trajectories** that can create
+those edges: from production soaks, candidate discovery, or LLM-proposed multi-turn
+scripts that a human then **accepts as laws** and seals with planted FAIL. Invention
+without acceptance is noise; acceptance without discovery is a thin battery.
 
 If you only need the ideas, steal **LLM proposes · code enforces** and
 **Failure → Law → Proof** without the package. Adopt Conjecture when you want that

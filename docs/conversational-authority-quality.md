@@ -258,7 +258,9 @@ over a large aspirational catalog. Battery size and stage: [MATURITY.md](./MATUR
 
 | Task | Role |
 |------|------|
-| Script drafts from soak logs | Propose turns + expected owner/pins |
+| **Trajectory invention** | Propose multi-turn scripts that plausibly create edge conditions (compound continue+detour, mid-flight FAQ, restart, soft handoff) |
+| **Discoverability** | Flag soak/log paths where owner or pin already drifted under helpful replies |
+| Script drafts | Turns + expected owner/pins from those trajectories |
 | Planted variants | Soft-enforcement mutants (steal owner, drop pin, restart) |
 | Projection stubs | Keep Observation mapping current when schema drifts |
 | Catalog hygiene | Suggest mode id / seed promotion after real FAIL/PASS |

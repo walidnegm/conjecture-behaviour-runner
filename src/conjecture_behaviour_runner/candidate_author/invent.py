@@ -89,19 +89,21 @@ def invent_exclusive_owner_conflicts(
                         priority=pri,  # type: ignore[arg-type]
                         failure_class=fc,
                         title=(
-                            f"INVENT: armed `{surface}` + {act} must not yield "
-                            f"to `{stealer}`"
+                            f"Free text resembles `{stealer}` while exclusive "
+                            f"`{surface}` is active ({act})"
                         ),
                         start_state={
                             "exclusive_surface": surface,
+                            "exclusive_owner": owner,
                             "armed": "true",
                             "typed_act": act,
                             "competing_leaf": stealer,
                         },
                         turns=(
-                            f"(setup) Arm exclusive surface={surface} "
-                            f"(finite card / gate open)",
-                            f"(probe) {probe} while {surface} still owns the turn",
+                            f"(setup) Open and arm finite list/gate surface `{surface}` "
+                            f"(test harness precondition — not end-user chat)",
+                            f"(probe) {probe} while `{surface}` still owns the turn "
+                            f"(text also resembles `{stealer}`)",
                         ),
                         must_hold=(
                             f"exclusive_owner≈{owner}",
@@ -109,6 +111,7 @@ def invent_exclusive_owner_conflicts(
                         ),
                         must_not=(
                             f"{stealer} wins delivery",
+                            f"route_to={stealer}",
                             "context loss / freeform derout of armed pick",
                         ),
                         seal_status=seal,

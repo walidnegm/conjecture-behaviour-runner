@@ -465,36 +465,87 @@ function showTab(tab) {
 function renderTrajectory(traj) {
   const steps = (traj && traj.steps) || [];
   const goals = (traj && traj.goal_state) || [];
-  const init = (traj && traj.initial_state) || [];
-  let html = '<p class="muted"><strong>Trajectory</strong> — ordered twists for this candidate scenario (one path; mode slug is the class it stresses).</p>';
-  if (init.length) {
-    html += '<div class="muted" style="margin:.5rem 0"><strong>Initial:</strong> '
-      + init.map(escapeHtml).join(' · ') + '</div>';
+  const initH = (traj && traj.initial_state_human) || [];
+  const initM = (traj && traj.initial_state_machine) || (traj && traj.initial_state) || [];
+  const exp = (traj && traj.expected_invariant) || {};
+  const oracle = (traj && traj.failure_oracle) || [];
+  const geo = (traj && traj.geometry) || {};
+  let html = '<p class="muted"><strong>Trajectory</strong> — human-first: user story → setup vs user twists → oracle. Geometry encodes the path after the behavior is clear.</p>';
+  if (traj.failure_mode) {
+    html += '<div style="margin:.5rem 0"><strong>Failure mode stressed:</strong> '
+      + '<span class="mono">' + escapeHtml(traj.failure_mode) + '</span></div>';
   }
-  if (goals.length) {
-    html += '<div class="muted" style="margin:.5rem 0"><strong>Goal:</strong> '
+  if (traj.scenario_purpose) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>Purpose:</strong> '
+      + escapeHtml(traj.scenario_purpose) + '</div>';
+  }
+  if (traj.user_trajectory) {
+    html += '<div class="turn" style="background:#f8fafc"><strong>User trajectory</strong><p style="margin:.35rem 0 0">'
+      + escapeHtml(traj.user_trajectory) + '</p></div>';
+  }
+  if (initH.length) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>Initial state (human):</strong><ul>'
+      + initH.map(x => '<li>' + escapeHtml(x) + '</li>').join('') + '</ul></div>';
+  }
+  if (initM.length) {
+    html += '<div class="muted mono" style="margin:.35rem 0"><strong>Machine:</strong> '
+      + initM.map(escapeHtml).join(' · ') + '</div>';
+  }
+  if (exp.prose) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>Expected invariant:</strong> '
+      + escapeHtml(exp.prose) + '</div>';
+  } else if (goals.length) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>Must hold:</strong> '
       + goals.map(escapeHtml).join(' · ') + '</div>';
   }
   html += steps.map(st => {
     const inv = (st.invariants || []).map(x =>
       (x.kind || '') + '=' + JSON.stringify(x.expected)).join(', ');
-    return `<div class="turn">
-      <div class="mono">twist ${st.index}: ${escapeHtml(st.id)} · ${escapeHtml(st.maneuver)}</div>
-      <div><strong>User:</strong> “${escapeHtml(st.user_text)}”</div>
-      <div class="muted mono">pin=${escapeHtml(JSON.stringify(st.pin || {}))}</div>
+    const isSetup = st.role === 'setup' || st.setup_only;
+    const head = isSetup
+      ? 'Twist ' + st.index + ' — Establish active interaction (test setup)'
+      : 'Twist ' + st.index + ' — User behavior';
+    const body = isSetup
+      ? '<div class="muted">' + escapeHtml(st.user_behavior || st.user_text || 'Harness setup') + '</div>'
+      : '<div><strong>User:</strong> “' + escapeHtml(st.user_behavior || st.user_text) + '”</div>'
+        + (st.competing_interpretation
+          ? '<div class="muted">Competing interpretation: ' + escapeHtml(st.competing_interpretation) + '</div>'
+          : '');
+    return `<div class="turn ${isSetup ? '' : 'ok'}">
+      <div class="mono">${escapeHtml(head)}</div>
+      <div class="muted mono">${escapeHtml(st.id)} · ${escapeHtml(st.maneuver)}</div>
+      ${body}
+      <div class="muted mono">geometry pin=${escapeHtml(JSON.stringify(st.pin || {}))}</div>
       <div class="muted mono">invariants: ${escapeHtml(inv || '—')}</div>
       ${(st.postconditions || []).length
         ? '<div class="muted">must hold after: ' + st.postconditions.map(escapeHtml).join('; ') + '</div>'
         : ''}
     </div>`;
   }).join('') || '<p class="muted">No twists</p>';
+  if (oracle.length) {
+    html += '<div class="turn bad" style="margin-top:.75rem"><strong>Failure oracle</strong><ul>'
+      + oracle.map(x => '<li>' + escapeHtml(x) + '</li>').join('') + '</ul></div>';
+  }
+  if (geo.surface || geo.stealer || geo.mode) {
+    html += '<div class="muted mono" style="margin-top:.75rem"><strong>Geometry mapping:</strong> '
+      + 'surface=' + escapeHtml(geo.surface || '—')
+      + ' · act=' + escapeHtml(geo.act || '—')
+      + ' · stealer=' + escapeHtml(geo.stealer || '—')
+      + ' · mode=' + escapeHtml(geo.mode || '—') + '</div>';
+  }
   document.getElementById('candPanelTrajectory').innerHTML = html;
 }
 function renderScenarioPanel(data) {
   const sc = data.scenario || {};
   const scope = sc.scope || {};
-  let html = '<p class="muted"><strong>Conjecture Scenario</strong> — description language (precursor to Script).</p>';
-  html += `<div class="muted mono">scenario_id=${escapeHtml(sc.scenario_id || data.scenario_id)} · class=${escapeHtml(sc.scenario_class || '')}</div>`;
+  let html = '<p class="muted"><strong>Conjecture Scenario</strong> — human-first description (precursor to Script).</p>';
+  html += `<div class="muted mono">scenario_id=${escapeHtml(sc.scenario_id || data.scenario_id)} · failure_mode=${escapeHtml(sc.failure_mode || '')} · class=${escapeHtml(sc.scenario_class || '')}</div>`;
+  if (sc.scenario_purpose) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>Purpose:</strong> ' + escapeHtml(sc.scenario_purpose) + '</div>';
+  }
+  if (sc.user_trajectory) {
+    html += '<div class="muted" style="margin:.5rem 0"><strong>User trajectory:</strong> ' + escapeHtml(sc.user_trajectory) + '</div>';
+  }
   if ((scope.expected_refusal || []).length) {
     html += '<div class="muted" style="margin:.5rem 0"><strong>expected_refusal:</strong><ul>'
       + scope.expected_refusal.map(x => '<li>' + escapeHtml(x) + '</li>').join('')

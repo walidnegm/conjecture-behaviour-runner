@@ -1,4 +1,13 @@
-"""Emit CandidatePath as Conjecture Scenario YAML (precursor to Script)."""
+"""Emit CandidatePath as Conjecture Scenario YAML (precursor to Script).
+
+Human-first order (author + console):
+
+  user trajectory → initial state → expected invariant → twists
+  (setup vs user behavior) → failure oracle → geometry encoding
+
+Internal fields (exclusive_surface, typed_act, stealer, pins) encode the trajectory
+*after* the behavior is clear — not as the primary story.
+"""
 from __future__ import annotations
 
 import json
@@ -21,12 +30,11 @@ def _require_yaml():
     return yaml
 
 _HEADER = """\
-# Conjecture Scenario (CANDIDATE — authored by portable candidate_author)
+# Conjecture Scenario (CANDIDATE — portable candidate_author)
 #
-# Scenario  = describe twists + envelopes (precursor)
-# Script    = play-back form (compile_scenario_to_script when freezes ready)
-#
-# Host vocabulary only in payload.pin / invariants — not a Conjecture catalog.
+# Human-first: user trajectory → state → twist → must-hold → failure oracle
+# Geometry (surface / act / stealer) encodes the path after the behavior is clear.
+# Scenario = description language · Script = play-back form (compile when freezes ready)
 #
 """
 
@@ -41,15 +49,117 @@ def scenario_id_for(path: CandidatePath) -> str:
 
 def _kind_from_start(path: CandidatePath) -> str:
     st = path.start_state or {}
-    return str(st.get("active_task.kind") or st.get("kind") or "").strip()
+    return str(
+        st.get("active_task.kind")
+        or st.get("kind")
+        or st.get("exclusive_surface")
+        or st.get("exclusive_owner")
+        or ""
+    ).strip()
+
+
+def _is_setup_turn(turn: str) -> bool:
+    t = (turn or "").strip().lower()
+    return t.startswith("(setup)") or t.startswith("setup:")
 
 
 def _user_text(turn: str) -> str:
     t = (turn or "").strip()
-    for prefix in ("(setup) ", "(probe) ", "(setup)", "(probe)"):
+    for prefix in (
+        "(setup) ",
+        "(probe) ",
+        "(setup)",
+        "(probe)",
+        "setup: ",
+        "Setup: ",
+    ):
         if t.lower().startswith(prefix.lower()):
             return t[len(prefix) :].strip()
     return t or "continue"
+
+
+def _geometry_from_path(path: CandidatePath) -> dict[str, str]:
+    st = dict(path.start_state or {})
+    pin = dict(path.pin_hints or {})
+    # invent.exclusive.{surface}.{act}.{stealer}
+    parts = [p for p in (path.path_id or "").split(".") if p]
+    surface = str(st.get("exclusive_surface") or "")
+    act = str(st.get("typed_act") or "")
+    stealer = str(st.get("competing_leaf") or st.get("stealer") or pin.get("read_kind") or "")
+    if len(parts) >= 5 and parts[0] == "invent" and parts[1] == "exclusive":
+        surface = surface or parts[2]
+        act = act or parts[3]
+        stealer = stealer or parts[4]
+    return {
+        "surface": surface,
+        "act": act,
+        "stealer": stealer,
+        "mode": (path.failure_class or "").strip(),
+        "source": path.source,
+    }
+
+
+def _user_trajectory_prose(path: CandidatePath, geo: dict[str, str]) -> str:
+    """End-user story first; mechanics stay secondary."""
+    surface = geo.get("surface") or "an exclusive finite-choice surface"
+    stealer = geo.get("stealer") or "a competing leaf"
+    act = geo.get("act") or "free text"
+    if path.source == "invention" and surface and stealer:
+        return (
+            f"The user is midway through a bounded interaction owned by `{surface}`. "
+            f"Instead of completing that interaction in the normal control, they send "
+            f"free-chat text that could also be interpreted as a `{stealer}` action "
+            f"(typed act: `{act}`). "
+            f"The system must keep `{surface}` authoritative — bind the reply to the "
+            f"active surface or re-prompt — and must not silently transfer ownership "
+            f"to `{stealer}`."
+        )
+    title = (path.title or "").strip()
+    if title:
+        return (
+            f"Trajectory under test: {title}. "
+            f"User path must preserve the exclusive owner and active record "
+            f"required by failure mode `{path.failure_class}`."
+        )
+    return (
+        f"Multi-turn trajectory that stresses failure mode `{path.failure_class}`. "
+        "Preserve exclusive owner and active record; refuse silent handoff to a stealer."
+    )
+
+
+def _scenario_purpose(path: CandidatePath, geo: dict[str, str]) -> str:
+    surface = geo.get("surface") or "exclusive surface"
+    stealer = geo.get("stealer") or "competing action"
+    mode = path.failure_class or "authority_failure"
+    if path.source == "invention":
+        return (
+            f"Verify free-text that resembles a competing action does not take ownership "
+            f"away from active exclusive surface `{surface}` (mode `{mode}`, stealer "
+            f"`{stealer}`)."
+        )
+    return (
+        f"Stress failure mode `{mode}`: system must hold exclusive owner / pin through "
+        f"the authored trajectory (source={path.source})."
+    )
+
+
+def _failure_oracle(path: CandidatePath, geo: dict[str, str]) -> list[str]:
+    stealer = geo.get("stealer") or "competing_leaf"
+    surface = geo.get("surface") or "exclusive_surface"
+    mode = path.failure_class or "owner_steal"
+    base = [
+        f"`{stealer}` becomes the authoritative owner",
+        f"active exclusive surface `{surface}` is dropped or silently disarmed",
+        "user message is processed as a new greenfield / foreign request",
+        "reply appears valid but no longer advances or protects the active interaction",
+    ]
+    for m in path.must_not:
+        if m and m not in base:
+            base.append(str(m))
+    return [
+        f"Failure mode `{mode}` is instantiated if any of the following occurs:",
+        *base,
+    ]
 
 
 def candidate_to_scenario_dict(
@@ -58,52 +168,85 @@ def candidate_to_scenario_dict(
     exclusive_owner: str | None = None,
 ) -> dict[str, Any]:
     kind = _kind_from_start(path)
-    owner = exclusive_owner or kind or "default"
+    geo = _geometry_from_path(path)
+    owner = (
+        exclusive_owner
+        or geo.get("surface")
+        or kind
+        or "default"
+    )
     pin = dict(path.pin_hints or {})
     if "task_intent" not in pin:
         pin["task_intent"] = "continue"
+    # Encode geometry into pin for drivers without polluting user_text
+    for k, v in (
+        ("exclusive_surface", geo.get("surface")),
+        ("typed_act", geo.get("act")),
+        ("stealer", geo.get("stealer")),
+    ):
+        if v and k not in pin:
+            pin[k] = v
 
     turns = list(path.turns) if path.turns else ("continue",)
     if len(turns) == 1:
         turns = (
-            f"(setup) Reach sole-continue state for kind={kind or 'unknown'}",
+            f"(setup) Establish exclusive ownership for {owner}",
             turns[0],
         )
 
     invs: list[dict[str, Any]] = []
-    if kind and kind not in ("none", "any"):
-        invs.append({"kind": "active_kind", "expected": kind})
     if owner and owner != "default":
         invs.append({"kind": "exclusive_owner", "expected": owner})
+    if kind and kind not in ("none", "any", owner):
+        invs.append({"kind": "active_kind", "expected": kind})
 
     steps: list[dict[str, Any]] = []
     for i, turn in enumerate(turns):
-        step_id = "establish_start" if i == 0 else f"twist_{i}"
-        maneuver = "establish_start_state" if i == 0 else "continue_mid_flight"
-        if i > 0 and pin.get("read_kind"):
-            maneuver = "probe_foreign_surface"
+        setup = i == 0 or _is_setup_turn(turn)
+        step_id = "establish_active_interaction" if setup else f"user_twist_{i}"
+        if setup:
+            maneuver = "test_setup_precondition"
+            role = "setup"
+            user_behavior = (
+                "Test harness establishes the active exclusive interaction "
+                "(not end-user chat)."
+            )
+            competing = ""
+        else:
+            maneuver = "user_free_chat_under_exclusive_surface"
+            role = "user_twist"
+            user_behavior = _user_text(turn)
+            competing = (
+                f"Text may also resemble input that `{geo.get('stealer') or 'stealer'}` "
+                "could treat as a new request."
+                if geo.get("stealer")
+                else ""
+            )
         payload: dict[str, Any] = {
-            "user_text": _user_text(turn),
+            "user_text": _user_text(turn) if not setup else f"[setup] arm {owner}",
             "pin": dict(pin),
-            "allowed_outcomes": ["continue_owned", "owner_held"],
-            "invariants": invs if i > 0 else (
-                [{"kind": "active_kind", "expected": kind}]
-                if kind and kind not in ("none", "")
-                else []
-            ),
+            "allowed_outcomes": ["continue_owned", "owner_held", "reprompt_exclusive"],
+            "invariants": list(invs),
         }
+        if setup:
+            payload["setup_only"] = True
         steps.append({
             "id": step_id,
-            "actor": "user",
-            "control_point": "chat_input",
+            "actor": "system" if setup else "user",
+            "role": role,
+            "control_point": "test_harness" if setup else "chat_input",
             "maneuver": maneuver,
             "entry_surface": "/assistant",
+            "user_behavior": user_behavior,
+            "competing_interpretation": competing,
             "payload": payload,
-            "preconditions": [
-                f"{k}={v}" for k, v in (path.start_state or {}).items()
-            ] if i == 0 else [f"active_task.kind={kind}" if kind else "mid_flight"],
-            "blocked_conditions": list(path.must_not) if i > 0 else ["already_foreign_owner"],
-            "postconditions": list(path.must_hold) or ["exclusive_owner_holds"],
+            "preconditions": (
+                [f"{k}={v}" for k, v in (path.start_state or {}).items()]
+                if setup
+                else [f"exclusive_owner={owner}", "armed=true"]
+            ),
+            "blocked_conditions": list(path.must_not) if not setup else [],
+            "postconditions": list(path.must_hold) or [f"exclusive_owner≈{owner}"],
             "wait": {
                 "type": "stream_wait",
                 "settle_condition": "agent_turn_complete",
@@ -112,8 +255,8 @@ def candidate_to_scenario_dict(
             },
             "nondeterminism": {
                 "type": "agentic",
-                "allowed_outcomes": ["continue_owned", "owner_held"],
-                "required_invariants": list(path.must_hold) or ["exclusive_owner_holds"],
+                "allowed_outcomes": ["continue_owned", "owner_held", "reprompt_exclusive"],
+                "required_invariants": list(path.must_hold) or [f"exclusive_owner≈{owner}"],
             },
             "evidence": [
                 {
@@ -125,10 +268,36 @@ def candidate_to_scenario_dict(
             ],
         })
 
-    goal = list(path.must_hold) if path.must_hold else ["exclusive_owner_holds"]
+    goal = list(path.must_hold) if path.must_hold else [f"exclusive_owner≈{owner}"]
+    initial_human = [
+        f"An exclusive finite-choice surface is open (`{geo.get('surface') or owner}`).",
+        f"`{owner}` owns the interaction and is waiting for a selection / reply.",
+        "Free-text chat remains available.",
+    ]
+    if geo.get("stealer"):
+        initial_human.append(
+            f"`{geo['stealer']}` is capable of interpreting the same text as a new request."
+        )
+
     return {
         "scenario_id": scenario_id_for(path),
         "scenario_class": "candidate_soak_precursor",
+        # --- Human-first narrative (console + review) ---
+        "failure_mode": path.failure_class,
+        "scenario_purpose": _scenario_purpose(path, geo),
+        "user_trajectory": _user_trajectory_prose(path, geo),
+        "expected_invariant": {
+            "prose": (
+                f"While the exclusive surface remains armed, exclusive_owner ≈ {owner}. "
+                "Reply must bind to the active interaction or re-prompt; must not activate "
+                f"the competing leaf `{geo.get('stealer') or '—'}`."
+            ),
+            "checks": invs,
+            "must_hold": list(path.must_hold) or [f"exclusive_owner≈{owner}"],
+            "must_not": list(path.must_not),
+        },
+        "failure_oracle": _failure_oracle(path, geo),
+        "geometry": geo,
         "scope": {
             "in_scope": [
                 path.title,
@@ -146,9 +315,12 @@ def candidate_to_scenario_dict(
             ],
         },
         "goal_state": goal,
-        "initial_state": [
-            f"{k}={v}" for k, v in (path.start_state or {}).items()
-        ] or ["idle_or_seeded_mid_flight"],
+        "initial_state": {
+            "human": initial_human,
+            "machine": [
+                f"{k}={v}" for k, v in (path.start_state or {}).items()
+            ] or [f"exclusive_owner={owner}"],
+        },
         "execution_profiles": [
             {
                 "id": "ci_stub_cognition",
@@ -177,7 +349,7 @@ def candidate_to_scenario_dict(
             "tolerated_degraded": ["continue_owned_after_single_retry"],
             "failure": [
                 {
-                    "state": "owner_steal",
+                    "state": path.failure_class or "owner_steal",
                     "required_graceful_handling": [
                         "fail_closed_to_verifier",
                         "surface_owner_mismatch_in_report",
@@ -207,6 +379,7 @@ def scenario_to_yaml(
     )
     meta = (
         f"# path_id: {path.path_id}\n"
+        f"# failure_mode: {path.failure_class}\n"
         f"# seal_status: {path.seal_status}\n"
         f"# priority: {path.priority}\n"
         f"# proof: {path.proof_pointer or '—'}\n"
@@ -227,10 +400,10 @@ def write_candidate_scenarios(
     index = [
         "# Candidate Conjecture Scenarios (portable author)",
         "",
-        "Precursor to Scripts. Generated — promote red soaks to goldens.",
+        "Human-first trajectories → geometry encoding. Promote red soaks to goldens.",
         "",
-        "| scenario_id | seal | priority | path_id |",
-        "|---|---|---|---|",
+        "| scenario_id | mode | seal | priority | path_id |",
+        "|---|---|---|---|---|",
     ]
     from datetime import datetime, timezone
 
@@ -256,7 +429,8 @@ def write_candidate_scenarios(
             "ok": True,
         })
         index.append(
-            f"| `{sid}` | {path.seal_status} | {path.priority} | `{path.path_id}` |"
+            f"| `{sid}` | `{path.failure_class}` | {path.seal_status} | "
+            f"{path.priority} | `{path.path_id}` |"
         )
     (out_dir / "INDEX.md").write_text("\n".join(index) + "\n", encoding="utf-8")
     manifest = {
@@ -278,7 +452,6 @@ def write_candidate_scenarios(
     (out_dir / "manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8",
     )
-    # Author-run summary so the local console can show "what invention generated"
     by_src: dict[str, int] = {}
     invent_rows = []
     for r in report:

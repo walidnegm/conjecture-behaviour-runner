@@ -12,6 +12,20 @@ pattern** → **execution evidence**. Rows you emit are scenarios, not modes. Se
 [Working taxonomy](../../docs/conversational-authority-quality.md#working-taxonomy-not-fmea-reinvention)
 and the local console Help panel.
 
+### Scenario authoring order (human-first)
+
+Emit/review order is **not** harness-first:
+
+1. What is the user trying to do?  
+2. What state is the system in?  
+3. What unexpected but plausible action occurs?  
+4. What must the system do?  
+5. What failure would prove the mode occurred?  
+
+Then encode geometry (`exclusive_surface`, `typed_act`, stealer, pins).  
+**Twist 0** = test-harness setup (arm surface) — not end-user chat.  
+**Twist 1+** = real user free-chat under that surface.
+
 ```text
 📍 Discovery path: Host vocab → Invent → Expand → Scenario → Script → Sealed
    (same tracker contract as Prose → Draft IR → Staffed IR → Compile/save)

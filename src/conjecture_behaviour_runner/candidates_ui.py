@@ -262,7 +262,7 @@ def list_candidates(
 
 
 def _trajectory_from_scenario(parsed: dict[str, Any] | None) -> dict[str, Any]:
-    """Human trajectory view: ordered twists + envelopes (not yet a Script)."""
+    """Human-first trajectory view: story → twists (setup vs user) → oracle."""
     if not isinstance(parsed, dict):
         return {"steps": [], "goal_state": [], "initial_state": []}
     steps_out: list[dict[str, Any]] = []
@@ -270,23 +270,51 @@ def _trajectory_from_scenario(parsed: dict[str, Any] | None) -> dict[str, Any]:
         if not isinstance(step, dict):
             continue
         payload = step.get("payload") if isinstance(step.get("payload"), dict) else {}
+        role = step.get("role") or (
+            "setup" if step.get("maneuver") in (
+                "establish_start_state", "test_setup_precondition",
+            ) or payload.get("setup_only")
+            else "user_twist"
+        )
         steps_out.append({
             "index": i,
             "id": step.get("id") or f"step_{i}",
+            "role": role,
             "actor": step.get("actor") or "user",
             "maneuver": step.get("maneuver") or "",
+            "user_behavior": step.get("user_behavior") or "",
+            "competing_interpretation": step.get("competing_interpretation") or "",
             "user_text": payload.get("user_text") or payload.get("message") or "",
             "pin": payload.get("pin") or {},
             "invariants": payload.get("invariants") or [],
             "preconditions": step.get("preconditions") or [],
             "postconditions": step.get("postconditions") or [],
             "blocked_conditions": step.get("blocked_conditions") or [],
+            "setup_only": bool(payload.get("setup_only")),
         })
+    init = parsed.get("initial_state")
+    if isinstance(init, dict):
+        initial_human = list(init.get("human") or [])
+        initial_machine = list(init.get("machine") or [])
+    else:
+        initial_human = []
+        initial_machine = list(init or [])
+    exp = parsed.get("expected_invariant")
+    if not isinstance(exp, dict):
+        exp = {"prose": "", "must_hold": list(parsed.get("goal_state") or [])}
     return {
         "scenario_id": parsed.get("scenario_id"),
         "scenario_class": parsed.get("scenario_class"),
+        "failure_mode": parsed.get("failure_mode") or "",
+        "scenario_purpose": parsed.get("scenario_purpose") or "",
+        "user_trajectory": parsed.get("user_trajectory") or "",
+        "expected_invariant": exp,
+        "failure_oracle": list(parsed.get("failure_oracle") or []),
+        "geometry": parsed.get("geometry") or {},
         "goal_state": list(parsed.get("goal_state") or []),
-        "initial_state": list(parsed.get("initial_state") or []),
+        "initial_state": initial_machine,
+        "initial_state_human": initial_human,
+        "initial_state_machine": initial_machine,
         "scope": parsed.get("scope") or {},
         "terminal_states": parsed.get("terminal_states") or {},
         "steps": steps_out,

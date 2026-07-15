@@ -67,6 +67,17 @@ def test_example_template_authors_and_writes(tmp_path: Path) -> None:
     doc = candidate_to_scenario_dict(paths[0])
     assert doc["scenario_class"] == "candidate_soak_precursor"
     assert doc["steps"]
+    # Human-first narrative fields (trajectory before pure geometry)
+    assert doc.get("failure_mode") or doc.get("scope")
+    assert "user_trajectory" in doc
+    assert "scenario_purpose" in doc
+    assert "failure_oracle" in doc
+    assert "geometry" in doc
+    assert isinstance(doc.get("initial_state"), dict)
+    roles = {s.get("role") for s in doc["steps"]}
+    assert "setup" in roles or any(
+        (s.get("payload") or {}).get("setup_only") for s in doc["steps"]
+    )
 
 
 def test_cli_candidates_author_example(tmp_path: Path) -> None:

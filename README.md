@@ -17,18 +17,18 @@ scripted turn it checks that owner · pin · handoff law still hold.
 
 ### Failure modes & Conversational Authority Quality (CAQ-FM)
 
-Named authority failures (owner steal, hollow open, pin drop, …), laws, and portable
-seeds live in this package — not only in host monorepos:
+**Start here if you want to understand *why* Conjecture exists and *which* failures it
+maps to:**  
+[**Conversational Authority Quality**](docs/conversational-authority-quality.md)  
+https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
+
+That guide is written for a new reader. Companion index of all modes:
 
 | Doc | What it is |
 |-----|------------|
-| [**Conversational Authority Quality**](docs/conversational-authority-quality.md) | Doctrine + how to land a portable law |
-| [**Mode catalog**](incidents/CATALOG.md) | Human list of modes (id + seed status) |
+| [**Mode catalog**](incidents/CATALOG.md) | Full list of modes (runnable / pending / host_only) |
 | [**Registry**](incidents/registry.yaml) | Machine SoT (`id` ↔ `portable_seed`) |
 | [**Land playbook**](incidents/README.md) | Classify → capture → patterns/ |
-
-On GitHub:  
-https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
 **Owners and kinds are yours, not Conjecture’s.** The package does not ship a fixed
 catalog of agents or task types. Whatever **type** your ledger defines—

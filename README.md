@@ -6,14 +6,17 @@ Regression for multi-turn **state law** (owner · pin · handoff) under **pinned
 cognition** — *looks fine in chat, broken underneath* — against **LLM proposes · code
 enforces**.
 
-**Why this exists (category thesis):**  
+In multi-turn agent systems, exclusive owner ≈ a mutex, active record ≈ a foreign key,
+and handoff rules ≈ when the lock may release — we are **not inventing** those; we are
+**asserting them after every turn** under LLM routing, when helpful detours often
+fail-open and chat evals only score the prose.
+
+**Why / how (conceptual home):**  
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
-That doc is the practical conceptual home: failure class, doctrine, worked example, full
-loop, and a plain-systems reading (owner/pin/yield ≈ mutex/FK/handoff — value is
-post-turn discipline under LLM routing, not inventing locks). Stage:
-[**MATURITY.md**](docs/MATURITY.md). This README is install and demos.
+Doctrine, worked example, full proof loop, and the plain-systems reading live there.
+Stage / battery: [**MATURITY.md**](docs/MATURITY.md). This README is install and demos.
 
 | Doc | What it is |
 |-----|------------|

@@ -53,27 +53,27 @@ wrong live labels is still a bad product.
 No law → not sealed. No FAIL/PASS pair → not sealed. Prefer structural ownership when
 authority is load-bearing; proofs catch what structure missed.
 
-### Same ideas in plain systems terms
+### In multi-turn systems (plain terms)
 
-Skeptical readers often reduce this correctly:
+In multi-turn agent systems, exclusive owner ≈ a mutex, active record ≈ a foreign key,
+and handoff rules ≈ when the lock may release — we are **not inventing** those; we are
+**asserting them after every turn** under LLM routing, when helpful detours often
+fail-open and chat evals only score the prose.
+
+Same mapping, shorter:
 
 | Our phrasing | Familiar systems idea |
 |--------------|------------------------|
-| Who owns the turn? | Exclusive owner / mutex for the active workflow |
-| Which record stays active? | Stable foreign key / entity pin |
-| When may ownership yield? | Lock-release / handoff condition |
+| Who owns the turn? | Exclusive owner (mutex for the active workflow) |
+| Which record stays active? | Stable entity pin (foreign-key style) |
+| When may ownership yield? | Handoff / lock-release condition |
 | Failure → Law → Proof | Bug → invariant → regression test |
 | LLM proposes · code enforces | Nondeterministic text must not mutate critical state without validation |
 
-We are **not** claiming to invent locks, foreign keys, or regression tests.
-
-What is under-tested in multi-turn LLM products is the **failure class**: free-form
-routing fail-opens into a helpful path (glossary, FAQ, another specialist), the **prose
-looks fine**, and owner / active record / handoff were never checked. Chat evals score
-sentences. Conjecture standardizes **post-turn state asserts**, **intentional handoff vs
-informational detour**, and **planted soft-enforcement must FAIL**.
-
-One-line product truth:
+What is under-tested is the **failure class**, not the existence of locks: free-form
+routing fail-opens into a helpful path, the prose looks fine, and owner / active record
+were never checked. Conjecture standardizes **post-turn state asserts**, **intentional
+handoff vs informational detour**, and **planted soft-enforcement must FAIL**.
 
 > After every turn, assert that the correct owner and active record remain intact.
 > Test intentional handoffs separately from informational detours. Plant a steal and

@@ -137,11 +137,13 @@ def _html_page() -> bytes:
       <span class="pipe-stage upcoming" role="listitem" title="forever regression">○ Sealed</span>
     </div>
     <p class="muted" style="margin:.35rem 0 .75rem">
-      <strong>Invent</strong> (geometry) runs first; <strong>Expand</strong> (cross-product)
-      second. Each row is a candidate failure mode. Open
-      <strong>Trajectory</strong> → <strong>Scenario</strong> → <strong>Script</strong>
-      (Scenario is the precursor; Script is the play-back form → promote to Sealed).
+      <strong>Invent</strong> (geometry) vs <strong>Expand</strong> (sole×foreign / matrix /
+      residual). Each row is a <em>candidate scenario</em> (one trajectory) — not a
+      failure-mode class. Many scenarios can map to one failure mode (taxonomy id).
+      Open <strong>Trajectory</strong> → <strong>Scenario</strong> → <strong>Script</strong>.
     </p>
+    <div id="candTaxonomy" class="muted" style="margin:0 0 .75rem; font-size:.9rem"></div>
+    <div id="candInventRun" class="muted" style="margin:0 0 .75rem; display:none"></div>
     <div class="row" style="margin-bottom:.75rem">
       <select id="candSeal" title="seal status">
         <option value="">all seals</option>
@@ -155,15 +157,17 @@ def _html_page() -> bytes:
         <option value="medium">medium</option>
         <option value="low">low</option>
       </select>
-      <select id="candSrc" title="source">
-        <option value="">all sources</option>
-        <option value="invention">invention</option>
+      <select id="candSrc" title="family / source">
+        <option value="">all families</option>
+        <option value="invention">Invention only</option>
+        <option value="expansion">Expansion only</option>
+        <option value="incident">Incident seeds</option>
         <option value="sole_continue_x_foreign">expand (sole×foreign)</option>
-        <option value="residual_heuristic">residual</option>
         <option value="matrix_queue">matrix</option>
-        <option value="host_incident">incident</option>
+        <option value="residual_heuristic">residual</option>
+        <option value="host_incident">incident source</option>
       </select>
-      <input type="search" id="candQ" placeholder="filter id…" style="min-width:10rem" />
+      <input type="search" id="candQ" placeholder="filter id / failure class…" style="min-width:10rem" />
       <button type="button" class="secondary" id="btnCandReload">Reload</button>
     </div>
     <div id="candList" class="muted">Loading candidates…</div>
@@ -455,6 +459,25 @@ function renderScriptPanel(data) {
   }
   document.getElementById('candPanelScript').innerHTML = html;
 }
+function renderCandRow(s, active) {
+  const id = s.scenario_id;
+  const href = '#/candidate/' + encodeURIComponent(id) + '/trajectory';
+  const fc = s.failure_class || '';
+  return `<div class="turn cand ${active === id ? 'active' : ''}" data-id="${escapeHtml(id)}">
+    <div class="row">
+      <a href="${href}">${escapeHtml(id)}</a>
+      <span class="badge ${sealBadge(s.seal_status)}">${escapeHtml(s.seal_status || '?')}</span>
+      <span class="muted">${escapeHtml(s.priority || '')}</span>
+      <span class="muted mono">${escapeHtml(s.family || s.source || '')}</span>
+    </div>
+    <div class="muted mono">${escapeHtml(fc ? 'failure_mode=' + fc + ' · ' : '')}${escapeHtml(s.path_id || '')}</div>
+    <div class="row" style="margin-top:.35rem">
+      <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/trajectory">Trajectory</a>
+      <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/scenario">Scenario</a>
+      <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/script">Script</a>
+    </div>
+  </div>`;
+}
 async function loadCandidates() {
   const seal = document.getElementById('candSeal').value;
   const pri = document.getElementById('candPri').value;
@@ -465,41 +488,80 @@ async function loadCandidates() {
   if (pri) params.set('priority', pri);
   if (src) params.set('source', src);
   if (q) params.set('q', q);
-  params.set('limit', '120');
+  params.set('limit', '200');
   const r = await fetch('/api/candidates?' + params.toString());
   const data = await r.json();
   const meta = document.getElementById('candMeta');
   const list = document.getElementById('candList');
+  const tax = document.getElementById('candTaxonomy');
+  const invEl = document.getElementById('candInventRun');
   if (!data.dir) {
     meta.textContent = 'none';
     list.innerHTML = '<p class="muted">' + (data.hint || 'No candidates dir') + '</p>';
+    tax.textContent = '';
+    invEl.style.display = 'none';
     return;
   }
+  const bf = data.by_family || {};
   meta.textContent = (data.count || 0) + '/' + (data.total_in_manifest || 0)
-    + ' · ' + (data.role || 'Scenario');
+    + ' scenarios · invent=' + (bf.invention || 0)
+    + ' expand=' + (bf.expansion || 0)
+    + (bf.incident ? ' incident=' + bf.incident : '');
+  tax.textContent = data.taxonomy_note || '';
+  // Last invent / author run
+  const ir = data.invent_run;
+  if (ir && !ir.error) {
+    invEl.style.display = 'block';
+    const n = ir.invention_count != null ? ir.invention_count
+      : (ir.scenarios || ir.invention_scenarios || []).length;
+    const when = ir.generated_at || '';
+    const rows = ir.scenarios || ir.invention_scenarios || [];
+    let html = '<strong>Last author run</strong> '
+      + '<span class="mono">' + escapeHtml(when) + '</span>'
+      + ' · invention scenarios generated: <strong>' + n + '</strong>';
+    if (rows.length) {
+      html += '<ul style="margin:.35rem 0 0; padding-left:1.2rem">';
+      rows.slice(0, 24).forEach(row => {
+        const sid = row.scenario_id || '';
+        html += '<li class="mono"><a href="#/candidate/'
+          + encodeURIComponent(sid) + '/trajectory">' + escapeHtml(sid) + '</a>'
+          + (row.failure_class ? ' · mode=' + escapeHtml(row.failure_class) : '')
+          + '</li>';
+      });
+      if (rows.length > 24) html += '<li class="muted">… +' + (rows.length - 24) + ' more</li>';
+      html += '</ul>';
+    }
+    invEl.innerHTML = html;
+  } else {
+    invEl.style.display = 'none';
+  }
   if (!(data.scenarios || []).length) {
     list.innerHTML = '<p class="muted">No scenarios match filters.</p>';
     return;
   }
   const active = parseHash().id;
-  list.innerHTML = (data.scenarios || []).map(s => {
-    const id = s.scenario_id;
-    const href = '#/candidate/' + encodeURIComponent(id) + '/trajectory';
-    return `<div class="turn cand ${active === id ? 'active' : ''}" data-id="${escapeHtml(id)}">
-      <div class="row">
-        <a href="${href}">${escapeHtml(id)}</a>
-        <span class="badge ${sealBadge(s.seal_status)}">${escapeHtml(s.seal_status || '?')}</span>
-        <span class="muted">${escapeHtml(s.priority || '')}</span>
-        <span class="muted mono">${escapeHtml(s.source || '')}</span>
-      </div>
-      <div class="muted mono">${escapeHtml(s.path_id || '')}</div>
-      <div class="row" style="margin-top:.35rem">
-        <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/trajectory">Trajectory</a>
-        <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/scenario">Scenario</a>
-        <a class="deep-link" href="#/candidate/${encodeURIComponent(id)}/script">Script</a>
-      </div>
-    </div>`;
-  }).join('');
+  const groups = data.groups || {};
+  const order = ['invention', 'expansion', 'incident', 'other'];
+  const labels = {
+    invention: 'Invention (geometry — not cross-product expand)',
+    expansion: 'Expansion (sole×foreign · matrix · residual)',
+    incident: 'Host incident seeds',
+    other: 'Other',
+  };
+  let html = '';
+  let usedGrouped = false;
+  order.forEach(fam => {
+    const rows = groups[fam] || [];
+    if (!rows.length) return;
+    usedGrouped = true;
+    html += '<div style="margin:1rem 0 .35rem"><strong>' + escapeHtml(labels[fam] || fam)
+      + '</strong> <span class="muted">(' + rows.length + ')</span></div>';
+    html += rows.map(s => renderCandRow(s, active)).join('');
+  });
+  if (!usedGrouped) {
+    html = (data.scenarios || []).map(s => renderCandRow(s, active)).join('');
+  }
+  list.innerHTML = html;
 }
 async function openCandidate(id, tab) {
   tab = tab || 'trajectory';
@@ -516,7 +578,11 @@ async function openCandidate(id, tab) {
   const b = document.getElementById('candDetailSeal');
   b.textContent = seal || 'candidate';
   b.className = 'badge ' + sealBadge(seal);
-  document.getElementById('candDetailPath').textContent = data.path || '';
+  const meta = data.meta || {};
+  const fc = meta.failure_class || '';
+  document.getElementById('candDetailPath').textContent =
+    (fc ? 'failure_mode=' + fc + ' · ' : '')
+    + (meta.family || meta.source || '') + ' · ' + (data.path || '');
   const links = data.links || {};
   document.getElementById('candDeepLinks').innerHTML = `
     <a class="deep-link" href="${escapeHtml(links.trajectory || '#')}"># trajectory</a>

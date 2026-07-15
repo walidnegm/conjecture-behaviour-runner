@@ -18,6 +18,58 @@ from typing import Any, Optional
 
 _SAFE_ID = re.compile(r"^[A-Za-z0-9._-]{1,160}$")
 
+# Author source → UI family (expansion vs invention)
+_INVENTION_SOURCES = frozenset({"invention"})
+_EXPANSION_SOURCES = frozenset({
+    "sole_continue_x_foreign",
+    "matrix_queue",
+    "residual",
+    "residual_heuristic",
+    "example",
+})
+_INCIDENT_SOURCES = frozenset({"host_incident"})
+
+
+def source_family(source: str | None) -> str:
+    """Map author source to a console family bucket."""
+    s = (source or "").strip()
+    if s in _INVENTION_SOURCES:
+        return "invention"
+    if s in _INCIDENT_SOURCES:
+        return "incident"
+    if s in _EXPANSION_SOURCES or s.startswith("matrix") or s.startswith("sole_"):
+        return "expansion"
+    return "other"
+
+
+def failure_class_from_row(
+    row: dict[str, Any],
+    *,
+    scenario_yaml_scope: Any = None,
+) -> str:
+    """Best-effort failure-mode class (taxonomy id), not the scenario id."""
+    for key in ("failure_class", "failure_mode", "mode_slug", "registry_id"):
+        v = row.get(key)
+        if v:
+            return str(v).strip()
+    path_id = str(row.get("path_id") or "")
+    # invent.exclusive… / matrix.owner_steal… / residual…
+    parts = [p for p in path_id.split(".") if p]
+    if len(parts) >= 2 and parts[0] in ("matrix", "residual", "incident", "invent"):
+        # matrix.hollow_open… → hollow_open; invent… often packs class in scope
+        if parts[0] == "matrix" and len(parts) >= 2:
+            return parts[1]
+        if parts[0] == "residual" and len(parts) >= 2:
+            return parts[1]
+        if parts[0] == "incident" and len(parts) >= 2:
+            return parts[1]
+    if isinstance(scenario_yaml_scope, dict):
+        for line in scenario_yaml_scope.get("in_scope") or []:
+            s = str(line)
+            if s.startswith("failure_class="):
+                return s.split("=", 1)[-1].strip()
+    return ""
+
 
 def resolve_candidates_dir(
     explicit: Optional[str | Path] = None,
@@ -58,10 +110,15 @@ def list_candidates(
     seal: Optional[str] = None,
     priority: Optional[str] = None,
     source: Optional[str] = None,
+    family: Optional[str] = None,
     limit: int = 200,
     q: Optional[str] = None,
 ) -> dict[str, Any]:
-    """Return list payload for GET /api/candidates."""
+    """Return list payload for GET /api/candidates.
+
+    Each row is a **candidate scenario** (one trajectory / path), not a failure-mode
+    class. Many scenarios may share one ``failure_class`` (taxonomy id).
+    """
     cdir = resolve_candidates_dir(candidates_dir)
     if cdir is None:
         return {
@@ -69,68 +126,137 @@ def list_candidates(
             "dir": None,
             "count": 0,
             "scenarios": [],
+            "groups": {},
             "hint": (
                 "No candidate Scenario dir found. Run "
                 "`conjecture candidates author --example --out DIR` "
                 "(or your host author), then set "
-                "CONJECTURE_CANDIDATES_DIR=DIR and re-open this console."
+                "CONJECTURE_CANDIDATES_DIR=DIR and re-open this console. "
+                "Use `--invent-llm` for invention runs; open invent_run.json "
+                "in that dir to see what was generated."
             ),
             "role": "Scenario precursor to Script",
+            "taxonomy_note": (
+                "Failure mode = class/category (e.g. owner_steal). "
+                "Candidate scenario = one multi-turn trajectory that may map to that class."
+            ),
         }
     man = _load_manifest(cdir)
     rows = list(man.get("scenarios") or [])
     if not isinstance(rows, list):
         rows = []
 
+    # Enrich rows with family + failure_class for the console
+    enriched: list[dict[str, Any]] = []
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        row = dict(r)
+        src = str(row.get("source") or "")
+        row["family"] = source_family(src)
+        if not row.get("failure_class"):
+            row["failure_class"] = failure_class_from_row(row)
+        enriched.append(row)
+
     def _ok(row: dict[str, Any]) -> bool:
         if seal and str(row.get("seal_status") or "") != seal:
             return False
         if priority and str(row.get("priority") or "") != priority:
             return False
-        if source and str(row.get("source") or "") != source:
+        if source:
+            # Allow family alias: source=expansion|invention
+            if source in ("expansion", "invention", "incident", "other"):
+                if row.get("family") != source:
+                    return False
+            elif str(row.get("source") or "") != source:
+                return False
+        if family and str(row.get("family") or "") != family:
             return False
         if q:
             blob = " ".join(
                 str(row.get(k) or "")
-                for k in ("scenario_id", "path_id", "source", "seal_status")
+                for k in (
+                    "scenario_id",
+                    "path_id",
+                    "source",
+                    "family",
+                    "failure_class",
+                    "seal_status",
+                )
             ).lower()
             if q.lower() not in blob:
                 return False
         return True
 
-    filtered = [r for r in rows if isinstance(r, dict) and _ok(r)]
+    filtered = [r for r in enriched if _ok(r)]
     # Prefer open/partial high first (manifest may already be sorted)
     pri = {"high": 0, "medium": 1, "low": 2}
     seal_r = {"open": 0, "partial": 1, "sealed": 2, "regression_check": 3}
+    fam_r = {"invention": 0, "expansion": 1, "incident": 2, "other": 3}
 
     def _key(r: dict[str, Any]) -> tuple:
         return (
+            fam_r.get(str(r.get("family") or ""), 9),
             pri.get(str(r.get("priority") or ""), 9),
             seal_r.get(str(r.get("seal_status") or ""), 9),
+            str(r.get("failure_class") or ""),
             str(r.get("scenario_id") or ""),
         )
 
     filtered = sorted(filtered, key=_key)[: max(0, int(limit))]
     by_seal: dict[str, int] = {}
     by_src: dict[str, int] = {}
-    for r in rows:
-        if not isinstance(r, dict):
-            continue
+    by_family: dict[str, int] = {}
+    by_failure_class: dict[str, int] = {}
+    for r in enriched:
         s = str(r.get("seal_status") or "?")
         by_seal[s] = by_seal.get(s, 0) + 1
         src = str(r.get("source") or "?")
         by_src[src] = by_src.get(src, 0) + 1
+        fam = str(r.get("family") or "?")
+        by_family[fam] = by_family.get(fam, 0) + 1
+        fc = str(r.get("failure_class") or "?")
+        by_failure_class[fc] = by_failure_class.get(fc, 0) + 1
+
+    groups: dict[str, list[dict[str, Any]]] = {
+        "invention": [],
+        "expansion": [],
+        "incident": [],
+        "other": [],
+    }
+    for r in filtered:
+        fam = str(r.get("family") or "other")
+        groups.setdefault(fam, []).append(r)
+
+    invent_run = None
+    for name in ("invent_run.json", "last_author_run.json"):
+        rp = cdir / name
+        if rp.is_file():
+            try:
+                invent_run = json.loads(rp.read_text(encoding="utf-8"))
+            except Exception:  # noqa: BLE001
+                invent_run = {"error": "unreadable", "path": str(rp)}
+            break
 
     return {
         "ok": True,
         "dir": str(cdir),
         "count": len(filtered),
-        "total_in_manifest": len(rows),
+        "total_in_manifest": len(enriched),
         "by_seal": by_seal,
         "by_source": by_src,
+        "by_family": by_family,
+        "by_failure_class": by_failure_class,
+        "groups": groups,
+        "invent_run": invent_run,
         "role": man.get("role") or "Scenario precursor to Script",
         "generator": man.get("generator"),
         "scenarios": filtered,
+        "taxonomy_note": (
+            "Failure mode = class/category (taxonomy). "
+            "Candidate scenario = one trajectory that maps to a class; "
+            "several incidents/trajectories can share one failure mode."
+        ),
     }
 
 
@@ -285,10 +411,18 @@ def get_candidate(
         "api": f"/api/candidates/{scenario_id}",
     }
 
+    meta_out = dict(meta) if isinstance(meta, dict) else {"scenario_id": scenario_id}
+    meta_out["family"] = source_family(str(meta_out.get("source") or ""))
+    if not meta_out.get("failure_class"):
+        scope = (scenario_dict or {}).get("scope") if scenario_dict else None
+        meta_out["failure_class"] = failure_class_from_row(
+            meta_out, scenario_yaml_scope=scope,
+        )
+
     return {
         "ok": True,
         "scenario_id": scenario_id,
-        "meta": meta,
+        "meta": meta_out,
         "path": str(path),
         "yaml": text,
         "scenario": scenario_dict,
@@ -297,15 +431,18 @@ def get_candidate(
         "links": links,
         "role": "Scenario precursor to Script",
         "stack": {
-            "trajectory": "Authored twists (story of the failure mode)",
+            "trajectory": "One multi-turn path (candidate scenario) that stresses a failure class",
             "scenario": "Conjecture Scenario YAML (description + envelopes)",
             "script": "Compiled Conjecture Script (play-back form)",
+            "failure_mode": "Taxonomy class (many scenarios may share one mode)",
         },
     }
 
 
 __all__ = [
+    "failure_class_from_row",
     "get_candidate",
     "list_candidates",
     "resolve_candidates_dir",
+    "source_family",
 ]

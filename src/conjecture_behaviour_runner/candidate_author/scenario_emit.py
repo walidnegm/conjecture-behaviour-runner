@@ -232,6 +232,8 @@ def write_candidate_scenarios(
         "| scenario_id | seal | priority | path_id |",
         "|---|---|---|---|",
     ]
+    from datetime import datetime, timezone
+
     report: list[dict[str, Any]] = []
     for path in paths:
         kind = _kind_from_start(path)
@@ -249,6 +251,8 @@ def write_candidate_scenarios(
             "seal_status": path.seal_status,
             "priority": path.priority,
             "source": path.source,
+            "failure_class": path.failure_class,
+            "title": path.title,
             "ok": True,
         })
         index.append(
@@ -265,6 +269,7 @@ def write_candidate_scenarios(
                 "seal_status": r["seal_status"],
                 "priority": r["priority"],
                 "source": r["source"],
+                "failure_class": r.get("failure_class") or "",
                 "file": f"{r['scenario_id']}.yaml",
             }
             for r in report
@@ -273,6 +278,49 @@ def write_candidate_scenarios(
     (out_dir / "manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8",
     )
+    # Author-run summary so the local console can show "what invention generated"
+    by_src: dict[str, int] = {}
+    invent_rows = []
+    for r in report:
+        src = str(r.get("source") or "")
+        by_src[src] = by_src.get(src, 0) + 1
+        if src == "invention":
+            invent_rows.append({
+                "scenario_id": r["scenario_id"],
+                "path_id": r["path_id"],
+                "failure_class": r.get("failure_class") or "",
+                "title": r.get("title") or "",
+                "seal_status": r.get("seal_status"),
+                "file": f"{r['scenario_id']}.yaml",
+            })
+    run_doc = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generator": "conjecture_behaviour_runner.candidate_author",
+        "total": len(report),
+        "by_source": by_src,
+        "invention_count": len(invent_rows),
+        "invention_scenarios": invent_rows,
+        "note": (
+            "Invention = geometry invent (not sole×foreign expansion). "
+            "Each row is a candidate scenario/trajectory; failure_class is the taxonomy id."
+        ),
+    }
+    (out_dir / "last_author_run.json").write_text(
+        json.dumps(run_doc, indent=2) + "\n", encoding="utf-8",
+    )
+    if invent_rows:
+        (out_dir / "invent_run.json").write_text(
+            json.dumps(
+                {
+                    **run_doc,
+                    "kind": "invention_only",
+                    "scenarios": invent_rows,
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
     return report
 
 

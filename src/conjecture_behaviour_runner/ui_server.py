@@ -209,6 +209,92 @@ def _html_page() -> bytes:
         Portable seed links registry → pattern. Script = runnable artifact. Proof = evidence + verdict.
       </p>
     </details>
+    <details class="card" style="margin:.5rem 0 1rem; padding:.75rem 1rem; box-shadow:none; border:1px solid #e4e4e7">
+      <summary style="cursor:pointer; font-weight:600">Help — harness plugs (pedantic; for seasoned testers)</summary>
+      <p class="muted" style="margin:.5rem 0; font-size:.85rem">
+        Conjecture is a <strong>test harness</strong>: it runs multi-turn scripts and must drive
+        <em>some</em> product while staying product-agnostic. Everyday speech calls every interface
+        an “API.” We split names so <strong>who calls whom</strong> is clear.
+      </p>
+      <pre class="muted" style="margin:.5rem 0; font-size:.72rem; background:#f4f4f5; color:#18181b; padding:.65rem; border-radius:.4rem; overflow:auto">YOU / CI / this console
+       │  (1) How you invoke Conjecture  →  CLI · run_script() · this UI
+       ▼
+  ┌─────────────┐
+  │  Conjecture │  testing tool
+  └──────┬──────┘
+         │  (2) How Conjecture invokes the product
+         │      standardized plugin: observe_turn → Observation
+         ▼
+  ┌─────────────┐
+  │ Adapter /   │  product-specific glue (implements the plugin)
+  │ Driver      │
+  └──────┬──────┘
+         │  (3) How the product is actually called
+         ▼
+  ┌─────────────┐
+  │ Product API │  chat / SSE / session / ledger (Bot0, or a third party)
+  └─────────────┘</pre>
+      <table class="muted" style="width:100%; border-collapse:collapse; font-size:.85rem; margin:.5rem 0">
+        <thead>
+          <tr style="text-align:left; border-bottom:1px solid #d4d4d8">
+            <th style="padding:.3rem .4rem">Term</th>
+            <th style="padding:.3rem .4rem">Meaning here</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #e4e4e7">
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Contract</strong></td>
+            <td style="padding:.35rem .4rem">Shared test language both harness and host honor:
+              Script · Turn · Observation (owner · pins) · invariants · failure-mode slug ·
+              PASS healthy / FAIL planted. Third parties implement this without using Bot0.</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e4e4e7">
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Plugin interface (SPI)</strong></td>
+            <td style="padding:.35rem .4rem">Plug shape <em>Conjecture defines</em> and <em>calls</em>.
+              Hosts fill it in. In code: <span class="mono">ControlPlaneAdapter</span>
+              (<span class="mono">apply_effect</span> · <span class="mono">observe_turn</span> ·
+              optional invariant checks). SPI is an interface; we avoid calling it “the API”
+              alone so it is not confused with product chat endpoints.</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e4e4e7">
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Adapter / Driver</strong></td>
+            <td style="padding:.35rem .4rem">One concrete implementation of that plugin for one product.
+              <span class="mono">GeometryHoldAdapter</span> (console stub),
+              <span class="mono">MiniAppAdapter</span>, future host Bot0 driver, HTTP JSON, …
+              Same object: “Adapter” = maps host world → contract; “Driver” = drives Act.</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e4e4e7">
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Product API</strong></td>
+            <td style="padding:.35rem .4rem">How clients call the <em>chatbot product</em>
+              (auth, chat, SSE, control projection). The Adapter uses these.
+              Not the same arrow as “how you start Conjecture.”</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e4e4e7">
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>How you call Conjecture</strong></td>
+            <td style="padding:.35rem .4rem">CLI · Python <span class="mono">run_script</span> · this console.
+              Also an “API” in casual speech — consumer of the harness, not the product plugin.</td>
+          </tr>
+          <tr>
+            <td style="padding:.35rem .4rem; vertical-align:top"><strong>Hook</strong></td>
+            <td style="padding:.35rem .4rem">Named step <em>inside</em> the Adapter: arrange (session / arm surface),
+              act (send turn), wait/settle, observe (map to Observation), write evidence.
+              Multi-turn E2E = sequence of hooks, not a different framework.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted" style="margin:.5rem 0 0; font-size:.85rem">
+        <strong>Why “SPI ≠ product API”:</strong> both are interfaces; they differ by direction.
+        Product API = callers come to the chatbot. Plugin (SPI) = Conjecture calls <em>your</em>
+        Adapter after each turn; you return owner · pins · outcome. That is what makes the
+        harness product-agnostic. Casual speech may call both “APIs”; we keep both arrows named.
+      </p>
+      <p class="muted" style="margin:.5rem 0 0; font-size:.85rem">
+        <strong>Today in this console:</strong> invent/expand <em>Run</em> uses
+        <span class="mono">GeometryHoldAdapter</span> (stub — not real product Act).
+        Path-faithful mini-app demos use <span class="mono">MiniAppAdapter</span>.
+        Real Bot0 multi-turn = host Adapter that calls product chat/control APIs.
+      </p>
+    </details>
     <div id="candTaxonomy" class="muted" style="margin:0 0 .75rem; font-size:.9rem"></div>
     <div id="candInventRun" class="muted" style="margin:0 0 .75rem; display:none"></div>
     <div class="row" style="margin-bottom:.75rem">

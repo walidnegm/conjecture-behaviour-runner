@@ -8,9 +8,21 @@ Package stage: [MATURITY.md](./MATURITY.md)
 
 ---
 
-## The failure class
+## Catch state-law breaks that still look fine in chat
 
-The reply can sound correct while the machine underneath is wrong:
+In multi-turn agents, the reply can sound correct while the **conversation machine**
+underneath is wrong: the wrong specialist owns the turn, the locked record silently
+changed, or a mid-flight task was illegally restarted. Those failures are **ledger and
+handoff bugs**, not “bad writing.” Ordinary unit tests and LLM-as-judge evals usually
+miss them — the prose still passes.
+
+The design principle is **LLM proposes · code enforces**. The model may emit
+labels—continue, detour, new task, abandon—but **deterministic code** (your rule-set)
+must decide exclusive owner, pin identity, and when ownership may yield. If that
+enforcement is soft, the model can **steal or hijack** the path and still produce a
+helpful-looking answer. Conjecture is regression for the **enforce** half: after each
+scripted turn it checks that owner · pin · handoff law still hold, under **pinned**
+labels so CI is repeatable.
 
 | Looks fine in chat | Broken underneath |
 |--------------------|-------------------|
@@ -19,10 +31,20 @@ The reply can sound correct while the machine underneath is wrong:
 | Fresh start after a change | Illegal restart wiped mid-flight work |
 | “Done” / “saved” / “pinned” | Nothing useful opened; empty advance |
 
-Those are **ledger / handoff / delivery** bugs, not “bad writing.” LLM-as-judge scores
-prose. Unit tests *can* assert owner and pin, but by default most suites do not share a
-portable observation contract, an incident taxonomy, or a **healthy PASS + planted FAIL**
-discipline. Conjecture is for that enforce path.
+```text
+User: "start mid-flight work on record R"
+User: "change a field mid-flight"     ← reply can still sound fine
+
+Unit / ordinal tests:  ✅ something returned
+LLM eval:              ✅ text looks helpful
+Conjecture:            ✅ exclusive_owner still the kind your ledger started
+                       ✅ pin still the same record id
+                       ❌ FAIL if continue stole or dropped the pin
+```
+
+Unit tests *can* assert owner and pin in isolation. What they usually lack by default is a
+shared authority model, an incident taxonomy, a portable **Observation** contract, and a
+**healthy PASS + planted FAIL** discipline. That institutionalization is the point.
 
 **“Authority” ≠ IAM.** Here it means who may act, what stays pinned, when ownership may
 yield, and what must open after a claimed success.
@@ -33,16 +55,13 @@ yield, and what must open after a claimed success.
 
 ## Doctrine
 
-**LLM proposes · code enforces.**
-
 | Side | Responsibility |
 |------|----------------|
 | **LLM** | Labels: continue, detour, new task, abandon, … |
 | **Code** | Exclusive owner, pin identity, yield/handoff, open surface |
 
-Conjecture only checks the **enforce** half, under **pinned** labels (CI must not re-roll
-a live model each run). Pair with separate classifier evals. Green enforce + wrong live
-labels is still a bad product.
+Pair with separate classifier evals — green enforce + wrong live labels is still a bad
+product.
 
 **Failure → Law → Proof**
 

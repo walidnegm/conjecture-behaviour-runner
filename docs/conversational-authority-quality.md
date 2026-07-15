@@ -181,9 +181,10 @@ A maintenance agent (or host loop) can usefully:
 Same doctrine one level up: the agent proposes scripts and laws; **code + seal** own what
 CI trusts. If the maintainer is nondeterministic, you poison the reliability layer.
 
-**Outsourced build (one line):** implementers may do the grind; whoever is accountable for
-outcomes still **accepts** the laws. The engineering object stays scripts, Observations,
-and invariants.
+**When someone else builds the agent:** implementers (or AI) may write scripts, projections,
+and drivers. Whoever is accountable for outcomes still **accepts** the laws and the
+PASS/FAIL evidence — the builder should not self-certify against weak criteria. The
+engineering object stays scripts, Observations, and invariants.
 
 ---
 

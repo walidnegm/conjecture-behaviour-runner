@@ -71,7 +71,7 @@ def test_example_template_authors_and_writes(tmp_path: Path) -> None:
     assert doc.get("failure_mode") or doc.get("scope")
     assert "user_trajectory" in doc
     assert "scenario_purpose" in doc
-    assert "failure_oracle" in doc
+    assert "mode_detection" in doc
     assert "geometry" in doc
     assert isinstance(doc.get("initial_state"), dict)
     roles = {s.get("role") for s in doc["steps"]}

@@ -468,9 +468,12 @@ function renderTrajectory(traj) {
   const initH = (traj && traj.initial_state_human) || [];
   const initM = (traj && traj.initial_state_machine) || (traj && traj.initial_state) || [];
   const exp = (traj && traj.expected_invariant) || {};
-  const oracle = (traj && traj.failure_oracle) || [];
+  const detect = (traj && traj.mode_detection) || (traj && traj.failure_oracle) || [];
   const geo = (traj && traj.geometry) || {};
-  let html = '<p class="muted"><strong>Trajectory</strong> — human-first: user story → setup vs user twists → oracle. Geometry encodes the path after the behavior is clear.</p>';
+  let html = '<p class="muted"><strong>Trajectory</strong> — '
+    + '<em>user trajectory</em> (story) → <em>geometry</em> (adversarial conditions) → '
+    + '<em>failure-mode mapping</em> (slug) → <em>mode detection</em> (observable evidence). '
+    + 'Setup twists are harness preconditions, not end-user chat.</p>';
   if (traj.failure_mode) {
     html += '<div style="margin:.5rem 0"><strong>Failure mode stressed:</strong> '
       + '<span class="mono">' + escapeHtml(traj.failure_mode) + '</span></div>';
@@ -522,12 +525,13 @@ function renderTrajectory(traj) {
         : ''}
     </div>`;
   }).join('') || '<p class="muted">No twists</p>';
-  if (oracle.length) {
-    html += '<div class="turn bad" style="margin-top:.75rem"><strong>Failure oracle</strong><ul>'
-      + oracle.map(x => '<li>' + escapeHtml(x) + '</li>').join('') + '</ul></div>';
+  if (detect.length) {
+    html += '<div class="turn bad" style="margin-top:.75rem"><strong>Mode detection</strong> '
+      + '<span class="muted">(observable evidence the mode materialized)</span><ul>'
+      + detect.map(x => '<li>' + escapeHtml(x) + '</li>').join('') + '</ul></div>';
   }
   if (geo.surface || geo.stealer || geo.mode) {
-    html += '<div class="muted mono" style="margin-top:.75rem"><strong>Geometry mapping:</strong> '
+    html += '<div class="muted mono" style="margin-top:.75rem"><strong>Scenario geometry:</strong> '
       + 'surface=' + escapeHtml(geo.surface || '—')
       + ' · act=' + escapeHtml(geo.act || '—')
       + ' · stealer=' + escapeHtml(geo.stealer || '—')

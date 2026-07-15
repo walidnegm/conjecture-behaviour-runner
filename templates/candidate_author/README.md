@@ -12,17 +12,23 @@ pattern** → **execution evidence**. Rows you emit are scenarios, not modes. Se
 [Working taxonomy](../../docs/conversational-authority-quality.md#working-taxonomy-not-fmea-reinvention)
 and the local console Help panel.
 
-### Scenario authoring order (human-first)
+### Conceptual split (not harness-first)
 
-Emit/review order is **not** harness-first:
+| Concept | Meaning |
+|---------|---------|
+| **User trajectory** | The behavioral story |
+| **Scenario geometry** | Normalized conditions that make it adversarial (`surface` × `act` × stealer, pins) |
+| **Failure-mode mapping** | Class of violation stressed (registry **slug**, e.g. `owner_steal`) |
+| **Mode detection** | Observable evidence the mode materialized (asserts / traces) — not an “oracle” |
+
+Authoring order:
 
 1. What is the user trying to do?  
 2. What state is the system in?  
 3. What unexpected but plausible action occurs?  
 4. What must the system do?  
-5. What failure would prove the mode occurred?  
+5. What evidence would show the mode hit?  
 
-Then encode geometry (`exclusive_surface`, `typed_act`, stealer, pins).  
 **Twist 0** = test-harness setup (arm surface) — not end-user chat.  
 **Twist 1+** = real user free-chat under that surface.
 

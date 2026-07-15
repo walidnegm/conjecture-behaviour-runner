@@ -1,12 +1,14 @@
 """Emit CandidatePath as Conjecture Scenario YAML (precursor to Script).
 
-Human-first order (author + console):
+Conceptual split (author + console):
 
-  user trajectory → initial state → expected invariant → twists
-  (setup vs user behavior) → failure oracle → geometry encoding
+  User trajectory       = the behavioral story
+  Scenario geometry     = normalized conditions that make it adversarial
+  Failure-mode mapping  = class of violation stressed (registry slug)
+  Mode detection        = observable evidence the mode materialized
+                          (do not call this an "oracle")
 
-Internal fields (exclusive_surface, typed_act, stealer, pins) encode the trajectory
-*after* the behavior is clear — not as the primary story.
+Authoring order: trajectory → state → twist → must-hold → mode detection → geometry.
 """
 from __future__ import annotations
 
@@ -32,8 +34,7 @@ def _require_yaml():
 _HEADER = """\
 # Conjecture Scenario (CANDIDATE — portable candidate_author)
 #
-# Human-first: user trajectory → state → twist → must-hold → failure oracle
-# Geometry (surface / act / stealer) encodes the path after the behavior is clear.
+# User trajectory → geometry → failure-mode mapping → mode detection
 # Scenario = description language · Script = play-back form (compile when freezes ready)
 #
 """
@@ -143,7 +144,8 @@ def _scenario_purpose(path: CandidatePath, geo: dict[str, str]) -> str:
     )
 
 
-def _failure_oracle(path: CandidatePath, geo: dict[str, str]) -> list[str]:
+def _mode_detection(path: CandidatePath, geo: dict[str, str]) -> list[str]:
+    """Observable evidence that the failure mode materialized (not 'oracle')."""
     stealer = geo.get("stealer") or "competing_leaf"
     surface = geo.get("surface") or "exclusive_surface"
     mode = path.failure_class or "owner_steal"
@@ -157,7 +159,7 @@ def _failure_oracle(path: CandidatePath, geo: dict[str, str]) -> list[str]:
         if m and m not in base:
             base.append(str(m))
     return [
-        f"Failure mode `{mode}` is instantiated if any of the following occurs:",
+        f"Failure mode `{mode}` is detected if any of the following is observed:",
         *base,
     ]
 
@@ -296,7 +298,7 @@ def candidate_to_scenario_dict(
             "must_hold": list(path.must_hold) or [f"exclusive_owner≈{owner}"],
             "must_not": list(path.must_not),
         },
-        "failure_oracle": _failure_oracle(path, geo),
+        "mode_detection": _mode_detection(path, geo),
         "geometry": geo,
         "scope": {
             "in_scope": [

@@ -262,7 +262,7 @@ def list_candidates(
 
 
 def _trajectory_from_scenario(parsed: dict[str, Any] | None) -> dict[str, Any]:
-    """Human-first trajectory view: story → twists (setup vs user) → oracle."""
+    """Human-first trajectory: story → twists → mode detection (not 'oracle')."""
     if not isinstance(parsed, dict):
         return {"steps": [], "goal_state": [], "initial_state": []}
     steps_out: list[dict[str, Any]] = []
@@ -309,7 +309,11 @@ def _trajectory_from_scenario(parsed: dict[str, Any] | None) -> dict[str, Any]:
         "scenario_purpose": parsed.get("scenario_purpose") or "",
         "user_trajectory": parsed.get("user_trajectory") or "",
         "expected_invariant": exp,
-        "failure_oracle": list(parsed.get("failure_oracle") or []),
+        "mode_detection": list(
+            parsed.get("mode_detection")
+            or parsed.get("failure_oracle")  # legacy emit
+            or []
+        ),
         "geometry": parsed.get("geometry") or {},
         "goal_state": list(parsed.get("goal_state") or []),
         "initial_state": initial_machine,

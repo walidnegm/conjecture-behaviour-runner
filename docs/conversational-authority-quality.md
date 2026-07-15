@@ -61,6 +61,15 @@ mitigation/guardrail.
 **Terminology guardrails:** mode slug ≠ incident id ≠ scenario id. Portable seed links
 registry → pattern. Script = runnable artifact. Proof = evidence + verdict.
 
+**Candidate scenario split** (authoring / console):
+
+| Concept | Meaning |
+|---------|---------|
+| **User trajectory** | Behavioral story |
+| **Scenario geometry** | Normalized adversarial conditions (surface × act × stealer, pins) |
+| **Failure-mode mapping** | Class stressed (registry slug) |
+| **Mode detection** | Observable evidence the mode materialized (not an “oracle”) |
+
 Optional causal analysis (still not FMEA product): functional insufficiency → trigger →
 behavioral failure mode (slug) → effect; incident = one occurrence of that chain.
 

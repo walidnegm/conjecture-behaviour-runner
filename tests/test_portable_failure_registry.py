@@ -35,7 +35,8 @@ class PortableFailureRegistryTests(unittest.TestCase):
         self.assertIn("Pinned cognition", text)
         self.assertIn("Worked example", text)
         self.assertIn("Why not just pytest", text)
-        self.assertIn("What \"portable\" means", text)
+        self.assertIn("portable", text.lower())
+        self.assertIn("not integration-free", text)
         self.assertIn("correctly decline", text)
 
     def test_runnable_seeds_have_pattern_folders(self) -> None:

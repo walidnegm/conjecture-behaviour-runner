@@ -23,9 +23,9 @@ relinquish that governance.
 **Conceptual home:** [**CAQ-FM**](docs/conversational-authority-quality.md) ·
 [MATURITY](docs/MATURITY.md) · This README: install and demos.
 
-**Walking taxonomy** (not FMEA): **failure mode slug** = unique registry `id` (class) →
-many **incidents** / **candidate scenarios** (trajectories) → optional **sealed script**
-under `patterns/`. Console Help spells this out; list rows are scenarios, not modes.
+**Working taxonomy** (not FMEA): **failure mode slug** = unique registry `id` (class) →
+many **incidents** / **candidate scenarios** (trajectories) → **sealed pattern** →
+**execution evidence**. Console Help has the full map; list rows are scenarios, not modes.
 
 | Doc | What it is |
 |-----|------------|

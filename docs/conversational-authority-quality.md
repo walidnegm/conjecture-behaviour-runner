@@ -32,21 +32,37 @@ Install: [README](../README.md) · Modes: [CATALOG](../incidents/CATALOG.md) · 
 [MATURITY](./MATURITY.md). **“Authority” ≠ IAM** — who may act, which record stays
 active, when ownership may yield, whether claimed success produced the promised effect.
 
-### Walking taxonomy (not FMEA)
+### Working taxonomy (not FMEA reinvention)
 
-We do **not** reinvent failure-mode analysis as a product. We use a small layered map
-so laws, incidents, and proofs stay consistent:
+We use a small layered map so discovery, classification, and validation stay consistent.
+This is **not** a full FMEA product — only enough structure to connect failure laws,
+observed incidents, candidate trajectories, executable tests, and evidence.
 
 | Layer | What it is | Example |
 |-------|------------|---------|
-| **Failure mode** (`id` / **slug**) | Named law in CAQ-FM / `registry.yaml`. **Slug = unique mode id** Conjecture uses internally — one id per *class*, not per incident. | `owner_steal`, `hollow_open` |
-| **Incident** | One real production/soak hit of that mode | “glossary stole mid claim C-1042 on …” |
-| **Candidate scenario** | One authored multi-turn **trajectory** that can stress a mode (console rows) | `invent_…_glossary_concept`, `matrix.hollow_open.…` |
-| **Script / sealed pattern** | CI-runnable proof; `patterns/<portable_seed>/` joins via registry | `patterns/owner_steal_mid_continue/` |
+| **Failure mode** (`id` / **slug**) | Named class of prohibited/incorrect behavior in CAQ-FM / `registry.yaml`. Slug = Conjecture’s unique id for the *class*, not one occurrence. | `owner_steal`, `hollow_open`, `packaging_steal` |
+| **Incident** | One observed production, soak, eval, or test occurrence of a mode. Many incidents → one mode. | “Glossary stole ownership mid-claim on C-1042 on 2026-07-01.” |
+| **Candidate scenario** | One authored multi-turn trajectory that can expose or stress a mode. Inventory rows are trajectories, not modes. Many scenarios → one mode. | `invent_…_glossary_concept`, `matrix.hollow_open.…` |
+| **Script / sealed pattern** | Deterministic CI-runnable form of a scenario (setup, turns, asserts). Linked via `patterns/<portable_seed>/` and registry `portable_seed`. | `patterns/owner_steal_mid_continue/` |
+| **Execution evidence** | Trace, assertions, artifacts, and verdict from running a sealed pattern — proof the law held or broke under that trajectory. | Trace: claims stayed authoritative; C-1042 stayed pinned. |
 
-**Several incidents and trajectories map to one failure mode.** Folder names under
-`patterns/` may differ from the declarative slug (CI stability); join with
-`portable_seed` / `registry_id`.
+**Core relationships** (not strictly 1:1): mode = reusable class · incident = occurrence ·
+scenario = trajectory · sealed pattern = repeatable test · evidence = run verdict.
+Many incidents/scenarios → one mode; one scenario may expose multiple modes; one pattern
+→ many results across models, versions, configs.
+
+**Supporting metadata** (not separate layers): trigger/context · effect ·
+cause/insufficiency hypothesis · invariant/law violated · detection signal ·
+mitigation/guardrail.
+
+**Discovery:** Invent (surface × act × stealer) · Expand (sole×foreign · matrix · residual).  
+**Maturation:** Open trajectory → Candidate scenario → Sealed pattern → Execution evidence.
+
+**Terminology guardrails:** mode slug ≠ incident id ≠ scenario id. Portable seed links
+registry → pattern. Script = runnable artifact. Proof = evidence + verdict.
+
+Optional causal analysis (still not FMEA product): functional insufficiency → trigger →
+behavioral failure mode (slug) → effect; incident = one occurrence of that chain.
 
 ---
 

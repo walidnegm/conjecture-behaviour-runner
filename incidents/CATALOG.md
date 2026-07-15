@@ -5,8 +5,8 @@ This is the human index for [Conversational Authority Quality](../docs/conversat
 
 Each **mode id** is a **slug**: the unique Conjecture/CAQ-FM registry id for a *class*
 (e.g. `owner_steal`). That is not an incident id and not a candidate scenario id.
-Many incidents and trajectories map to one slug. Full walking taxonomy:
-[CAQ § Walking taxonomy](../docs/conversational-authority-quality.md#walking-taxonomy-not-fmea)
+Many incidents and trajectories map to one slug. Full map:
+[CAQ § Working taxonomy](../docs/conversational-authority-quality.md#working-taxonomy-not-fmea-reinvention)
 (not a full FMEA product).
 
 | Need | Open |

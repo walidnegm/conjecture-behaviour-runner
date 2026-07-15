@@ -7,7 +7,8 @@
 | **Candidate discovery** (expand + invent) | Templates + env | [../templates/candidate_author/README.md](../templates/candidate_author/README.md) · SPEC §2.2 |
 | **Discovery path diagram** | SVG ladder | [images/discovery-pipeline.svg](./images/discovery-pipeline.svg) |
 | **Pipeline stage tracker** | Portable contract | `pipeline_tracker` — same strip shape as Prose → Draft IR → Save |
-| **Conversational Authority Quality** (portable) | Doctrine | [conversational-authority-quality.md](./conversational-authority-quality.md) |
+| **Conversational Authority Quality** (portable) | Category thesis | [conversational-authority-quality.md](./conversational-authority-quality.md) |
+| **Package maturity** | Readiness disclosure | [MATURITY.md](./MATURITY.md) |
 | **Portable failure-mode registry** | Machine SoT | [../incidents/registry.yaml](../incidents/registry.yaml) |
 | **Portable catalog** (failure modes) | Human index | [../incidents/CATALOG.md](../incidents/CATALOG.md) |
 | **Lexicon** (optional depth) | Host monorepo vocabulary | Host path `docs/the-language-of-building-ai-products.md` — not vendored here |

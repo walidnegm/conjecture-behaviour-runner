@@ -30,6 +30,9 @@ class PortableFailureRegistryTests(unittest.TestCase):
         self.assertIn("LLM proposes", text)
         self.assertIn("code enforces", text)
         self.assertIn("registry.yaml", text)
+        # Category thesis: buyer-owned acceptance, not only "skip us"
+        self.assertIn("Buyer-owned", text)
+        self.assertIn("enterprise", text.lower())
 
     def test_runnable_seeds_have_pattern_folders(self) -> None:
         data = yaml.safe_load(_REGISTRY.read_text(encoding="utf-8"))

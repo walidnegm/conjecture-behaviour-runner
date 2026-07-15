@@ -6,21 +6,19 @@ Regression for multi-turn **state law** (owner · pin · handoff) under **pinned
 cognition** — *looks fine in chat, broken underneath* — against **LLM proposes · code
 enforces**.
 
-**Why this exists (doctrine + failure modes):**  
+**Why this exists (category thesis):**  
 [**Conversational Authority Quality (CAQ-FM)**](docs/conversational-authority-quality.md)  
 https://github.com/walidnegm/conjecture-behaviour-runner/blob/main/docs/conversational-authority-quality.md
 
-That guide owns the full pitch, honest limits, **known gaps** (incl. concurrency), and
-an **expansion horizon** for broader scope without diluting the core. This README is the
-package face: install, demos, drivers, what gets checked after each turn.
-
-**Fit today:** stateful multi-turn agents with owners/pins/handoffs. Free-form RAG /
-early prompt chaining can safely ignore the machinery. Adoption is an ongoing tax —
-steal the doctrine if that is enough.
+That doc is the conceptual home: fluent answers vs broken state, **LLM proposes · code
+enforces**, and the enterprise wedge — **buyer-owned acceptance contracts** when someone
+else builds the agent. Package readiness and seed battery live in
+[**MATURITY.md**](docs/MATURITY.md). This README is install, demos, and drivers.
 
 | Doc | What it is |
 |-----|------------|
-| [**CAQ-FM guide**](docs/conversational-authority-quality.md) | Conceptual home — start here for *why* |
+| [**CAQ-FM thesis**](docs/conversational-authority-quality.md) | Problem + architecture + enterprise operating model |
+| [**MATURITY**](docs/MATURITY.md) | Readiness, battery size, gaps |
 | [**Mode catalog**](incidents/CATALOG.md) | Full list of modes (runnable / pending / host_only) |
 | [**Registry**](incidents/registry.yaml) | Machine SoT (`id` ↔ `portable_seed`) |
 | [**Land playbook**](incidents/README.md) | Classify → capture → patterns/ |

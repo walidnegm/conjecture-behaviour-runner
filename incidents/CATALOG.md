@@ -5,7 +5,8 @@ This is the human index for [Conversational Authority Quality](../docs/conversat
 
 | Need | Open |
 |------|------|
-| **Doctrine** | [docs/conversational-authority-quality.md](../docs/conversational-authority-quality.md) |
+| **Thesis** | [docs/conversational-authority-quality.md](../docs/conversational-authority-quality.md) |
+| **Maturity / battery honesty** | [docs/MATURITY.md](../docs/MATURITY.md) |
 | **Machine SoT** | [registry.yaml](registry.yaml) |
 | **Land a seed** | [README.md](README.md) |
 | **Runnable proofs** | `patterns/<portable_seed>/` |
@@ -21,8 +22,7 @@ This is the human index for [Conversational Authority Quality](../docs/conversat
 | **host_only** | Documented here for the map; prove-out lives in product hosts (not this package) |
 
 Host monorepos may keep extra product-specific modes. This catalog is the **shared map**
-of known CAQ-FM modes. The **runnable battery** is still thin (count below); most rows are
-seed_pending / host_only — philosophy + vocabulary first, full portable coverage later.
+of known CAQ-FM modes. Runnable battery size and package stage: [MATURITY.md](../docs/MATURITY.md).
 
 ---
 

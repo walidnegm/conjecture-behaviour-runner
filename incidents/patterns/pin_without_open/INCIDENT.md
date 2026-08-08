@@ -4,8 +4,8 @@
 |-------|--------|
 | **Slug** | `pin_without_open` |
 | **Date** | 2026-07-13 |
-| **Host** | path-faithful mini-app (public demo) · host dogfood Bot0 |
-| **Conversation / ref** | Bot0 staging `conv_09449a0d` (Wealth Bottleneck V1) |
+| **Host** | path-faithful mini-app (public demo); host dogfood products apply the same law |
+| **Conversation / ref** | (host-private; do not commit product conv ids / tenant names) |
 | **Conjecture-class?** | yes (delivery-leaf / open surface) |
 
 ## Symptom (what the user saw)

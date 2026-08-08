@@ -100,6 +100,51 @@ def test_ui_candidates_api(tmp_path: Path, monkeypatch) -> None:
         assert detail.get("ok") is True
         assert "user_text" in (detail.get("yaml") or "")
         assert detail.get("scenario", {}).get("scenario_id") == "demo_candidate"
+
+        # Batch run (geometry) — all filtered → report card
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/candidates/run-batch",
+            data=json.dumps(
+                {
+                    "selection": "all",
+                    "adapter": "geometry",
+                    "filters": {"q": "demo"},
+                    "max_scenarios": 5,
+                }
+            ).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req) as resp:
+            report = json.load(resp)
+        assert report.get("ok") is True
+        assert report.get("adapter") == "geometry"
+        assert (report.get("summary") or {}).get("total") >= 1
+        assert (report.get("results") or [])[0].get("scenario_id") == "demo_candidate"
+
+        # Selected list
+        req2 = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/candidates/run-batch",
+            data=json.dumps(
+                {
+                    "selection": "ids",
+                    "ids": ["demo_candidate"],
+                    "adapter": "geometry",
+                }
+            ).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req2) as resp:
+            report2 = json.load(resp)
+        assert report2.get("summary", {}).get("total") == 1
+
+        with urllib.request.urlopen(
+            f"http://127.0.0.1:{port}/api/host-runner"
+        ) as resp:
+            host = json.load(resp)
+        assert host.get("ok") is True
+        assert "available" in host
     finally:
         httpd.shutdown()
         monkeypatch.delenv("CONJECTURE_CANDIDATES_DIR", raising=False)

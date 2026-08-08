@@ -22,12 +22,14 @@ Environment
 
 ``CONJECTURE_INVENT_LLM_MODEL``
     Model id for the invent propose call (required with base URL).
+    When only a key is set, default is ``gpt-4o`` (not mini — invent needs
+    stronger geometry reasoning). Override e.g. ``o3-mini``, ``gpt-4.1``.
 
 ``CONJECTURE_INVENT_LLM_API_KEY``
     API key (falls back to ``OPENAI_API_KEY`` if set). Never log this value.
 
 ``CONJECTURE_INVENT_LLM_TIMEOUT_S``
-    HTTP timeout seconds (default 60).
+    HTTP timeout seconds (default **120** for invent; mini used 60).
 """
 from __future__ import annotations
 
@@ -80,13 +82,32 @@ class InventConfig:
 
 
 def load_invent_config() -> InventConfig:
-    """Load invent config from environment (safe defaults)."""
+    """Load invent config from environment (safe defaults).
+
+    Key resolution: ``CONJECTURE_INVENT_LLM_API_KEY`` → ``OPENAI_API_KEY``.
+    When a key is present but base/model are unset, default to OpenAI public
+    chat-completions (``https://api.openai.com/v1`` + ``gpt-4o``) so a
+    single ``OPENAI_API_KEY`` is enough for local invent. Override base/model
+    explicitly for Azure, proxies, reasoning models (``o3-mini``), or host
+    endpoints. Prefer stronger invent models; mini is fine for smoke only.
+    """
     key = (os.environ.get("CONJECTURE_INVENT_LLM_API_KEY") or "").strip()
     if not key:
         key = (os.environ.get("OPENAI_API_KEY") or "").strip() or None
     base = (os.environ.get("CONJECTURE_INVENT_LLM_BASE_URL") or "").strip() or None
     model = (os.environ.get("CONJECTURE_INVENT_LLM_MODEL") or "").strip() or None
     prompt = (os.environ.get("CONJECTURE_INVENT_PROMPT_PATH") or "").strip() or None
+    # DX: key alone → OpenAI defaults (portable; no product service keys).
+    if key and not base:
+        base = (
+            (os.environ.get("OPENAI_BASE_URL") or "").strip()
+            or "https://api.openai.com/v1"
+        )
+    if key and not model:
+        model = (
+            (os.environ.get("OPENAI_MODEL") or "").strip()
+            or "gpt-4o"
+        )
     return InventConfig(
         max_proposals=_env_int("CONJECTURE_INVENT_MAX_PROPOSALS", 4),
         max_scenarios=_env_int("CONJECTURE_INVENT_MAX_SCENARIOS", 4),
@@ -94,7 +115,20 @@ def load_invent_config() -> InventConfig:
         llm_base_url=base.rstrip("/") if base else None,
         llm_model=model,
         llm_api_key=key,
-        llm_timeout_s=_env_float("CONJECTURE_INVENT_LLM_TIMEOUT_S", 60.0),
+        llm_timeout_s=_env_float("CONJECTURE_INVENT_LLM_TIMEOUT_S", 120.0),
+    )
+
+
+def _is_reasoning_model(model: str | None) -> bool:
+    """OpenAI o-series (and similar) often reject temperature / prefer max_completion_tokens."""
+    m = (model or "").strip().lower()
+    if not m:
+        return False
+    return (
+        m.startswith("o1")
+        or m.startswith("o3")
+        or m.startswith("o4")
+        or "reason" in m
     )
 
 
@@ -177,8 +211,11 @@ def env_llm_complete(
             {"role": "system", "content": sys_content},
             {"role": "user", "content": user_prompt},
         ],
-        "temperature": 0.3,
     }
+    # Chat models: low temp for structured invent JSON. Reasoning models:
+    # omit temperature (API often rejects it).
+    if not _is_reasoning_model(cfg.llm_model):
+        body["temperature"] = 0.3
     data = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(
         url,

@@ -3,7 +3,8 @@
 | Document | Type | Path |
 |----------|------|------|
 | **Conjecture Behaviour Runner Specification** | **Specification** (`CBR-SPEC`) | [SPEC.md](./SPEC.md) |
-| Project face (hero = planted-bug demo) | README | [../README.md](../README.md) |
+| Project face (harness + **Quality Console**) | README | [../README.md](../README.md) · [Quality Console](../README.md#quality-console--conversational-agentic-quality) · [SDK sibling pair](../README.md#sibling-of-the-control-plane-sdk-adopt--prove) |
+| **Quality Console screenshots** | Gallery | [images/console/](./images/console/) |
 | **Candidate discovery** (expand + invent) | Templates + env | [../templates/candidate_author/README.md](../templates/candidate_author/README.md) · SPEC §2.2 |
 | **Discovery path diagram** | SVG ladder | [images/discovery-pipeline.svg](./images/discovery-pipeline.svg) |
 | **Pipeline stage tracker** | Portable contract | `pipeline_tracker` — same strip shape as Prose → Draft IR → Save |
@@ -17,7 +18,9 @@
 | **Script author prompt seed** | Trajectory + ODD → Conjecture Script | [../prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) |
 
 **Start with five concepts:** Script · Turn · Driver · Observation · Invariant.  
-Local UI: `conjecture ui`. Contributor guide: [../CONTRIBUTING.md](../CONTRIBUTING.md).  
+**Quality Console:** `conjecture ui` — programs, CAQ laws, multi-lens laundry gaps,
+How we run, Coverage battery, Author → Runner → Verdict (see main README).  
+Contributor guide: [../CONTRIBUTING.md](../CONTRIBUTING.md).  
 **Claim hierarchy (CBR-SPEC §0)** is advanced reading — not required for a first PR.
 
 ## Canonical stack (architecture — face README leads with the demo)

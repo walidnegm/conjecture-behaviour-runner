@@ -129,6 +129,31 @@ entries:
   - exclusive_owner
   notes: Fine modes below are first-class; do not count only this bucket.
   legacy_id: delivery_order_gap
+- id: draft_improve_to_ir
+  failure_mode: Open mid-draft improve steals to IR
+  portable_seed: null
+  law: >
+    With active prose draft + steps, open improve/strengthen (including compound
+    agentic process goals) must stay on drafting refine — never
+    classify_drafting_turn interpret → workflow_builder IR unless finite
+    interpret grammar (proceed / interpret chip).
+  plane: delivery
+  family: delivery_ownership
+  parent_id: wrong_delivery_leaf
+  portability: host
+  seed_status: host_only
+  law_shape:
+  - exclusive_owner
+  - active_kind
+  host_proof:
+  - conv_1732aa88
+  - residual.drafting.open_improve_not_ir
+  - test_draft_open_improve_not_ir
+  notes: >
+    Related sealed siblings: compound_primary_secondary (deictic apply + report),
+    missing_sole_continue (draft refine vs foreign surface). This mode is the
+    open-NL improve → IR leaf steal (whole improve leaf skipped).
+  legacy_id: draft_improve_to_ir
 - id: named_item_misresolve
   failure_mode: Named-item misresolution
   portable_seed: null
@@ -235,6 +260,105 @@ entries:
   seed_status: host_only
   law_shape: []
   notes: Host armed-pick exclusivity; promote when portable seed exists
+- id: id_slot_thin_verify
+  failure_mode: ID slot thin-verify failure
+  portable_seed: null
+  law: >-
+    Closed-set identity slots (pattern_id / enum ids) resolve to membership or
+    empty — never raw free text, never default-on-garbage, contains-match only
+    under chip grammar; tool args re-checked in code; no exception detail leak.
+  plane: substrate
+  family: substrate
+  parent_id: null
+  portability: host
+  seed_status: host_only
+  law_shape: []
+  notes: >-
+    Host monorepo · purity L42 · id_slot_thin_verify_contract · conv_828ad8d5
+- id: utterance_to_slot_leakage
+  failure_mode: Utterance-to-slot leakage
+  portable_seed: null
+  law: >-
+    Short product name slots receive the value, never the naming speech act.
+  plane: substrate
+  family: substrate
+  parent_id: null
+  portability: host
+  seed_status: host_only
+  law_shape: []
+  notes: Host monorepo · utterance_to_slot_contract · L41 cousin
+# --- Promoted from host real-world seals (2026-08) — law portable; seed pending ---
+- id: open_leaf_unarmed_return
+  failure_mode: Open leaf unarmed return
+  portable_seed: null
+  law: >-
+    When a specialist or host asks for a bounded next act (name, pick, confirm),
+    the same package must arm ownership (kind/phase/awaiting or product stamp)
+    so the next free-text turn advances that leaf — not greenfield discovery.
+  plane: ownership
+  family: ownership
+  parent_id: hollow_advance
+  portability: portable
+  seed_status: seed_pending
+  law_shape:
+  - open_leaf
+  - awaiting
+  - sole_continue
+  notes: >-
+    Host sealed (create/name, builder short-circuit). Public seed TBD.
+    Cousin of hollow_advance / hollow_open. SDK open-leaf arming law.
+- id: continuum_invite_unarmed_affirm
+  failure_mode: Continuum invite without armed affirm
+  portable_seed: null
+  law: >-
+    High-confidence next-surface invite (chips) must stamp a continuum pin
+    same turn so free-text affirm (yes / yes please) advances that surface —
+    not inventory list / greenfield / unclear. Affirm tokens only while armed.
+  plane: ownership
+  family: ownership
+  parent_id: open_leaf_unarmed_return
+  portability: portable
+  seed_status: seed_pending
+  law_shape:
+  - continuum_pin
+  - armed_affirm
+  - open_leaf
+  notes: >-
+    Host sealed ISS Done → Goal Seek + cost_save/project_ready edges.
+    Portable proof: pin + affirm → primary send_text before improve-entry.
+    Companion: conversation-control-plane open-leaf / continuum shape (§2.1.x).
+- id: soft_existence_claim
+  failure_mode: Soft existence claim
+  portable_seed: null
+  law: >-
+    Name pin / dialogue agreement is not registry existence. Do not claim an
+    entity "already exists" without a durable id; thin-verify intent → SoR →
+    tool or refuse (A19). Not dual create FSM / skip laundry.
+  plane: substrate
+  family: substrate
+  parent_id: null
+  portability: portable
+  seed_status: seed_pending
+  law_shape:
+  - thin_verify
+  - registry_id
+  notes: SDK A19 · host seals create-on-existing-name; public mini-app seed TBD.
+- id: resume_without_rehydrate
+  failure_mode: Resume without rehydrate
+  portable_seed: null
+  law: >-
+    After disconnect / long idle / worker re-entry, the next hop must rehydrate
+    View from authoritative projection (kind, phase, pins) — not cold freestyle
+    over a stale ambient transcript.
+  plane: ownership
+  family: ownership
+  parent_id: null
+  portability: portable
+  seed_status: seed_pending
+  law_shape:
+  - hydration
+  - projection
+  notes: Host session_staleness / mute class; portable when Observation seed exists.
 out_of_scope:
 - id: success_payload_rewrite
   reason: Host unit + prompt/worker deploy — not mini-app Observation seed
@@ -244,3 +368,7 @@ out_of_scope:
   reason: Host cognition delivery; promote when Observation-shaped seed exists
 - id: domain_pick_misbound
   reason: Host armed-pick exclusivity; promote when portable seed exists
+- id: id_slot_thin_verify
+  reason: Host unit ratchets · pattern_id normalize + create_scenario thin-verify
+- id: utterance_to_slot_leakage
+  reason: Host unit ratchets · name-slot peel + speech-act reject

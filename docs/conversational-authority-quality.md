@@ -32,6 +32,13 @@ Install: [README](../README.md) · Modes: [CATALOG](../incidents/CATALOG.md) · 
 [MATURITY](./MATURITY.md). **“Authority” ≠ IAM** — who may act, which record stays
 active, when ownership may yield, whether claimed success produced the promised effect.
 
+**Sibling package:** [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane)
+implements the **ledger + decide_turn + multi-turn stream** (hydrate/adjudicate seat).
+This package owns the **mode registry + proofs**. Promote host-sealed laws here when the
+law is portable (`seed_pending` until a mini-app seed lands) — e.g.
+`continuum_invite_unarmed_affirm`, `open_leaf_unarmed_return`, `soft_existence_claim`
+(2026-08 registry refresh).
+
 ### Working taxonomy (not FMEA reinvention)
 
 We use a small layered map so discovery, classification, and validation stay consistent.
@@ -101,6 +108,14 @@ transition state correctly? Green enforce + wrong live labels is still a bad pro
 
 No law → not sealed. No FAIL/PASS pair → not sealed. Prefer structural ownership when
 authority is load-bearing; proofs catch what structure missed.
+
+**Closed identity ids (`id_slot_thin_verify`):** when the burn is free text as a
+catalog/enum id (not a soft-existence name pin), the fix is **membership
+thin-verify + empty-on-miss + refuse invalid present + no raw slot in chat
+errors** — not a helpful default to a real pattern and not a one-off synonym
+list. Full practice: host AGENTS §2 *ID-slot thin-verify* · [CATALOG](../incidents/CATALOG.md)
+§ *Fix approach — id_slot_thin_verify*. Wrong-leaf freestyle under sticky midflight
+is a **routing** class (owner steal / fall-through), not a normalizer tweak.
 
 ### In multi-turn systems (plain terms)
 

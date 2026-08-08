@@ -9,7 +9,7 @@ philosophy to land useful work.**
 pip install -e ".[dev]"
 conjecture path-faithful --prove-bugs   # in-process path-faithful
 PYTHONPATH=src python proofs/run_external_http_proof.py --prove-bugs  # external SUT
-# conjecture ui   # optional demo viewer only (not required)
+# conjecture ui   # Quality Console (programs · laws · multi-turn tools)
 pytest tests/ -q
 ```
 

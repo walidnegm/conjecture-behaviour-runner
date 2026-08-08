@@ -188,9 +188,13 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     p_ui = sub.add_parser(
         "ui",
-        help="Open local browser UI for path-faithful story + planted bugs",
+        help="Quality Console (Home/Laws/Seek + Candidates/Runner/Verdict) · default port 8765",
     )
-    p_ui.add_argument("--host", default="127.0.0.1")
+    p_ui.add_argument(
+        "--host",
+        default=None,
+        help="Bind address (default: CONJECTURE_UI_HOST or 0.0.0.0 — WSL-safe)",
+    )
     p_ui.add_argument("--port", type=int, default=8765)
     p_ui.add_argument(
         "--no-browser",

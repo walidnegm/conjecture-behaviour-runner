@@ -17,11 +17,20 @@ for full coverage.
 |---------------|-----------------------------|
 | Philosophy + vocabulary (Failure → Law → Proof) | Comprehensive wall of every authority failure |
 | Harness + drivers + planted-bug demos | Drop-in coverage for arbitrary free-form agents |
-| ~**6 runnable** portable seeds | Most production long-tail sealed in public CI |
+| ~**6 runnable** portable seeds · **25+** named registry modes | Most production long-tail sealed in public CI |
 | Full **catalog map** with status honesty | Every row `runnable` |
+| **Quality Console** (`conjecture ui`) — Map · All modes · programs (Authority / Laundry / Antipatterns=SDK A# / Voice / Purity / Surface×law) · multi-lens laundry · coverage · Author→Runner→Verdict | Host-dense laundry multi-lens board / full surface×law matrix without a host snapshot join |
+| **Sibling Control Plane SDK** alignment (adopt + prove) | This package replacing the ownership ledger |
+| Candidate discovery (invent · expand · optional LLM propose) | Fully autonomous “find every burn in my product” |
 
 Catalog statuses: **runnable** · **seed_pending** · **host_only**. Hosts (product
-codebases) still own most seals.
+codebases) still own most seals. The **Quality Console** is first-class navigation
+for Conversational Agentic Quality (see [README · Quality Console](../README.md#quality-console--conversational-agentic-quality));
+dense inventories and the laundry **multi-lens gap board** (static · LLM/vector ·
+behaviour) are richest when the host provides the quality snapshot APIs.
+
+**Pair with** [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane):
+SDK = ownership SoR + adjudicate shape · Conjecture = prove + console.
 
 ---
 

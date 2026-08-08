@@ -54,7 +54,7 @@ include = ["conjecture_behaviour_runner*"]
 # Public package only — no application layout under src/.
 
 [tool.setuptools.package-data]
-conjecture_behaviour_runner = ["py.typed"]
+conjecture_behaviour_runner = ["py.typed", "static/*", "prompts/*"]
 "conjecture_behaviour_runner.experimental" = ["schema.json"]
 "conjecture_behaviour_runner.candidate_author" = ["templates/*", "prompts/*"]
 

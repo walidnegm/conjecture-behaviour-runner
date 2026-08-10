@@ -50,7 +50,7 @@ def console_admin_status() -> dict[str, Any]:
     # Portable harness title prefixes only — host monorepo may extend via driver
     title_prefixes: list[str] = ["cbr-", "conjecture-e2e", "conjecture"]
     try:
-        from conjecture_host.http_driver import (  # type: ignore
+        from regression_suite.conjecture_bot0_http_driver import (  # type: ignore
             CONJECTURE_TITLE_PREFIXES,
         )
 

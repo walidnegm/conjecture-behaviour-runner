@@ -38,7 +38,7 @@ def _host_root() -> Optional[Path]:
     cwd = Path.cwd().resolve()
     markers = (
         cwd / "docs" / "epics" / "failure-mode-registry.yaml",
-        cwd / "conjecture_host" / "conjecture_expansion" / "law_seek_harness.py",
+        cwd / "regression_suite" / "conjecture_expansion" / "law_seek_harness.py",
     )
     if all(m.is_file() for m in markers[:1]) or markers[1].is_file():
         return cwd
@@ -47,7 +47,7 @@ def _host_root() -> Optional[Path]:
     for parent in here.parents:
         if (parent / "docs" / "epics" / "failure-mode-registry.yaml").is_file():
             return parent
-        if (parent / "conjecture_host" / "conjecture_expansion").is_dir():
+        if (parent / "regression_suite" / "conjecture_expansion").is_dir():
             return parent
     return None
 
@@ -61,11 +61,11 @@ def host_quality_available() -> dict[str, Any]:
             "error": "host_monorepo_not_found",
             "hint": (
                 "Run `conjecture ui` from the Bot0 monorepo root, or ensure "
-                "conjecture_host.expansion is importable."
+                "regression_suite.conjecture_expansion is importable."
             ),
         }
     try:
-        import conjecture_host.expansion.law_seek_harness  # noqa: F401
+        import regression_suite.conjecture_expansion.law_seek_harness  # noqa: F401
     except Exception as exc:  # noqa: BLE001
         return {
             "ok": False,
@@ -89,7 +89,7 @@ def get_law_seek(
     if not avail.get("available"):
         return avail
 
-    from conjecture_host.expansion.law_seek_harness import (
+    from regression_suite.conjecture_expansion.law_seek_harness import (
         ARTIFACT_DIR,
         format_law_seek_markdown,
         run_law_seek,
@@ -155,7 +155,7 @@ def get_law_seek(
         "error": "no_law_seek_artifact",
         "hint": (
             "POST /api/law-seek/run with {\"quick\": true} or CLI: "
-            "python -m conjecture_host.expansion law_seek --quick"
+            "python -m regression_suite.conjecture_expansion law_seek --quick"
         ),
         "artifact_dir": str(ARTIFACT_DIR),
     }
@@ -173,7 +173,7 @@ def get_quality_snapshot(
     if not avail.get("available"):
         return avail
 
-    from conjecture_host.expansion.quality_console_snapshot import (
+    from regression_suite.conjecture_expansion.quality_console_snapshot import (
         SNAPSHOT_DIR,
         build_quality_console_snapshot,
         load_latest_snapshot,
@@ -250,6 +250,105 @@ def get_laws(*, registry_id: Optional[str] = None) -> dict[str, Any]:
     }
 
 
+def get_architecture_audit(
+    *,
+    run: bool = False,
+    subject: str = "bot0_dogfood",
+    concept_id: Optional[str] = None,
+) -> dict[str, Any]:
+    """Architecture Audit (Offer 2) — inventory registry + dogfood concept runners.
+
+    File-based storage under regression_suite/artifacts/architecture_audit/.
+    """
+    avail = host_quality_available()
+    if not avail.get("available"):
+        return avail
+
+    try:
+        from regression_suite.architecture_audit.registry import (
+            inventory_summary,
+            load_inventory_registry,
+        )
+        from regression_suite.architecture_audit.runner import (
+            load_latest_report,
+            run_architecture_audit,
+        )
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "ok": False,
+            "available": True,
+            "error": "architecture_audit_import_failed",
+            "detail": str(exc),
+        }
+
+    reg = load_inventory_registry()
+    summary = inventory_summary(reg)
+
+    if run:
+        concept_ids = [concept_id] if concept_id else None
+        # When a single concept is requested, still allow stubs to show if listed
+        report = run_architecture_audit(
+            concept_ids=concept_ids,
+            subject=subject or "bot0_dogfood",
+            implemented_only=concept_id is None,
+            write_artifact=True,
+        )
+        return {
+            "ok": True,
+            "available": True,
+            "ran": True,
+            "registry": reg,
+            "summary": summary,
+            "report": report,
+            "artifact": report.get("artifact"),
+        }
+
+    latest = load_latest_report()
+    return {
+        "ok": True,
+        "available": True,
+        "ran": False,
+        "registry": reg,
+        "summary": summary,
+        "report": latest,
+        "artifact": (
+            str(
+                __import__(
+                    "regression_suite.architecture_audit.registry",
+                    fromlist=["ARTIFACT_DIR"],
+                ).ARTIFACT_DIR
+                / "latest.json"
+            )
+            if latest
+            else None
+        ),
+        "hint": (
+            "POST /api/architecture-audit/run with host plug-in present (v0.1: "
+            "agent_engine_inventory dogfood). Without host inventory, registry loads "
+            "but assessors degrade. Stubs stay inventory-only until implemented."
+        ),
+    }
+
+
+def get_architecture_audit_depth_prompt() -> dict[str, Any]:
+    """LLM questionnaire to deepen audit methodology from dogfood results."""
+    avail = host_quality_available()
+    if not avail.get("available"):
+        return avail
+    try:
+        from regression_suite.architecture_audit.depth_prompt import (
+            build_depth_questionnaire,
+        )
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "ok": False,
+            "available": True,
+            "error": "depth_prompt_import_failed",
+            "detail": str(exc),
+        }
+    return build_depth_questionnaire()
+
+
 __all__ = [
     "host_quality_available",
     "get_law_seek",
@@ -257,4 +356,6 @@ __all__ = [
     "get_laws",
     "law_seek_running",
     "request_law_seek_stop",
+    "get_architecture_audit",
+    "get_architecture_audit_depth_prompt",
 ]

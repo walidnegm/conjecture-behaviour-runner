@@ -64,7 +64,7 @@ def test_host_spi_does_not_brand_title_without_flag(monkeypatch) -> None:
     cat = resolve_host_limits_catalog(
         host={
             "available": True,
-            "source": "conjecture_host.http_driver:run",
+            "source": "regression_suite.conjecture_bot0_http_driver:run",
         }
     )
     assert "Bot0 monorepo" not in cat["title"]

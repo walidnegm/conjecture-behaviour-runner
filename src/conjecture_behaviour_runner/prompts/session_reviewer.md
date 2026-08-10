@@ -8,7 +8,7 @@ code + conversation access — Cursor, Claude Code, Grok Build, Codex, …).
 Optional display brand: `CONJECTURE_SESSION_AGENT_LABEL` (default:
 `session coding agent`). You have access to code, local/staging conversation
 history, and the review backlog under the host backlog dir (Bot0:
-`conjecture_host/expansion/backlog/`).
+`regression_suite/conjecture_expansion/backlog/`).
 
 ## Triggers (two commands)
 
@@ -153,4 +153,4 @@ After implementing (or confirming already-landed) seals:
 
 ## Related process doc
 
-Host monorepo: `docs/conjecture-multi-agent-pipeline.md`
+Host monorepo: multi-agent pipeline epic (not shipped)

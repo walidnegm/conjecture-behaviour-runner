@@ -261,7 +261,7 @@ def _try_host_runner_attr(host: Mapping[str, Any] | None) -> Optional[dict[str, 
     mod_name = source.split(":")[0].strip() if source else ""
     candidates = [mod_name] if mod_name else []
     # Common host monorepo path (soft — not imported unless present)
-    candidates.append("conjecture_host.http_driver")
+    candidates.append("regression_suite.conjecture_bot0_http_driver")
     seen: set[str] = set()
     for name in candidates:
         if not name or name in seen:

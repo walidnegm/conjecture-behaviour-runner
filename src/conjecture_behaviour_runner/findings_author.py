@@ -23,7 +23,7 @@ Reviewer modes (``CONJECTURE_FINDINGS_REVIEWER``)
   who has monorepo context + conversation ids. Invent/author may still use
   OpenAI/Claude.
 * **openai** — portable OpenAI-compatible findings LLM (``CONJECTURE_FINDINGS_LLM_*``
-  / invent LLM). No product host LLM factory.
+  / invent LLM). No product-specific LLM factory helper.
 * **deterministic** — tables only, no enqueue.
 
 Env

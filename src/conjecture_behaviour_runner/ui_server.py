@@ -411,6 +411,13 @@ def _html_page() -> bytes:
       </div>
       <nav class="app-nav nav-rows" id="appNav" aria-label="Console sections">
         <div class="nav-row">
+          <span class="nav-group-label">Offers</span>
+          <button type="button" data-view="architecture-audit"
+            title="Offer 2: multi-agent architecture audit (consistency, resilience, inventory) — ledger-optional">Architecture Audit</button>
+          <button type="button" data-view="home"
+            title="Offer 1 home: multi-turn proof &amp; seal map">Proof &amp; Seal map</button>
+        </div>
+        <div class="nav-row">
           <span class="nav-group-label">Browse</span>
           <button type="button" class="active" data-view="home">Map</button>
           <button type="button" data-view="laws" title="All named failure modes (registry)">Failure modes</button>
@@ -447,6 +454,32 @@ def _html_page() -> bytes:
     </div>
   </header>
 <main>
+
+  <!-- ========== OFFER 2 · ARCHITECTURE AUDIT ========== -->
+  <section class="app-view" id="view-architecture-audit" data-view="architecture-audit">
+    <div class="view-title">Architecture Audit · Offer 2</div>
+    <p class="muted" style="margin:.25rem 0 .75rem;font-size:.88rem;max-width:48rem">
+      Hybrid <strong>probabilistic + deterministic</strong> multi-agent systems —
+      consistency, resilience, authority, ownership, progressive hardening, exposure,
+      memory, heterogeneity, observability, time/space.
+      <strong>Not</strong> multi-turn freezes (Offer 1 · Map / Observe / Runner).
+      Inventory is a <strong>dynamic YAML registry</strong>; implement concepts one-by-one.
+      Dogfood subject: <code>bot0_dogfood</code> (our product line as baseline v0.1).
+      Storage: file-based artifacts (not Postgres).
+    </p>
+    <div class="row" style="gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
+      <button type="button" id="btnAuditRefresh">Load inventory</button>
+      <button type="button" id="btnAuditRun">Run dogfood audit (implemented)</button>
+      <button type="button" class="secondary" id="btnAuditDepth">LLM depth questionnaire</button>
+    </div>
+    <div id="auditSummary" class="card" style="margin-bottom:.75rem;padding:.75rem 1rem">—</div>
+    <div class="view-title" style="font-size:1rem">Inventory · parameters &amp; concepts</div>
+    <div id="auditInventory" style="margin-bottom:1rem">—</div>
+    <div class="view-title" style="font-size:1rem">Latest run</div>
+    <div id="auditReport">—</div>
+    <div class="view-title" style="font-size:1rem;margin-top:1rem">Depth prompt (LLM)</div>
+    <pre id="auditDepth" style="max-height:22rem;overflow:auto;font-size:.72rem;white-space:pre-wrap;background:#fafafa;border:1px solid #e4e4e7;border-radius:.4rem;padding:.75rem">Run “LLM depth questionnaire” after a dogfood run.</pre>
+  </section>
 
   <!-- ========== HOME / APPROACH MAP ========== -->
   <section class="app-view active" id="view-home" data-view="home">
@@ -779,19 +812,19 @@ def _html_page() -> bytes:
   <div class="card">
     <div class="view-title" style="font-size:.95rem">CLI cheat sheet (host monorepo)</div>
     <pre class="stack-box" style="margin:0"># Static — everyday
-python -m conjecture_host.expansion daily_seek --quick
-python -m conjecture_host.expansion surface_coverage
+python -m regression_suite.conjecture_expansion daily_seek --quick
+python -m regression_suite.conjecture_expansion surface_coverage
 
 # Coverage battery (static join + optional dynamic scripts/live)
-python -m conjecture_host.expansion law_seek --quick
-python -m conjecture_host.expansion law_seek --live --quick
+python -m regression_suite.conjecture_expansion law_seek --quick
+python -m regression_suite.conjecture_expansion law_seek --live --quick
 
 # Dynamic multi-turn (Author → Runner)
-python -m conjecture_host.expansion candidates --write --limit 30
+python -m regression_suite.conjecture_expansion candidates --write --limit 30
 # then Console: Author → select → Runner (geometry stub | host HTTP) → Verdict
 
 # One FM static + optional LLM code hunt (Conjecture invent LLM env — not platform library)
-python -m conjecture_host.expansion daily_seek --registry-id owner_steal --llm</pre>
+python -m regression_suite.conjecture_expansion daily_seek --registry-id owner_steal --llm</pre>
     <p class="muted" style="margin:.65rem 0 0;font-size:.82rem">
       Artifacts: <span class="mono">artifacts/fm_daily_seek/</span> ·
       <span class="mono">artifacts/law_seek/</span> ·
@@ -812,7 +845,7 @@ python -m conjecture_host.expansion daily_seek --registry-id owner_steal --llm</
     <p class="view-lead">
       <strong>Crawl coverage + live SoR</strong> — not a second law book.
       Join integrity · registry ratchets · transition edges · Conjecture scripts · optional live ledger.
-      Artifacts: <span class="mono">host_artifacts/law_seek/</span> (MD export, not primary UX).
+      Artifacts: <span class="mono">regression_suite/artifacts/law_seek/</span> (MD export, not primary UX).
     </p>
     <div class="run-bar">
       <div class="row">
@@ -1245,8 +1278,8 @@ python -m conjecture_host.expansion daily_seek --registry-id owner_steal --llm</
       0 · Approach map (do not merge quality jobs)
     </summary>
     <p class="muted" style="margin:.5rem 0">
-      Epic: <span class="mono">docs/conjecture-control-plane-quality-console.md</span> ·
-      Categories: <span class="mono">docs/quality-category-disambiguation.md</span> ·
+      Epic: <span class="mono">host quality-console epic (not shipped)</span> ·
+      Categories: <span class="mono">host quality-category epic (not shipped)</span> ·
       Diagnostics: taxonomy §2.4 patching note · AGENTS.md banner.
     </p>
     <div class="stack-box" style="margin:.5rem 0">Doctrine names · registry freezes the id · purity tracks seal grade
@@ -1272,8 +1305,8 @@ Coding-agent note (every diagnostic):
   FOLLOW LAWS · AGENTS.md · no laundry / regex as sole NL arbiter
 
 CLI:
-  python -m conjecture_host.expansion law_seek --quick
-  python -m conjecture_host.expansion console_snapshot
+  python -m regression_suite.conjecture_expansion law_seek --quick
+  python -m regression_suite.conjecture_expansion console_snapshot
   conjecture ui   # http://127.0.0.1:8765</div>
     <p class="muted" style="margin:.5rem 0 0; font-size:.85rem">
       Deep-links: <span class="mono">#/home</span> ·
@@ -1633,6 +1666,141 @@ function showAppView(view) {
   if (v === 'laws') loadLaws();
   if (v === 'seek') loadSeek();
   if (v === 'program' && programId) loadProgram(programId);
+  if (v === 'architecture-audit') loadArchitectureAudit();
+}
+
+/* ---- Offer 2: Architecture Audit ---- */
+async function loadArchitectureAudit() {
+  const sum = document.getElementById('auditSummary');
+  const inv = document.getElementById('auditInventory');
+  const rep = document.getElementById('auditReport');
+  if (sum) sum.textContent = 'Loading…';
+  try {
+    const r = await fetch('/api/architecture-audit');
+    const data = await r.json();
+    renderArchitectureAudit(data);
+  } catch (e) {
+    if (sum) sum.textContent = 'Failed: ' + e;
+    if (inv) inv.textContent = '—';
+    if (rep) rep.textContent = '—';
+  }
+}
+
+function renderArchitectureAudit(data) {
+  const sum = document.getElementById('auditSummary');
+  const inv = document.getElementById('auditInventory');
+  const rep = document.getElementById('auditReport');
+  if (!data || !data.ok) {
+    if (sum) sum.innerHTML = '<strong>Unavailable</strong> · ' + escapeHtml(data && (data.error || data.hint) || 'unknown');
+    return;
+  }
+  const s = data.summary || {};
+  const report = data.report;
+  if (sum) {
+    sum.innerHTML =
+      '<div><strong>audit v' + escapeHtml(String(s.audit_version || (data.registry && data.registry.audit_version) || '?')) + '</strong> · ' +
+      escapeHtml(String(s.title || 'Architecture Audit')) + '</div>' +
+      '<div class="muted" style="font-size:.82rem;margin-top:.35rem">' +
+      'parameters: ' + (s.parameter_count || 0) +
+      ' · concepts: ' + (s.concept_count || 0) +
+      ' · implemented: <code>' + escapeHtml((s.implemented || []).join(', ') || '—') + '</code>' +
+      ' · stubs: ' + ((s.stubs || []).length) +
+      (report ? ' · last overall: <strong>' + escapeHtml(String(report.overall_grade || '—')) + '</strong>' : ' · no run yet') +
+      '</div>' +
+      '<div class="muted" style="font-size:.75rem;margin-top:.25rem">registry: ' + escapeHtml(String(s.registry_path || '')) + '</div>';
+  }
+  const reg = data.registry || {};
+  const params = reg.parameters || [];
+  const concepts = reg.concepts || [];
+  let html = '<table class="mode-table"><thead><tr><th>Concept</th><th>Parameter</th><th>Status</th><th>Title</th></tr></thead><tbody>';
+  concepts.forEach(c => {
+    const st = String(c.status || '');
+    const badge = st === 'implemented' ? 'pass' : (st === 'stub' ? 'thin' : 'gap');
+    html += '<tr><td class="mono">' + escapeHtml(c.id || '') + '</td><td>' + escapeHtml(c.parameter || '') +
+      '</td><td><span class="badge ' + badge + '">' + escapeHtml(st) + '</span></td><td>' + escapeHtml(c.title || '') + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  html += '<p class="muted" style="font-size:.8rem;margin-top:.5rem"><strong>Parameters:</strong> ' +
+    params.map(p => escapeHtml(p.id || '')).join(' · ') + '</p>';
+  if (inv) inv.innerHTML = html;
+
+  if (!rep) return;
+  if (!report) {
+    rep.innerHTML = '<p class="muted">No artifact yet. Click <strong>Run dogfood audit</strong>.</p>';
+    return;
+  }
+  let rh = '<p><strong>Overall:</strong> ' + escapeHtml(String(report.overall_grade)) +
+    ' · subject <code>' + escapeHtml(String(report.subject || '')) + '</code>' +
+    ' · ' + escapeHtml(String(report.ran_at || '')) + '</p>';
+  (report.results || []).forEach(res => {
+    rh += '<div class="card" style="margin:.5rem 0;padding:.65rem .85rem">';
+    rh += '<div><strong>' + escapeHtml(res.concept_id || '') + '</strong> · grade <code>' +
+      escapeHtml(String(res.grade || '')) + '</code>';
+    if (res.passed_count != null) rh += ' · criteria ' + res.passed_count + '/' + res.criteria_count;
+    rh += '</div>';
+    if (res.message) rh += '<div class="muted" style="font-size:.8rem">' + escapeHtml(res.message) + '</div>';
+    if (res.criteria && res.criteria.length) {
+      rh += '<table class="mode-table" style="margin-top:.4rem"><thead><tr><th>Criterion</th><th>Pass</th><th>Evidence</th></tr></thead><tbody>';
+      res.criteria.forEach(cr => {
+        rh += '<tr><td class="mono">' + escapeHtml(cr.id || '') + '</td><td>' +
+          (cr.passed ? '✓' : '✗') + '</td><td style="font-size:.75rem">' +
+          escapeHtml(String(cr.evidence || '').slice(0, 200)) + '</td></tr>';
+      });
+      rh += '</tbody></table>';
+    }
+    if (res.findings && res.findings.length) {
+      rh += '<ul style="margin:.35rem 0 0;padding-left:1.1rem;font-size:.82rem">';
+      res.findings.forEach(f => {
+        rh += '<li><strong>' + escapeHtml(f.severity || '') + '</strong> ' + escapeHtml(f.code || '') +
+          ' — ' + escapeHtml(f.message || '') + '</li>';
+      });
+      rh += '</ul>';
+    }
+    if (res.inventory && res.inventory.agents) {
+      rh += '<div class="muted" style="font-size:.78rem;margin-top:.35rem">Agents: ' +
+        res.inventory.agents.map(a => escapeHtml(a.id) + ' (' + escapeHtml(a.engine || '') + ')').join(', ') +
+        '</div>';
+    }
+    rh += '</div>';
+  });
+  rep.innerHTML = rh;
+}
+
+async function runArchitectureAudit() {
+  const sum = document.getElementById('auditSummary');
+  if (sum) sum.textContent = 'Running dogfood audit…';
+  try {
+    const r = await fetch('/api/architecture-audit/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject: 'bot0_dogfood' }),
+    });
+    const data = await r.json();
+    renderArchitectureAudit(data);
+  } catch (e) {
+    if (sum) sum.textContent = 'Run failed: ' + e;
+  }
+}
+
+async function loadAuditDepthPrompt() {
+  const pre = document.getElementById('auditDepth');
+  if (pre) pre.textContent = 'Building depth questionnaire…';
+  try {
+    const r = await fetch('/api/architecture-audit/depth-prompt');
+    const data = await r.json();
+    if (!data.ok) {
+      if (pre) pre.textContent = JSON.stringify(data, null, 2);
+      return;
+    }
+    if (pre) {
+      pre.textContent =
+        '=== SYSTEM ===\n' + (data.system || '') +
+        '\n\n=== USER ===\n' + (data.user || '') +
+        '\n\n=== HINT ===\n' + (data.hint || '');
+    }
+  } catch (e) {
+    if (pre) pre.textContent = String(e);
+  }
 }
 function healthBadge(h) {
   // Seek battery label only — never implies surface×law proof.
@@ -1990,7 +2158,7 @@ function renderVoiceProofBoard(board) {
     html += '</tbody></table></div>';
   }
   html += '<p class="muted" style="margin:.5rem 0 0;font-size:.78rem">'
-    + 'LLM vector: <span class="mono">python -m conjecture_host.expansion daily_seek --llm --limit 8</span> '
+    + 'LLM vector: <span class="mono">python -m regression_suite.conjecture_expansion daily_seek --llm --limit 8</span> '
     + '· Multi-turn: matrix.yaml + Conjecture freezes · Static: registry coverage.ratchets</p>';
   html += '</div>';
   return html;
@@ -3224,6 +3392,7 @@ document.querySelectorAll('#appNav button[data-view]').forEach(btn => {
   btn.onclick = () => {
     const v = btn.getAttribute('data-view');
     if (v === 'home') location.hash = '#/home';
+    else if (v === 'architecture-audit') location.hash = '#/architecture-audit';
     else if (v === 'laws') location.hash = '#/laws';
     else if (v === 'techniques') location.hash = '#/techniques';
     else if (v === 'seek') location.hash = '#/seek';
@@ -3647,7 +3816,8 @@ function parseHash() {
     return { view: 'program-laundry', programId: 'code_poison_laundry', id: null, tab: 'trajectory', params };
   }
   const views = [
-    'home', 'laws', 'seek', 'candidates', 'run', 'runner',
+    'home', 'architecture-audit', 'audit',
+    'laws', 'seek', 'candidates', 'run', 'runner',
     'techniques', 'how-we-run', 'proof',
     'backlog', 'verdict', 'admin', 'cleanup', 'demo', 'help',
     'program-laundry', 'program-antipattern', 'program-voice',
@@ -3661,6 +3831,7 @@ function parseHash() {
     if (v === 'runner') v = 'run';      // Runner tab id remains "run"
     if (v === 'map' || v === 'approach') v = 'home';
     if (v === 'how-we-run' || v === 'proof') v = 'techniques';
+    if (v === 'audit') v = 'architecture-audit';
     return { view: v, id: null, tab: 'trajectory', params, mode: params.mode || null };
   }
   // Empty hash → Map (quality programs)
@@ -4743,6 +4914,12 @@ document.querySelectorAll('[data-goto]').forEach(btn => {
 });
 const btnHomeRefresh = document.getElementById('btnHomeRefresh');
 if (btnHomeRefresh) btnHomeRefresh.onclick = () => loadQualitySnapshot({ rebuild: true }).then(() => loadHome());
+const btnAuditRefresh = document.getElementById('btnAuditRefresh');
+if (btnAuditRefresh) btnAuditRefresh.onclick = () => loadArchitectureAudit();
+const btnAuditRun = document.getElementById('btnAuditRun');
+if (btnAuditRun) btnAuditRun.onclick = () => runArchitectureAudit();
+const btnAuditDepth = document.getElementById('btnAuditDepth');
+if (btnAuditDepth) btnAuditDepth.onclick = () => loadAuditDepthPrompt();
 const btnReloadViz = document.getElementById('btnReloadViz');
 if (btnReloadViz) {
   btnReloadViz.onclick = () => {
@@ -4894,12 +5071,12 @@ def _surface_map_path() -> Path | None:
     """Host monorepo surface×agent×FM heat map (artifact), if present."""
     candidates = (
         Path.cwd()
-        / "conjecture_host"
+        / "regression_suite"
         / "artifacts"
         / "surface_map"
         / "surface_area_map.html",
         Path(__file__).resolve().parents[4]
-        / "conjecture_host"
+        / "regression_suite"
         / "artifacts"
         / "surface_map"
         / "surface_area_map.html",
@@ -4976,7 +5153,7 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                         "error": "surface_map_missing",
                         "hint": (
                             "Generate host artifact: "
-                            "host_artifacts/surface_map/surface_area_map.html"
+                            "regression_suite/artifacts/surface_map/surface_area_map.html"
                         ),
                     },
                 )
@@ -5069,6 +5246,39 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                 try:
                     payload = get_laws(registry_id=_one_law("id") or _one_law("registry_id"))
                     code = 200 if payload.get("ok") else 404
+                    _json_response(self, code, payload)
+                except Exception as exc:  # noqa: BLE001
+                    _json_response(self, 500, {"ok": False, "error": str(exc)})
+                return
+            if path == "/api/architecture-audit":
+                from conjecture_behaviour_runner.quality_console_api import (
+                    get_architecture_audit,
+                )
+
+                def _one_aa(key: str) -> Optional[str]:
+                    vals = qs.get(key) or []
+                    return vals[0] if vals else None
+
+                try:
+                    run = (_one_aa("run") or "") in ("1", "true", "yes")
+                    payload = get_architecture_audit(
+                        run=run,
+                        subject=_one_aa("subject") or "bot0_dogfood",
+                        concept_id=_one_aa("concept") or _one_aa("concept_id"),
+                    )
+                    code = 200 if payload.get("ok") or payload.get("available") else 503
+                    _json_response(self, code, payload)
+                except Exception as exc:  # noqa: BLE001
+                    _json_response(self, 500, {"ok": False, "error": str(exc)})
+                return
+            if path == "/api/architecture-audit/depth-prompt":
+                from conjecture_behaviour_runner.quality_console_api import (
+                    get_architecture_audit_depth_prompt,
+                )
+
+                try:
+                    payload = get_architecture_audit_depth_prompt()
+                    code = 200 if payload.get("ok") or payload.get("available") else 503
                     _json_response(self, code, payload)
                 except Exception as exc:  # noqa: BLE001
                     _json_response(self, 500, {"ok": False, "error": str(exc)})
@@ -5197,6 +5407,25 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                             live=live,
                             quick=bool(quick),
                             skip_scripts=skip_scripts,
+                        )
+                        code = 200 if payload.get("ok") else 500
+                        _json_response(self, code, payload)
+                    except Exception as exc:  # noqa: BLE001
+                        _json_response(self, 500, {"ok": False, "error": str(exc)})
+                    return
+                if path in ("/api/architecture-audit/run", "/api/architecture-audit"):
+                    from conjecture_behaviour_runner.quality_console_api import (
+                        get_architecture_audit,
+                    )
+
+                    body = _read_json_body(self)
+                    subject = str(body.get("subject") or "bot0_dogfood")
+                    concept_id = body.get("concept_id") or body.get("concept")
+                    try:
+                        payload = get_architecture_audit(
+                            run=True,
+                            subject=subject,
+                            concept_id=str(concept_id) if concept_id else None,
                         )
                         code = 200 if payload.get("ok") else 500
                         _json_response(self, code, payload)
@@ -5364,7 +5593,7 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                         max_del = 200
                     # Host monorepo driver (product APIs only)
                     try:
-                        from conjecture_host.http_driver import (
+                        from regression_suite.conjecture_bot0_http_driver import (
                             cleanup_conjecture_conversations,
                         )
                     except Exception as imp_exc:  # noqa: BLE001

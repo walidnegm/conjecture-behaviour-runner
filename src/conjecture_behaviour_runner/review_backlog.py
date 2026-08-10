@@ -18,7 +18,7 @@ Invent/authoring may still use ChatGPT/Claude. Reviewer defaults to **session**.
 Store (host)
 ------------
 ``CONJECTURE_BACKLOG_DIR`` or ``<candidates_dir>/../backlog`` or
-``conjecture_host/expansion/backlog``.
+``regression_suite/conjecture_expansion/backlog``.
 
 Each item is one JSON file under ``items/`` + ``index.json`` summary.
 
@@ -79,8 +79,8 @@ def resolve_backlog_dir(explicit: str | Path | None = None) -> Path:
     # Prefer monorepo host path when present
     cwd = Path.cwd().resolve()
     for base in [cwd, *cwd.parents]:
-        host = base / "conjecture_host" / "conjecture_expansion" / "backlog"
-        if host.parent.is_dir() or (base / "conjecture_host").is_dir():
+        host = base / "regression_suite" / "conjecture_expansion" / "backlog"
+        if host.parent.is_dir() or (base / "regression_suite").is_dir():
             host.mkdir(parents=True, exist_ok=True)
             (host / "items").mkdir(parents=True, exist_ok=True)
             return host
@@ -713,7 +713,7 @@ def _write_handoff(bdir: Path) -> None:
         "   (summary, files, commits, tests/ratchets, closed_at)",
         "",
         "Protocol: `extract/conjecture-behaviour-runner/.../prompts/session_reviewer.md`",
-        "Process: `docs/conjecture-multi-agent-pipeline.md`",
+        "Process: host multi-agent pipeline epic (not shipped)",
         "",
         f"Updated: {_iso()}",
         f"Session agent label: {label}",

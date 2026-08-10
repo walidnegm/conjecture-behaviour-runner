@@ -65,6 +65,35 @@ ratchets · seek · multi-turn proof so operators and coding agents stop hunting
 | **Enforcement harness** | Multi-turn scripts · Observation · invariants · planted-bug CI |
 | **Quality Console** | Local **Conversational Agentic Quality** cockpit — programs, CAQ laws, multi-lens gaps, coverage battery, Author → Runner → Verdict |
 
+### Two *offers* (console front doors — do not merge)
+
+The console is one app; the **customer jobs** stay split:
+
+| Offer | Front door | Question | Needs your ownership ledger? |
+|-------|------------|----------|------------------------------|
+| **1 · Multi-turn Proof & Seal** | Map · Failure modes · Observe · Author → Runner → Verdict | Did ownership / authority **law hold** when chat looked fine? | **Yes** (contract shape — exclusive owner, kind, pins, …) |
+| **2 · Multi-agent Architecture Audit** | **Offers → Architecture Audit** (`#/architecture-audit`) | Is this hybrid **probabilistic + deterministic** multi-agent system **consistent, resilient, well-bounded** (not ownership alone)? | **No** — inventory + criteria first |
+
+**Audit is broader than turn ownership:** consistency · resilience · authority boundaries ·
+progressive hardening · tool/prompt exposure · memory/hydration · engine heterogeneity ·
+observability · time/space. Ownership is **one** axis.
+
+```bash
+conjecture ui --port 8765
+# Offer 1: Map / Observe / Runner
+# Offer 2: Offers → Architecture Audit  (or #/architecture-audit)
+```
+
+| Layer | Portable in this package today | Host plug-in (product monorepo) densifies |
+|-------|--------------------------------|------------------------------------------|
+| Console **front door** + APIs | Yes (`ui_server` · `/api/architecture-audit*`) | — |
+| Inventory registry · dogfood assessors | Thin / stub without host | Closed registries, engine map, KindSpec, … |
+| Multi-turn freezes · CAQ modes | Yes (portable seeds + registry) | Host goldens + law_seek join |
+
+**Killer questions:**  
+- Audit — *Is this multi-agent system consistent and resilient as a hybrid architecture?*  
+- Proof & Seal — *Who owns the next turn — and can you prove it?*
+
 What authority regression must provide:
 
 - shared multi-turn script shape  
@@ -273,6 +302,7 @@ registry).
 | **Agent patching note** | Live | Do not invent · hotfix · break-fix · laundry |
 | **Quality snapshot API** | Live | `/api/quality-snapshot` · host join densifies inventories |
 | **Categories / plane chrome** | Live | Plane vs program labels (CAQ plane ≠ purity program) |
+| **Architecture Audit (Offer 2)** | Live door · host-dense v0.1 | Inventory registry + concept runners · dogfood subject · LLM depth questionnaire · file artifacts |
 
 **Doctrine (always on the chrome):** LLM proposes · **code owns** · no laundry / regex as
 sole NL meaning · seal with **contract + ratchet** · open-leaf arming and continuum pins
@@ -282,7 +312,8 @@ when product invites a next act (SDK delivery law).
 
 | Nav | Kind | What you see |
 |-----|------|----------------|
-| **Map** | Home | Stack ladder, mode counts, open critical, program cards, patching note |
+| **Offers · Architecture Audit** | Offer 2 | Hybrid multi-agent audit inventory · criteria · dogfood run · depth prompt |
+| **Map** (Proof & Seal home) | Offer 1 home | Stack ladder, mode counts, open critical, program cards, patching note |
 | **All modes** | Law book | Registry slugs · lifecycle · seek health · ratchets |
 | **Authority** | Program | Ownership / pin / open / continuum / save modes |
 | **Laundry** | Program | Code-poison classes + multi-lens gap board |

@@ -541,7 +541,7 @@ def resolve_host_runner() -> tuple[Any | None, dict[str, Any]]:
 
     Discovery order:
       1. ``CONJECTURE_HOST_RUNNER`` = ``module.path:callable`` (returns evidence dict)
-      2. Soft import ``conjecture_host.http_driver:run_candidate_host_http``
+      2. Soft import ``regression_suite.conjecture_bot0_http_driver:run_candidate_host_http``
          (Bot0 monorepo convenience)
 
     Returns ``(callable | None, status_payload)``.
@@ -574,7 +574,7 @@ def resolve_host_runner() -> tuple[Any | None, dict[str, Any]]:
     if env:
         specs.append(env)
     specs.append(
-        "conjecture_host.http_driver:run_candidate_host_http"
+        "regression_suite.conjecture_bot0_http_driver:run_candidate_host_http"
     )
     seen: set[str] = set()
     for spec in specs:

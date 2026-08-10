@@ -30,14 +30,14 @@ instead of **Stay / Leave** on the cost stream.
 
 | Artifact | Role |
 |----------|------|
-| `host/control/cost_out_recommend_fork.py` | Stay/Leave product leaf |
+| `host: cost_out recommend fork leaf` | Stay/Leave product leaf |
 | Conjecture script `cost_out_recommend_fork_stay_leave` | Multi-turn golden |
-| `host_tests/test_cost_out_recommend_fork.py` | Unit ratchet |
+| `host unit ratchet for cost_out recommend fork` | Unit ratchet |
 
 ## Prove
 
 ```bash
-python -m conjecture_behaviour_runner --script cost_out_recommend_fork_stay_leave
+conjecture --script <host_script_id>  # host golden for stay/leave fork
 ```
 
 Port: replace `cost_out` / recommend grammar with your sole-continue kind +

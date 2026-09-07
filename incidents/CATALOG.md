@@ -40,6 +40,12 @@ of known CAQ-FM modes. Runnable battery size and package stage: [MATURITY.md](..
 | **id** | Declarative machine id |
 | **portable_seed** | `patterns/` folder name (may differ from id) |
 | **Law** | One-line invariant |
+| **Golden-turn stage** | Where on the SDK [golden turn](https://github.com/walidnegm/conversation-control-plane/blob/main/docs/conversation-control-plane-sdk.md#the-golden-turn--one-correct-turn-end-to-end) (0–6 + **5b**) the class burns |
+
+Diagnose by stage before patching: a steal is stage **4**, a hollow open is stage **5**,
+a CONTINUES act that never reaches its editor is stage **5b**, a complete that was
+an abandon is stage **6**. The catalog below is the class list; the stage is the
+audit lens (same template as the Control Plane SDK — not a second doctrine).
 
 ---
 
@@ -63,6 +69,7 @@ of known CAQ-FM modes. Runnable battery size and package stage: [MATURITY.md](..
 |--------------------|-----|---------------|--------|
 | “Pinned…” but nothing useful opens | `hollow_open` | `pin_without_open` | **runnable** |
 | Continue/advance “succeeds” with empty UI | `hollow_advance` | `hollow_async_advance` | **runnable** |
+| Stated CONTINUES act never reaches its host reader (editor) | `continues_act_not_delivered` | — | **host_only** (`conv_5566b22c` · TC-O) |
 | Asks for a name/pick but next free-text is greenfield | `open_leaf_unarmed_return` | — | seed_pending |
 | “Next: Goal Seek?” then “yes please” → list/workflows | `continuum_invite_unarmed_affirm` | — | seed_pending |
 | Wrong code path wins the turn (coarse bucket) | `wrong_delivery_leaf` | — | partial |
@@ -86,6 +93,8 @@ of known CAQ-FM modes. Runnable battery size and package stage: [MATURITY.md](..
 | Code path falls into freestyle fabrication | `fall_through_fabrication` | — | seed_pending |
 | “Do X and tell me Y” loses half the ask | `compound_act_loss` | — | host_only |
 | Open mid-draft improve/strengthen steals to IR | `draft_improve_to_ir` | — | host_only |
+| Cognition labels rewritten by apply_* / gate_detour / decide | `cognition_override` | — | seed_pending |
+| Staffed/compiled then cold re-extract | `staffed_free_text_advance` | — | host_only |
 
 ### Open-leaf / continuum (portable law — host proofs today)
 
@@ -134,8 +143,11 @@ seed_pending). Still first-class slugs in `registry.yaml`. Plain mode names
 | Plain failure mode | id / legacy |
 |--------------------|-------------|
 | Packaging steal | `packaging_steal` · legacy `packaging_too_wide` |
+| Cognition overwritten after propose | `cognition_override` · C26 S0d/S2 (named) |
+| Staffed then cold extract | `staffed_free_text_advance` · host |
 | Missing session leaf | `lost_activity_recall` · legacy `missing_state_leaf` |
 | Hollow open | `hollow_open` · portable seed `pin_without_open` |
+| CONTINUES act never reaches host reader | `continues_act_not_delivered` · host TC-O |
 | Wrong delivery leaf | `wrong_delivery_leaf` · legacy `delivery_order_gap` |
 | Open mid-draft improve → IR | `draft_improve_to_ir` · host `conv_1732aa88` |
 | Compound act loss | `compound_act_loss` · host compound leaves |
@@ -146,6 +158,7 @@ seed_pending). Still first-class slugs in `registry.yaml`. Plain mode names
 |----|-----------------------------|
 | `draft_improve_to_ir` | Host monorepo · residual open-improve-not-IR |
 | `compound_act_loss` | Host compound primary/secondary leaves |
+| `continues_act_not_delivered` | Host · `test_host_act_reachability_contract` · scan of CONTINUES read_kinds vs `chat()` doors |
 | `packaging_steal` / `wrong_delivery_leaf` / … | Host STEAL table + product ratchets |
 | `success_payload_rewrite` / `false_save_claim` | Host unit / deploy |
 | `id_slot_thin_verify` | Host · `test_id_slot_thin_verify_seal` · pattern_id / create_scenario / risk_id |

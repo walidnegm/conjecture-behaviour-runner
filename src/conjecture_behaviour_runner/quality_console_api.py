@@ -6,6 +6,7 @@ gracefully when those modules are unavailable.
 from __future__ import annotations
 
 import json
+import sys
 import threading
 from pathlib import Path
 from typing import Any, Optional
@@ -39,8 +40,9 @@ def _host_root() -> Optional[Path]:
     markers = (
         cwd / "docs" / "epics" / "failure-mode-registry.yaml",
         cwd / "regression_suite" / "conjecture_expansion" / "law_seek_harness.py",
+        cwd / "regression_suite" / "architecture_audit" / "inventory_registry.yaml",
     )
-    if all(m.is_file() for m in markers[:1]) or markers[1].is_file():
+    if markers[0].is_file() or markers[1].is_file() or markers[2].is_file():
         return cwd
     # Package lives at extract/conjecture-behaviour-runner/src/... → monorepo is parents[4]
     here = Path(__file__).resolve()
@@ -49,11 +51,29 @@ def _host_root() -> Optional[Path]:
             return parent
         if (parent / "regression_suite" / "conjecture_expansion").is_dir():
             return parent
+        if (parent / "regression_suite" / "architecture_audit").is_dir():
+            return parent
     return None
 
 
-def host_quality_available() -> dict[str, Any]:
+def _ensure_host_on_sys_path() -> Optional[Path]:
+    """Put monorepo root on sys.path so host packages import when ui is installed editable.
+
+    ``conjecture ui`` often runs the *extract* package from site-packages / extract src
+    while the process cwd is the monorepo — without this, ``import regression_suite``
+    fails even though the tree is present on disk.
+    """
     root = _host_root()
+    if root is None:
+        return None
+    root_s = str(root)
+    if root_s not in sys.path:
+        sys.path.insert(0, root_s)
+    return root
+
+
+def host_quality_available() -> dict[str, Any]:
+    root = _ensure_host_on_sys_path()
     if root is None:
         return {
             "ok": False,
@@ -61,7 +81,7 @@ def host_quality_available() -> dict[str, Any]:
             "error": "host_monorepo_not_found",
             "hint": (
                 "Run `conjecture ui` from the Bot0 monorepo root, or ensure "
-                "regression_suite.conjecture_expansion is importable."
+                "host quality modules are importable."
             ),
         }
     try:
@@ -258,14 +278,13 @@ def get_architecture_audit(
 ) -> dict[str, Any]:
     """Architecture Audit (Offer 2) — inventory registry + dogfood concept runners.
 
-    File-based storage under regression_suite/artifacts/architecture_audit/.
+    Does **not** require law_seek / Offer-1 quality stack — only host architecture_audit
+    package (or degrades with a clear error).
     """
-    avail = host_quality_available()
-    if not avail.get("available"):
-        return avail
-
+    root = _ensure_host_on_sys_path()
     try:
         from regression_suite.architecture_audit.registry import (
+            ARTIFACT_DIR,
             inventory_summary,
             load_inventory_registry,
         )
@@ -276,17 +295,29 @@ def get_architecture_audit(
     except Exception as exc:  # noqa: BLE001
         return {
             "ok": False,
-            "available": True,
+            "available": False,
             "error": "architecture_audit_import_failed",
             "detail": str(exc),
+            "root": str(root) if root else None,
+            "hint": (
+                "Run `conjecture ui` from the monorepo root so host package "
+                "architecture_audit is on sys.path. Offer 2 does not need law_seek."
+            ),
         }
 
     reg = load_inventory_registry()
     summary = inventory_summary(reg)
+    try:
+        from regression_suite.architecture_audit.doctrine_visibility import (
+            doctrine_visibility_bundle,
+        )
+
+        doctrine = doctrine_visibility_bundle()
+    except Exception:  # noqa: BLE001
+        doctrine = {"version": 0, "panels": []}
 
     if run:
         concept_ids = [concept_id] if concept_id else None
-        # When a single concept is requested, still allow stubs to show if listed
         report = run_architecture_audit(
             concept_ids=concept_ids,
             subject=subject or "bot0_dogfood",
@@ -297,8 +328,10 @@ def get_architecture_audit(
             "ok": True,
             "available": True,
             "ran": True,
+            "root": str(root) if root else None,
             "registry": reg,
             "summary": summary,
+            "doctrine_visibility": doctrine,
             "report": report,
             "artifact": report.get("artifact"),
         }
@@ -308,45 +341,61 @@ def get_architecture_audit(
         "ok": True,
         "available": True,
         "ran": False,
+        "root": str(root) if root else None,
         "registry": reg,
         "summary": summary,
+        "doctrine_visibility": doctrine,
         "report": latest,
-        "artifact": (
-            str(
-                __import__(
-                    "regression_suite.architecture_audit.registry",
-                    fromlist=["ARTIFACT_DIR"],
-                ).ARTIFACT_DIR
-                / "latest.json"
-            )
-            if latest
-            else None
-        ),
+        "artifact": str(ARTIFACT_DIR / "latest.json") if latest else None,
         "hint": (
-            "POST /api/architecture-audit/run with host plug-in present (v0.1: "
-            "agent_engine_inventory dogfood). Without host inventory, registry loads "
-            "but assessors degrade. Stubs stay inventory-only until implemented."
+            "POST /api/architecture-audit/run for dogfood. "
+            "doctrine_visibility panels (memory L1–L6 relation) always load with inventory."
         ),
     }
 
 
 def get_architecture_audit_depth_prompt() -> dict[str, Any]:
-    """LLM questionnaire to deepen audit methodology from dogfood results."""
-    avail = host_quality_available()
-    if not avail.get("available"):
-        return avail
+    """Back-compat: Architecture Audit Review prompt v1."""
+    return get_architecture_audit_prompt(mode="audit_review", version=1)
+
+
+def get_architecture_audit_prompt(
+    *,
+    mode: str = "audit_review",
+    version: Optional[int] = None,
+) -> dict[str, Any]:
+    """Versioned Architecture Audit LLM prompts (console-visible).
+
+    Live: audit_review v1. Planned: invent · compare · interrogate.
+    """
+    root = _ensure_host_on_sys_path()
     try:
-        from regression_suite.architecture_audit.depth_prompt import (
-            build_depth_questionnaire,
+        from regression_suite.architecture_audit.audit_prompts import (
+            build_audit_prompt,
+            list_prompts,
         )
     except Exception as exc:  # noqa: BLE001
         return {
             "ok": False,
-            "available": True,
-            "error": "depth_prompt_import_failed",
+            "available": False,
+            "error": "audit_prompt_import_failed",
             "detail": str(exc),
+            "root": str(root) if root else None,
+            "catalog": [],
         }
-    return build_depth_questionnaire()
+    try:
+        payload = build_audit_prompt(mode=mode, version=version)
+        if isinstance(payload, dict) and "catalog" not in payload:
+            payload["catalog"] = list_prompts()
+        return payload
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "ok": False,
+            "available": False,
+            "error": "audit_prompt_build_failed",
+            "detail": str(exc),
+            "root": str(root) if root else None,
+        }
 
 
 __all__ = [
@@ -358,4 +407,5 @@ __all__ = [
     "request_law_seek_stop",
     "get_architecture_audit",
     "get_architecture_audit_depth_prompt",
+    "get_architecture_audit_prompt",
 ]

@@ -469,16 +469,46 @@ def _html_page() -> bytes:
     </p>
     <div class="row" style="gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
       <button type="button" id="btnAuditRefresh">Load inventory</button>
-      <button type="button" id="btnAuditRun">Run dogfood audit (implemented)</button>
-      <button type="button" class="secondary" id="btnAuditDepth">LLM depth questionnaire</button>
+      <button type="button" id="btnAuditRun">Run dogfood audit</button>
+      <button type="button" class="secondary" id="btnAuditDepth">Load full prompt + evidence</button>
     </div>
     <div id="auditSummary" class="card" style="margin-bottom:.75rem;padding:.75rem 1rem">—</div>
+
+    <div class="view-title" style="font-size:1rem">Doctrine visibility</div>
+    <p class="muted" style="font-size:.82rem;max-width:48rem;margin:.2rem 0 .5rem">
+      Notional models the audit uses (memory layers · observability layers).
+      Not scores — shared picture for humans and LLM review.
+    </p>
+    <div id="auditDoctrine" class="card" style="margin-bottom:1rem;padding:.75rem 1rem;font-size:.82rem">—</div>
+
+    <div class="view-title" style="font-size:1rem">Audit prompts (versioned)</div>
+    <p class="muted" style="font-size:.82rem;max-width:48rem;margin:.2rem 0 .5rem">
+      Static assessors scan code without an LLM. These prompts are for
+      <strong>human / LLM review</strong> of inventory + evidence.
+      Live today: <code>audit_review</code> <strong>v1</strong>.
+      Later: invent · compare · interrogate (select to preview planned system text).
+    </p>
+    <div class="row" style="gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;align-items:center">
+      <label class="muted" style="font-size:.8rem" for="auditPromptMode">Mode</label>
+      <select id="auditPromptMode" style="font-size:.85rem;padding:.25rem .4rem;border-radius:.35rem;border:1px solid #d4d4d8">
+        <option value="audit_review" selected>audit_review (live)</option>
+        <option value="invent">invent (planned)</option>
+        <option value="compare">compare (planned)</option>
+        <option value="interrogate">interrogate (planned)</option>
+      </select>
+      <button type="button" class="secondary" id="btnAuditPromptShow" style="font-size:.8rem">Show prompt</button>
+    </div>
+    <div id="auditPromptMeta" class="card" style="margin-bottom:.5rem;padding:.65rem .85rem;font-size:.82rem">—</div>
+    <div class="view-title" style="font-size:.95rem">System instruction</div>
+    <pre id="auditPromptSystem" style="max-height:14rem;overflow:auto;font-size:.72rem;white-space:pre-wrap;background:#fafafa;border:1px solid #e4e4e7;border-radius:.4rem;padding:.75rem">Loading…</pre>
+    <div class="view-title" style="font-size:.95rem;margin-top:.65rem">User payload (evidence-bound)</div>
+    <pre id="auditPromptUser" style="max-height:18rem;overflow:auto;font-size:.72rem;white-space:pre-wrap;background:#fafafa;border:1px solid #e4e4e7;border-radius:.4rem;padding:.75rem">Select mode / load full prompt after a dogfood run.</pre>
+    <div id="auditPromptCatalog" class="muted" style="font-size:.78rem;margin:.5rem 0 1rem">—</div>
+
     <div class="view-title" style="font-size:1rem">Inventory · parameters &amp; concepts</div>
     <div id="auditInventory" style="margin-bottom:1rem">—</div>
     <div class="view-title" style="font-size:1rem">Latest run</div>
     <div id="auditReport">—</div>
-    <div class="view-title" style="font-size:1rem;margin-top:1rem">Depth prompt (LLM)</div>
-    <pre id="auditDepth" style="max-height:22rem;overflow:auto;font-size:.72rem;white-space:pre-wrap;background:#fafafa;border:1px solid #e4e4e7;border-radius:.4rem;padding:.75rem">Run “LLM depth questionnaire” after a dogfood run.</pre>
   </section>
 
   <!-- ========== HOME / APPROACH MAP ========== -->
@@ -1666,8 +1696,12 @@ function showAppView(view) {
   if (v === 'laws') loadLaws();
   if (v === 'seek') loadSeek();
   if (v === 'program' && programId) loadProgram(programId);
-  if (v === 'architecture-audit') loadArchitectureAudit();
+  if (v === 'architecture-audit') {
+    loadArchitectureAudit();
+    loadAuditPrompt('audit_review');
+  }
 }
+
 
 /* ---- Offer 2: Architecture Audit ---- */
 async function loadArchitectureAudit() {
@@ -1686,6 +1720,62 @@ async function loadArchitectureAudit() {
   }
 }
 
+function renderOneDoctrinePanel(mem) {
+  let html = '<div style="margin-bottom:1rem"><div><strong>' + escapeHtml(mem.title || 'Doctrine') + '</strong>';
+  html += ' · <code>' + escapeHtml(String(mem.id || '')) + '</code>';
+  html += ' · v' + escapeHtml(String(mem.version != null ? mem.version : '?')) + '</div>';
+  if (mem.ascii) {
+    html += '<pre style="margin:.5rem 0;font-size:.72rem;white-space:pre-wrap;background:#f4f4f5;border-radius:.35rem;padding:.65rem;overflow:auto">' +
+      escapeHtml(mem.ascii) + '</pre>';
+  }
+  // Q → where it lives (grounding/memory questions panel)
+  if (mem.questions && mem.questions.length) {
+    html += '<table class="mode-table" style="margin-top:.35rem"><thead><tr>' +
+      '<th>Question</th><th>Where it lives</th><th>Kind</th><th>Audit concept</th></tr></thead><tbody>';
+    mem.questions.forEach(function (Q) {
+      html += '<tr><td style="font-size:.8rem"><strong>' + escapeHtml(Q.question || '') +
+        '</strong></td><td style="font-size:.75rem">' + escapeHtml(Q.where_it_lives || '') +
+        '</td><td class="mono" style="font-size:.72rem">' + escapeHtml(Q.kind || '') +
+        '</td><td style="font-size:.72rem">' + escapeHtml(Q.audit_concept || '') +
+        '</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+  if (mem.layers && mem.layers.length) {
+    html += '<table class="mode-table" style="margin-top:.35rem"><thead><tr>' +
+      '<th>Layer</th><th>Role</th><th>Proper use</th><th>Graded by</th></tr></thead><tbody>';
+    mem.layers.forEach(function (L) {
+      html += '<tr><td class="mono"><strong>' + escapeHtml(L.id || '') + '</strong> ' +
+        escapeHtml(L.name || '') + '</td><td style="font-size:.75rem">' +
+        escapeHtml(L.role || '') + '</td><td style="font-size:.75rem">' +
+        escapeHtml(L.proper_use || '') + '</td><td style="font-size:.75rem">' +
+        escapeHtml(L.graded_by || '') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+  if (mem.grading_honesty) {
+    const g = mem.grading_honesty;
+    html += '<div class="muted" style="margin-top:.5rem;font-size:.78rem"><strong>We grade today:</strong> ' +
+      escapeHtml((g.what_we_grade_today || []).join(' · ')) + '</div>';
+    html += '<div class="muted" style="margin-top:.25rem;font-size:.78rem"><strong>Not yet:</strong> ' +
+      escapeHtml((g.what_we_do_not_grade_yet || []).join(' · ')) + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderAuditDoctrine(data) {
+  const el = document.getElementById('auditDoctrine');
+  if (!el) return;
+  const doc = data && data.doctrine_visibility;
+  const panels = (doc && doc.panels) || [];
+  if (!panels.length) {
+    el.innerHTML = '<span class="muted">No doctrine panels loaded.</span>';
+    return;
+  }
+  el.innerHTML = panels.map(renderOneDoctrinePanel).join('');
+}
+
 function renderArchitectureAudit(data) {
   const sum = document.getElementById('auditSummary');
   const inv = document.getElementById('auditInventory');
@@ -1694,6 +1784,7 @@ function renderArchitectureAudit(data) {
     if (sum) sum.innerHTML = '<strong>Unavailable</strong> · ' + escapeHtml(data && (data.error || data.hint) || 'unknown');
     return;
   }
+  renderAuditDoctrine(data);
   const s = data.summary || {};
   const report = data.report;
   if (sum) {
@@ -1740,11 +1831,14 @@ function renderArchitectureAudit(data) {
     rh += '</div>';
     if (res.message) rh += '<div class="muted" style="font-size:.8rem">' + escapeHtml(res.message) + '</div>';
     if (res.criteria && res.criteria.length) {
-      rh += '<table class="mode-table" style="margin-top:.4rem"><thead><tr><th>Criterion</th><th>Pass</th><th>Evidence</th></tr></thead><tbody>';
+      rh += '<table class="mode-table" style="margin-top:.4rem"><thead><tr>' +
+        '<th>Criterion</th><th>Pass</th><th>Description (what we mean)</th><th>Evidence</th></tr></thead><tbody>';
       res.criteria.forEach(cr => {
+        const desc = cr.description || cr.detail || '';
         rh += '<tr><td class="mono">' + escapeHtml(cr.id || '') + '</td><td>' +
-          (cr.passed ? '✓' : '✗') + '</td><td style="font-size:.75rem">' +
-          escapeHtml(String(cr.evidence || '').slice(0, 200)) + '</td></tr>';
+          (cr.passed ? '✓' : '✗') + '</td><td style="font-size:.72rem;max-width:18rem">' +
+          escapeHtml(String(desc).slice(0, 280)) + '</td><td style="font-size:.72rem">' +
+          escapeHtml(String(cr.evidence || '').slice(0, 180)) + '</td></tr>';
       });
       rh += '</tbody></table>';
     }
@@ -1782,25 +1876,58 @@ async function runArchitectureAudit() {
   }
 }
 
-async function loadAuditDepthPrompt() {
-  const pre = document.getElementById('auditDepth');
-  if (pre) pre.textContent = 'Building depth questionnaire…';
-  try {
-    const r = await fetch('/api/architecture-audit/depth-prompt');
-    const data = await r.json();
-    if (!data.ok) {
-      if (pre) pre.textContent = JSON.stringify(data, null, 2);
-      return;
-    }
-    if (pre) {
-      pre.textContent =
-        '=== SYSTEM ===\n' + (data.system || '') +
-        '\n\n=== USER ===\n' + (data.user || '') +
-        '\n\n=== HINT ===\n' + (data.hint || '');
-    }
-  } catch (e) {
-    if (pre) pre.textContent = String(e);
+function renderAuditPrompt(data) {
+  const meta = document.getElementById('auditPromptMeta');
+  const sys = document.getElementById('auditPromptSystem');
+  const user = document.getElementById('auditPromptUser');
+  const cat = document.getElementById('auditPromptCatalog');
+  if (!data || !data.ok) {
+    if (meta) meta.textContent = 'Prompt unavailable: ' + (data && (data.error || data.detail) || 'unknown');
+    return;
   }
+  if (meta) {
+    meta.innerHTML =
+      '<strong>' + escapeHtml(String(data.title || data.prompt_id || '')) + '</strong>' +
+      ' · <code>' + escapeHtml(String(data.prompt_id || '')) + '</code>' +
+      ' · mode <code>' + escapeHtml(String(data.mode || '')) + '</code>' +
+      ' · v' + escapeHtml(String(data.version != null ? data.version : '?')) +
+      ' · <span class="badge ' + (data.planned ? 'thin' : 'pass') + '">' +
+      escapeHtml(String(data.status || (data.planned ? 'planned' : 'live'))) + '</span>' +
+      (data.one_liner ? '<div class="muted" style="margin-top:.35rem">' + escapeHtml(String(data.one_liner)) + '</div>' : '') +
+      (data.use_when ? '<div class="muted" style="margin-top:.2rem">Use when: ' + escapeHtml(String(data.use_when)) + '</div>' : '') +
+      (data.hint ? '<div class="muted" style="margin-top:.35rem;font-size:.78rem">' + escapeHtml(String(data.hint)) + '</div>' : '');
+  }
+  if (sys) sys.textContent = data.system || '(empty system)';
+  if (user) user.textContent = data.user || '(empty user)';
+  if (cat && data.catalog) {
+    cat.innerHTML = '<strong>Prompt catalog:</strong> ' + data.catalog.map(function (p) {
+      return escapeHtml(String(p.prompt_id || '')) +
+        ' <span class="badge ' + (p.status === 'live' ? 'pass' : 'thin') + '">' +
+        escapeHtml(String(p.status || '')) + '</span>';
+    }).join(' · ');
+  }
+}
+
+async function loadAuditPrompt(mode) {
+  const m = mode || (document.getElementById('auditPromptMode') || {}).value || 'audit_review';
+  const sys = document.getElementById('auditPromptSystem');
+  if (sys) sys.textContent = 'Loading prompt…';
+  try {
+    const qs = new URLSearchParams({ mode: m });
+    if (m === 'audit_review') qs.set('version', '1');
+    const r = await fetch('/api/architecture-audit/prompt?' + qs.toString());
+    const data = await r.json();
+    renderAuditPrompt(data);
+  } catch (e) {
+    if (sys) sys.textContent = String(e);
+  }
+}
+
+async function loadAuditDepthPrompt() {
+  // Full evidence-bound payload (audit_review v1)
+  const sel = document.getElementById('auditPromptMode');
+  if (sel) sel.value = 'audit_review';
+  await loadAuditPrompt('audit_review');
 }
 function healthBadge(h) {
   // Seek battery label only — never implies surface×law proof.
@@ -4920,6 +5047,10 @@ const btnAuditRun = document.getElementById('btnAuditRun');
 if (btnAuditRun) btnAuditRun.onclick = () => runArchitectureAudit();
 const btnAuditDepth = document.getElementById('btnAuditDepth');
 if (btnAuditDepth) btnAuditDepth.onclick = () => loadAuditDepthPrompt();
+const btnAuditPromptShow = document.getElementById('btnAuditPromptShow');
+if (btnAuditPromptShow) btnAuditPromptShow.onclick = () => loadAuditPrompt();
+const auditPromptMode = document.getElementById('auditPromptMode');
+if (auditPromptMode) auditPromptMode.onchange = () => loadAuditPrompt();
 const btnReloadViz = document.getElementById('btnReloadViz');
 if (btnReloadViz) {
   btnReloadViz.onclick = () => {
@@ -5271,13 +5402,23 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                 except Exception as exc:  # noqa: BLE001
                     _json_response(self, 500, {"ok": False, "error": str(exc)})
                 return
-            if path == "/api/architecture-audit/depth-prompt":
+            if path in (
+                "/api/architecture-audit/depth-prompt",
+                "/api/architecture-audit/prompt",
+            ):
                 from conjecture_behaviour_runner.quality_console_api import (
-                    get_architecture_audit_depth_prompt,
+                    get_architecture_audit_prompt,
                 )
 
+                def _one_ap(key: str) -> Optional[str]:
+                    vals = qs.get(key) or []
+                    return vals[0] if vals else None
+
                 try:
-                    payload = get_architecture_audit_depth_prompt()
+                    mode = _one_ap("mode") or "audit_review"
+                    ver_raw = _one_ap("version")
+                    version = int(ver_raw) if ver_raw and str(ver_raw).isdigit() else None
+                    payload = get_architecture_audit_prompt(mode=mode, version=version)
                     code = 200 if payload.get("ok") or payload.get("available") else 503
                     _json_response(self, code, payload)
                 except Exception as exc:  # noqa: BLE001

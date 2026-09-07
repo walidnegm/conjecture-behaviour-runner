@@ -78,6 +78,26 @@ entries:
   - open_surface
   - reply_nonempty
   legacy_id: hollow_async_advance
+- id: continues_act_not_delivered
+  failure_mode: CONTINUES act never reaches its host reader
+  portable_seed: null
+  law: >-
+    A named CONTINUES act must be dispatched by the host to its declared
+    reader even when decide_turn is fresh/bot0. Tool-path plan_act is not
+    delivery if chat() never calls the tool.
+  plane: delivery
+  family: hollow_delivery
+  parent_id: hollow_open
+  portability: host
+  seed_status: host_only
+  law_shape:
+  - delivery_mode
+  - host_dispatch
+  - continues
+  notes: >-
+    Host sealed conv_5566b22c / TC-O. Public seed TBD. Cousin of
+    hollow_open (pin, no surface) and fall_through_fabrication (freestyle
+    after the host missed the reader).
 - id: cold_start_collapse
   failure_mode: Cold-start authoring collapse
   portable_seed: cold_system_suggest_miss
@@ -343,6 +363,62 @@ entries:
   - thin_verify
   - registry_id
   notes: SDK A19 · host seals create-on-existing-name; public mini-app seed TBD.
+- id: scoped_event_as_process_start
+  failure_mode: Scoped event lowered as a process start
+  portable_seed: null
+  law: >-
+    An event that can fire while another stream is running is not a way the
+    process begins. Lowering a scoped event listener as a start node makes the
+    graph report two entry points, and no local topology mutation can repair it
+    while the node's structural kind still says "start" — an annotation naming
+    it an event does not reduce the start count. Extraction, naming and
+    diagnosis can all be correct while the representation has no legal shape
+    for the concept.
+  plane: authoring
+  family: representation
+  parent_id: null
+  portability: portable
+  seed_status: seed_pending
+  law_shape:
+  - node_kind
+  - entry_count
+  - event_scope
+- id: repair_claims_unearned_progress
+  failure_mode: Repair claims progress it did not make
+  portable_seed: null
+  law: >-
+    A repair aimed at a named blocker must move THAT blocker. Reporting
+    "partial" because unrelated bookkeeping improved — while the target count
+    is unchanged — invites the user to re-run a button the same message tells
+    them not to re-run. Acceptance must also be bounded: lexicographic priority
+    may decide direction, but one high-priority win must not license unlimited
+    damage in lower slots.
+  plane: repair
+  family: repair
+  parent_id: null
+  portability: portable
+  seed_status: runnable
+  law_shape:
+  - accept_vector
+  - target_blocker
+- id: unterminated_task_on_failure
+  failure_mode: Unterminated task on failure
+  portable_seed: null
+  law: >-
+    A handler failure must terminate its task (ABANDON) or explicitly re-arm it
+    for retry. A kind whose only terminal is the success phase leaves the task
+    ACTIVE forever after a failure, and every later turn is silently suppressed
+    by the still-open owner — the user is refused work unrelated to the thing
+    that failed.
+  plane: ownership
+  family: ownership
+  parent_id: null
+  portability: portable
+  seed_status: seed_pending
+  law_shape:
+  - active_kind
+  - terminal_phase
+  - transition
 - id: resume_without_rehydrate
   failure_mode: Resume without rehydrate
   portable_seed: null
@@ -359,6 +435,39 @@ entries:
   - hydration
   - projection
   notes: Host session_staleness / mute class; portable when Observation seed exists.
+- id: cognition_override
+  failure_mode: Cognition overwritten after propose
+  portable_seed: null
+  law: >-
+    Unified-router exclusive-owner fields must survive later writers
+    (apply_* chain, gate_detour, decide) except finite grammar or a
+    declared allow-table. Retrieval / pin / armed-gate stamps are not meaning.
+  plane: cognition
+  family: cognition
+  parent_id: packaging_steal
+  portability: host
+  seed_status: seed_pending
+  law_shape:
+  - exclusive_owner
+  - pinned_cognition
+  notes: >-
+    Named C26 S0d/S2. Host: conv_cce8d110 · conv_bd44b6a2. Pin labels, assert
+    they survive apply_unified_router_authorities. Not a 30th apply_*.
+- id: staffed_free_text_advance
+  failure_mode: Staffed accept free-text re-extracts process
+  portable_seed: null
+  law: >-
+    After staffing is accepted and a compiled graph exists, compile lowers
+    confirmed IR only. Must not cold-extract a new process unless cognition
+    stamped _force_extraction / new world.
+  plane: ownership
+  family: ownership
+  parent_id: null
+  portability: host
+  seed_status: host_only
+  law_shape:
+  - exclusive_owner
+  notes: Host conv_c762dcdf · conv_bd44b6a2 · test_staffed_compiled_extract_contract
 out_of_scope:
 - id: success_payload_rewrite
   reason: Host unit + prompt/worker deploy — not mini-app Observation seed

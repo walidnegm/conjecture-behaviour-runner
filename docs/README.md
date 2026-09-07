@@ -8,6 +8,7 @@
 | **Candidate discovery** (expand + invent) | Templates + env | [../templates/candidate_author/README.md](../templates/candidate_author/README.md) · SPEC §2.2 |
 | **Discovery path diagram** | SVG ladder | [images/discovery-pipeline.svg](./images/discovery-pipeline.svg) |
 | **Pipeline stage tracker** | Portable contract | `pipeline_tracker` — same strip shape as Prose → Draft IR → Save |
+| **Golden-turn audit** (sibling SDK template) | After-Act stage lens (0–6 + 5b) | [main README](../README.md#golden-turn-audit-same-template-as-the-sdk) · [CATALOG](../incidents/CATALOG.md) · [CCP golden turn](https://github.com/walidnegm/conversation-control-plane/blob/main/docs/conversation-control-plane-sdk.md#the-golden-turn--one-correct-turn-end-to-end) |
 | **Conversational Authority Quality** (portable) | Category thesis | [conversational-authority-quality.md](./conversational-authority-quality.md) |
 | **Package maturity** | Readiness disclosure | [MATURITY.md](./MATURITY.md) |
 | **Portable failure-mode registry** | Machine SoT | [../incidents/registry.yaml](../incidents/registry.yaml) |

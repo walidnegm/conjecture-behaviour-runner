@@ -56,6 +56,24 @@ turn** under pinned cognition (and join the same mode ids the SDK anti-patterns 
 map describe). The console does not invent laws either — it **joins** registry ·
 ratchets · seek · multi-turn proof so operators and coding agents stop hunting silos.
 
+### Golden-turn audit (same template as the SDK)
+
+The Control Plane SDK names one correct turn
+([golden turn](https://github.com/walidnegm/conversation-control-plane/blob/main/docs/conversation-control-plane-sdk.md#the-golden-turn--one-correct-turn-end-to-end):
+stages **0–6 + 5b**). Conjecture does not replace that picture. After each Act it
+asks whether **state law at that stage** still held while chat looked fine.
+
+| Golden-turn stage | What a freeze typically proves |
+|-------------------|--------------------------------|
+| 3 stream / task | Kind stayed on the ledger; no silent restart |
+| 4 authority | Exclusive owner; no steal / yield miss |
+| 5 delivery | Open leaf is non-empty; armed grammar held |
+| **5b agent boundary** | CONTINUES named a reader; handoff claimed `take_once` |
+| 6 execution | COMPLETE ≠ ABANDON; take-once not double-run |
+
+Mode slugs in [CATALOG](incidents/CATALOG.md) name the **class**; the stage column
+there is where to look first. Do not invent a parallel audit ladder.
+
 ---
 
 ## Two faces of this package

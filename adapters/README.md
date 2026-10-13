@@ -24,6 +24,7 @@ The public harness talks to a host through `ControlPlaneAdapter`
 | **HTTP/JSON** (`contrib.http_json.HttpJsonAdapter`) | **Shipped** — POST turn; map owner/pins/outcome from dotted JSON paths (stdlib) |
 | **Conversation Control Plane** (`contrib.control_plane.ControlPlaneStreamAdapter`) | **Shipped** — multi-turn stream contract; needs `pip install conjecture-behaviour-runner[control-plane]` |
 | **Path-faithful mini-app** (`path_faithful.MiniAppAdapter`) | **Shipped** — Act via `handle()`; planted bugs for E2E |
+| **UI (Playwright, Cypress, …)** | Pattern — implement `ui_grammar` in your driver and call `budget.RunBudget.check` before each step. See [docs/ui-driver-and-run-budget.md](../docs/ui-driver-and-run-budget.md) |
 | **Your own ledger / LangGraph / Temporal / Crew** | Subclass `BaseControlPlaneAdapter`; implement `apply_effect` + `observe_turn` |
 
 Built-in verifier kinds (`conjecture_behaviour_runner.invariants`, free via

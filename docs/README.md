@@ -10,6 +10,7 @@
 | **Pipeline stage tracker** | Portable contract | `pipeline_tracker` — same strip shape as Prose → Draft IR → Save |
 | **Golden-turn audit** (sibling SDK template) | After-Act stage lens (0–6 + 5b) | [main README](../README.md#golden-turn-audit-same-template-as-the-sdk) · [CATALOG](../incidents/CATALOG.md) · [CCP golden turn](https://github.com/walidnegm/conversation-control-plane/blob/main/docs/conversation-control-plane-sdk.md#the-golden-turn--one-correct-turn-end-to-end) |
 | **Conversational Authority Quality** (portable) | Category thesis | [conversational-authority-quality.md](./conversational-authority-quality.md) |
+| **UI driver and run budget** | Pattern + portable modules | [ui-driver-and-run-budget.md](./ui-driver-and-run-budget.md) · `ui_grammar` · `budget.RunBudget` |
 | **Package maturity** | Readiness disclosure | [MATURITY.md](./MATURITY.md) |
 | **Portable failure-mode registry** | Machine SoT | [../incidents/registry.yaml](../incidents/registry.yaml) |
 | **Portable catalog** (failure modes) | Human index | [../incidents/CATALOG.md](../incidents/CATALOG.md) |

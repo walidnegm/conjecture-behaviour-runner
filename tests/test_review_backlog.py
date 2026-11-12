@@ -174,3 +174,15 @@ def test_close_with_string_patch(tmp_path: Path) -> None:
     )
     assert raw["status"] == "closed"
     assert raw["patch"]["command"] == "fix"
+
+
+def test_a_test_never_writes_the_host_backlog() -> None:
+    """11-12: 20 of 32 'needs review' items in the host's real backlog were written by tests."""
+    import os
+    from pathlib import Path
+
+    from conjecture_behaviour_runner.review_backlog import resolve_backlog_dir
+
+    got = resolve_backlog_dir().resolve()
+    assert str(got) == str(Path(os.environ["CONJECTURE_BACKLOG_DIR"]).resolve())
+    assert "conjecture_expansion" not in got.parts

@@ -181,6 +181,17 @@ def get_law_seek(
     }
 
 
+def _seek_newer_than_snapshot(snapshot_path: Path) -> bool:
+    """True when the latest law_seek result was written after the cached snapshot."""
+    try:
+        from regression_suite.conjecture_expansion.law_seek_harness import ARTIFACT_DIR
+
+        seek = Path(ARTIFACT_DIR) / "latest.json"
+        return seek.is_file() and snapshot_path.is_file() and seek.stat().st_mtime > snapshot_path.stat().st_mtime
+    except Exception:  # noqa: BLE001 — a stale header is better than a broken console
+        return False
+
+
 def get_quality_snapshot(
     *,
     rebuild: bool = False,
@@ -201,6 +212,20 @@ def get_quality_snapshot(
 
     if not rebuild and not run_seek:
         cached = load_latest_snapshot()
+        # A sweep run since the snapshot was built makes the cache stale: the console header
+        # read "law_seek: FAIL · 2026-08-07" on 11-12 after a passing sweep that day. Rebuild
+        # from the newest result (no re-run of the battery).
+        if cached is not None and _seek_newer_than_snapshot(SNAPSHOT_DIR / "latest.json"):
+            cached = None
+            snap = build_quality_console_snapshot(run_seek=False, write_artifact=True)
+            return {
+                "ok": True,
+                "available": True,
+                "rebuilt": True,
+                "rebuilt_reason": "newer_law_seek",
+                "snapshot": snap,
+                "artifact": snap.get("artifact"),
+            }
         if cached is not None:
             return {
                 "ok": True,

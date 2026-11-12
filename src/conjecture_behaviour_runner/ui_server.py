@@ -102,6 +102,21 @@ def _html_page() -> bytes:
     .open { background: #fff7ed; color: #c2410c; }
     .partial { background: #eff6ff; color: #1d4ed8; }
     .reg { background: #f4f4f5; color: #3f3f46; }
+    .ce-rates { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .6rem; }
+    .ce-rate { border: 1px solid #e4e4e7; border-radius: .6rem; padding: .6rem .75rem; background: #fff; }
+    .ce-rate .n { font-size: 1.35rem; font-weight: 700; }
+    .ce-rate .l { font-size: .75rem; color: #71717a; }
+    .ce-rate.bad .n { color: #b91c1c; }
+    .ce-stage { display: inline-block; font-size: .7rem; font-weight: 700; border-radius: 999px;
+                padding: .12rem .5rem; margin-right: .25rem; }
+    .ce-bar { height: .45rem; border-radius: 999px; background: #e4e4e7; overflow: hidden; }
+    .ce-bar > span { display: block; height: 100%; }
+    .ce-runs { background: #fff; border: 1px solid var(--line); border-radius: .75rem; overflow: hidden; }
+    .ce-run { cursor: pointer; padding: .5rem .75rem; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .ce-run:last-child { border-bottom: 0; }
+    .ce-run:hover { background: #fafafa; }
+    .ce-run.active { background: #eff6ff; box-shadow: inset 3px 0 0 var(--blue); }
+    .ce-run strong { font-size: 13px; }
     .turn { border: 1px solid #e4e4e7; border-radius: .6rem; padding: .75rem; margin: .6rem 0; }
     .turn.ok { border-color: #a7f3d0; background: #f0fdf4; }
     .turn.bad { border-color: #fecaca; background: #fef2f2; }
@@ -390,69 +405,127 @@ def _html_page() -> bytes:
     .lens-card ul.compact li { margin: .15rem 0; line-height: 1.35; }
     .lens-card .empty-note { color: #a1a1aa; font-style: italic; }
     .prog-sot li { margin: .2rem 0; font-size: .82rem; }
+
+    /* ── Redesign 11-12: the product's visual language (AGENTS.md "Visual design language").
+       Charcoal = primary actions + active navigation · blue = interaction (links, focus) ·
+       violet = AI · grey = panels and secondary controls · semantic colours only for real
+       exceptions. Type scale 11 / 12 / 13 / 16. Explanations behind one ⓘ. ── */
+    :root { --ink:#202124; --ink2:#3f3f46; --mute:#71717a; --line:#e4e4e7; --panel:#fafafa;
+            --bg:#f4f4f5; --blue:#2563eb; --violet:#8753e8; --ok:#047857; --bad:#b91c1c; }
+    body { background: var(--bg); color: var(--ink); font-size: 13px; }
+    .side { position: fixed; inset: 0 auto 0 0; width: 14rem; background: #fff;
+            border-right: 1px solid var(--line); display: flex; flex-direction: column;
+            padding: .9rem .6rem; box-sizing: border-box; z-index: 30; overflow-y: auto; }
+    .side-brand { display: flex; gap: .5rem; align-items: center; padding: 0 .4rem .9rem; }
+    .side-brand .brand-mark { margin: 0; width: 1.5rem; height: 1.5rem; }
+    .side-name { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+    .side-sub { font-size: 11px; color: var(--mute); }
+    .side-nav { display: flex; flex-direction: column; gap: .8rem; flex: 1; }
+    .side-group { display: flex; flex-direction: column; gap: 1px; }
+    .side-label { font-size: 11px; font-weight: 600; color: var(--mute); padding: 0 .55rem .25rem; }
+    .side-nav button { text-align: left; background: transparent; color: var(--ink2);
+            border: 0; border-radius: .45rem; padding: .32rem .55rem; font-size: 13px;
+            font-weight: 500; cursor: pointer; }
+    .side-nav button:hover { background: #f4f4f5; color: var(--ink); }
+    .side-nav button.active { background: var(--ink); color: #fff; }
+    .side-foot { border-top: 1px solid var(--line); padding: .6rem .4rem 0; margin-top: .6rem; }
+    .side-foot .chrome-bar { font-size: 11px; line-height: 1.4; white-space: normal;
+            background: transparent; border: 0; padding: 0; margin: 0; }
+    .side-foot .status-pill { display: block; margin: .3rem 0 0; padding: 0; font-size: 11px; }
+    main { margin-left: 14rem; max-width: 72rem; padding: 1.25rem 1.75rem 3rem; }
+    .card { border-radius: .75rem; border-color: var(--line); box-shadow: none; padding: 1rem 1.1rem; }
+    .view-title { font-size: 16px; font-weight: 650; margin: 0 0 .25rem;
+            display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+    .view-lead { font-size: 13px; color: var(--ink2); }
+    .view-lead.folded { display: none; }
+    .muted { font-size: 12px; color: var(--mute); }
+    button { background: var(--ink); border-radius: .45rem; font-size: 12px; padding: .42rem .8rem; }
+    button.secondary { background: #fff; color: var(--ink); border: 1px solid #d4d4d8; border-radius: 999px; }
+    button.secondary:hover { background: #f4f4f5; }
+    a { color: var(--blue); }
+    a.map-cta { background: var(--ink); border-color: var(--ink); color: #fff !important;
+            border-radius: .45rem; font-size: 12px; }
+    a.map-cta:hover { background: #3f3f46; }
+    a.map-cta.secondary { background: #fff; color: var(--ink) !important; border: 1px solid #d4d4d8;
+            border-radius: 999px; }
+    a.map-cta.secondary:hover { background: #f4f4f5; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    input, select, textarea { font-size: 12px; border-radius: .45rem; }
+    .badge { font-size: 11px; }
+    table { font-size: 12px; }
+    /* Lists of results read as one list of compact rows, not a stack of cards. */
+    #backlogList, #contentReport > details { }
+    #backlogList { background: #fff; border: 1px solid var(--line); border-radius: .75rem; overflow: hidden; }
+    #backlogList > details.scenario-result { margin: 0; border: 0; border-radius: 0;
+            border-bottom: 1px solid var(--line); box-shadow: none; }
+    #backlogList > details.scenario-result:last-child { border-bottom: 0; }
+    details.scenario-result > summary { padding: .45rem .75rem; font-size: 12px; gap: .45rem; }
+    details.scenario-result > summary .muted { font-size: 12px; }
+    .patch-banner { background: var(--panel) !important; border: 1px solid var(--line) !important;
+            color: var(--ink2) !important; font-size: 11px !important; border-radius: .6rem !important; }
+    .patch-banner strong { color: var(--ink) !important; }
+    .info-dot { font-family: Georgia, "Times New Roman", serif; font-style: italic; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+            width: 1.05rem; height: 1.05rem; border-radius: 999px; font-size: 11px; color: var(--mute);
+            border: 1px solid #d4d4d8; background: #fff; font-weight: 600; line-height: 1; user-select: none; }
+    .info-dot:hover, .info-dot.on { color: var(--ink); border-color: var(--ink); }
+    [data-tooltip] { position: relative; }
+    [data-tooltip]:hover::after { content: attr(data-tooltip); position: absolute; left: 0; top: 100%;
+            margin-top: .35rem; background: var(--ink); color: #fff; font-size: 11px; font-weight: 400;
+            line-height: 1.4; padding: .35rem .55rem; border-radius: .4rem; width: max-content;
+            max-width: 18rem; white-space: normal; z-index: 50; pointer-events: none; text-align: left; }
+    .side-nav [data-tooltip]:hover::after { left: calc(100% + .4rem); top: 0; margin-top: 0; }
+    @media (max-width: 760px) {
+      .side { position: static; width: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .side-nav { flex-direction: row; flex-wrap: wrap; }
+      main { margin-left: 0; padding: 1rem; }
+    }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <h1>
-        <img class="brand-mark" src="/static/favicon.svg" width="24" height="24" alt="" />
-        Conjecture · Conversational Agentic Quality
-      </h1>
-      <div class="brand-sub">
-        <span class="brand-badge">Quality Console</span>
-        <p class="tagline">
-          Simple loop:
-          <strong>categories</strong> → <strong>failure modes</strong> → <strong>incidents</strong>
-          → <strong>mitigations in code</strong> → <strong>observation</strong>
-          (when evidence still shows the burn).
-          Doctrine unchanged — this console only navigates it.
-        </p>
-      </div>
-      <nav class="app-nav nav-rows" id="appNav" aria-label="Console sections">
-        <div class="nav-row">
-          <span class="nav-group-label">Offers</span>
-          <button type="button" data-view="architecture-audit"
-            title="Offer 2: multi-agent architecture audit (consistency, resilience, inventory) — ledger-optional">Architecture Audit</button>
-          <button type="button" data-view="home"
-            title="Offer 1 home: multi-turn proof &amp; seal map">Proof &amp; Seal map</button>
+  <aside class="side">
+    <div class="side-brand">
+      <img class="brand-mark" src="/static/favicon.svg" width="22" height="22" alt="" />
+      <div>
+        <div class="side-name">Conjecture</div>
+        <div class="side-sub">Quality console
+          <span class="info-dot" data-tooltip="Categories → failure modes → incidents → mitigations in code → observation. Doctrine is unchanged; this console only navigates it.">i</span>
         </div>
-        <div class="nav-row">
-          <span class="nav-group-label">Browse</span>
-          <button type="button" class="active" data-view="home">Map</button>
-          <button type="button" data-view="laws" title="All named failure modes (registry)">Failure modes</button>
-          <button type="button" data-view="program-authority" title="Category: who may own the turn / pin / open">Authority</button>
-          <button type="button" data-view="program-laundry" title="Category: free-text meaning / policy as laundry">Laundry</button>
-          <button type="button" data-view="program-antipattern" title="Category: SDK construction anti-patterns A1–A19">Antipatterns</button>
-          <button type="button" data-view="program-voice" title="Category: product voice / delivery feel">Voice</button>
-          <button type="button" data-view="program-purity" title="Category: seal grade scoreboards">Purity</button>
-          <button type="button" data-view="program-memory" title="Category: SoR · View · continuity">Memory</button>
-          <button type="button" data-view="program-surface" title="Where each mode is still unproven on product surfaces">Where unproven</button>
-        </div>
-        <div class="nav-row">
-          <span class="nav-group-label">Observe &amp; prove</span>
-          <button type="button" data-view="techniques" title="How static vs multi-turn proof runs">How we run</button>
-          <button type="button" data-view="seek" title="Observation battery — join / ratchets / live evidence">Observe</button>
-          <button type="button" data-view="candidates" title="Author multi-turn scenarios from incidents">Author</button>
-          <button type="button" data-view="run" title="Run multi-turn proof">Runner</button>
-          <button type="button" data-view="backlog" title="Verdict / backlog from runs">Verdict</button>
-          <span class="nav-group-label" style="margin-left:.35rem">Ops</span>
-          <button type="button" data-view="demo">Demo</button>
-          <button type="button" data-view="admin">Admin</button>
-          <button type="button" data-view="help">Help</button>
-          <span class="status-pill" id="status" title="Status"></span>
-        </div>
-      </nav>
-      <div class="chrome-bar" id="seekChrome" title="Last observation battery summary">observation: loading…</div>
-      <div class="chrome-bar viz-chrome" id="vizChrome">
-        <strong style="color:#1d4ed8">WHERE UNPROVEN</strong>
-        <span class="muted" style="font-size:.78rem">surfaces × failure modes — empty = still open</span>
-        <a class="map-cta" href="#/home" id="btnJumpViz" style="margin-left:.35rem;padding:.35rem .75rem;font-size:.8rem">Show on Map ↓</a>
-        <a class="map-cta secondary" href="/surface-map" target="_blank" rel="noopener"
-           style="padding:.35rem .75rem;font-size:.8rem">Full page ↗</a>
       </div>
     </div>
-  </header>
+    <nav class="app-nav side-nav" id="appNav" aria-label="Console sections">
+      <div class="side-group"><div class="side-label">Overview</div>
+        <button type="button" class="active" data-view="home" data-tooltip="Proof & seal map — surfaces × failure modes">Map</button>
+        <button type="button" data-view="architecture-audit" data-tooltip="Multi-agent architecture audit — consistency, resilience, inventory">Architecture audit</button>
+      </div>
+      <div class="side-group"><div class="side-label">Failure modes</div>
+        <button type="button" data-view="laws" data-tooltip="Every named failure mode in the registry">All failure modes</button>
+        <button type="button" data-view="program-authority" data-tooltip="Who may own the turn, pin and open">Authority</button>
+        <button type="button" data-view="program-laundry" data-tooltip="Free-text meaning or policy hidden in phrase lists">Laundry</button>
+        <button type="button" data-view="program-antipattern" data-tooltip="Construction anti-patterns A1–A22">Antipatterns</button>
+        <button type="button" data-view="program-voice" data-tooltip="Product voice and delivery">Voice</button>
+        <button type="button" data-view="program-purity" data-tooltip="Seal-grade scoreboards">Purity</button>
+        <button type="button" data-view="program-memory" data-tooltip="System of record, View, continuity">Memory</button>
+        <button type="button" data-view="program-surface" data-tooltip="Where each mode is still unproven on product surfaces">Where unproven</button>
+      </div>
+      <div class="side-group"><div class="side-label">Prove</div>
+        <button type="button" data-view="techniques" data-tooltip="Static vs multi-turn proof techniques">How we run</button>
+        <button type="button" data-view="seek" data-tooltip="Evidence battery — join, ratchets, live ledger audit">Observe</button>
+        <button type="button" data-view="candidates" data-tooltip="Author multi-turn scenarios from incidents">Author</button>
+        <button type="button" data-view="run" data-tooltip="Run multi-turn proof">Runner</button>
+        <button type="button" data-view="backlog" data-tooltip="Review what the runs found">Verdict</button>
+        <button type="button" data-view="content" data-tooltip="What was said, stage by stage — DeepEval on the answer">Content</button>
+      </div>
+      <div class="side-group"><div class="side-label">Ops</div>
+        <button type="button" data-view="demo">Demo</button>
+        <button type="button" data-view="admin">Admin</button>
+        <button type="button" data-view="help">Help</button>
+      </div>
+    </nav>
+    <div class="side-foot">
+      <div class="chrome-bar" id="seekChrome">observation: loading…</div>
+      <span class="status-pill" id="status"></span>
+    </div>
+  </aside>
 <main>
 
   <!-- ========== OFFER 2 · ARCHITECTURE AUDIT ========== -->
@@ -658,7 +731,7 @@ def _html_page() -> bytes:
       <strong>observation</strong> (still red on surfaces?).
       Source: <span class="mono">failure-mode-registry.yaml</span>.
     </p>
-    <p class="muted" style="font-size:.82rem;line-height:1.45;margin:.35rem 0 .5rem">
+    <p class="view-lead muted" style="margin:.35rem 0 .5rem">
       <strong>How to read a row (simple):</strong>
       <em>named?</em> = mode is in the book ·
       <em>mitigations</em> = code ratchets ·
@@ -667,7 +740,7 @@ def _html_page() -> bytes:
       (not “product broken %”).
       Named/sealed in the book does <strong>not</strong> mean every product surface is proven.
     </p>
-    <p class="muted" style="font-size:.8rem;margin:0 0 .35rem">
+    <p class="view-lead muted" style="margin:0 0 .35rem">
       <strong>Category</strong> = how you enter the problem (authority, laundry, antipattern, voice, purity, memory).
       A mode can have several. <strong>Slice</strong> = where it breaks in the control plane (ownership, delivery, …).
     </p>
@@ -1055,12 +1128,12 @@ python -m regression_suite.conjecture_expansion daily_seek --registry-id owner_s
       <a class="deep-link" href="#/techniques">How we run</a>.
       Each finished run enqueues a <strong>Verdict</strong> item for session review.
     </p>
-    <ol class="muted" style="margin:0 0 1rem; padding-left:1.25rem; font-size:.88rem; line-height:1.5">
+    <ol class="view-lead muted" style="margin:0 0 1rem; padding-left:1.25rem">
       <li><strong>Candidates</strong> — tick rows (or filter → Select all visible).</li>
       <li><strong>Runner</strong> — Selected only · adapter · <strong>Run batch</strong>.</li>
       <li><strong>Verdict</strong> — session agent classifies · suggests fixes · <code>fix</code> closes with patch.</li>
     </ol>
-    <p class="muted" style="margin:0 0 .75rem; font-size:.85rem">
+    <p class="view-lead muted" style="margin:0 0 .75rem">
       One scenario: open it on Candidates → <strong>Run (host HTTP)</strong> on the detail page.
     </p>
     <div class="row" style="margin-bottom:.75rem">
@@ -1120,7 +1193,7 @@ python -m regression_suite.conjecture_expansion daily_seek --registry-id owner_s
       </div>
       <button type="button" class="secondary" id="btnBacklogRefresh">Refresh</button>
     </div>
-    <p class="muted" style="margin:.75rem 0 0;font-size:.85rem">
+    <p class="view-lead muted" style="margin:.5rem 0 0">
       Pipeline: <strong>Candidates</strong> → <strong>Runner</strong> → <strong>Verdict</strong>.
       Session commands: <strong>review conjecture backlog</strong> → <strong>fix</strong>
       (open items close; patch documented on the closed item).
@@ -1129,6 +1202,32 @@ python -m regression_suite.conjecture_expansion daily_seek --registry-id owner_s
   </div>
   <div id="backlogList" class="muted">Loading backlog…</div>
   <div id="backlogDetail" style="display:none" class="card"></div>
+  </section>
+
+  <!-- ========== CONTENT (content evaluation) ========== -->
+  <section class="app-view" id="view-content" data-view="content">
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="view-title">Content evaluation</div>
+        <p class="view-lead" style="margin:0">
+          <strong>What was said, stage by stage.</strong> Each golden case names where its answer
+          must come from. <strong>Retrieve</strong> and <strong>select</strong> are checked by code;
+          the <strong>answer</strong> is judged by DeepEval (faithfulness, answer relevancy).
+          A failure names the stage that broke.
+        </p>
+      </div>
+      <button type="button" class="secondary" id="btnContentRefresh">Refresh</button>
+    </div>
+    <p class="muted mono" id="contentMeta" style="margin:.5rem 0 0;font-size:.78rem"></p>
+    <p class="view-lead muted" style="margin:.5rem 0 0">
+      Runs are started from the command line with a stated model-call budget; this view only reads their reports.
+    </p>
+  </div>
+  <div class="row" style="gap:1rem;align-items:flex-start">
+    <div id="contentRuns" style="flex:0 0 19rem" class="muted">Loading reports…</div>
+    <div id="contentReport" style="flex:1;min-width:0"></div>
+  </div>
   </section>
 
   <!-- ========== ADMIN ========== -->
@@ -1658,6 +1757,46 @@ assert result.passed</pre>
   </section>
 </main>
 <script>
+// ── Redesign 11-12 (product design language) ──
+// 1. Native title= tooltips become the styled data-tooltip, including on rows rendered later.
+(function () {
+  function convert(root) {
+    (root.querySelectorAll ? root.querySelectorAll('[title]') : []).forEach(el => {
+      if (el.tagName === 'IFRAME' || el.closest('svg')) return;
+      const t = el.getAttribute('title');
+      if (t && !el.hasAttribute('data-tooltip')) el.setAttribute('data-tooltip', t);
+      if (t && !el.hasAttribute('aria-label') && !el.textContent.trim()) el.setAttribute('aria-label', t);
+      el.removeAttribute('title');
+    });
+  }
+  // 2. Each screen's explanation folds behind one ⓘ beside its title.
+  function foldLeads(root) {
+    (root.querySelectorAll ? root.querySelectorAll('.view-lead:not([data-folded])') : []).forEach(lead => {
+      lead.setAttribute('data-folded', '1');
+      lead.classList.add('folded');
+      const scope = lead.closest('.card') || lead.parentElement;
+      const title = scope && scope.querySelector('.view-title');
+      // One ⓘ per screen title: further explanation paragraphs of the same card join it.
+      const existing = title && title.querySelector(':scope > .info-dot');
+      if (existing) { existing._leads.push(lead); return; }
+      const dot = document.createElement('span');
+      dot.className = 'info-dot'; dot.textContent = 'i'; dot.setAttribute('role', 'button');
+      dot._leads = [lead];
+      dot.setAttribute('aria-label', 'What this screen is'); dot.tabIndex = 0;
+      const toggle = () => { dot.classList.toggle('on'); dot._leads.forEach(l => l.classList.toggle('folded', !dot.classList.contains('on'))); };
+      dot.onclick = toggle; dot.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+      (title || lead.parentElement).appendChild(dot);
+    });
+  }
+  function apply(root) { convert(root); foldLeads(root); }
+  document.addEventListener('DOMContentLoaded', () => {
+    apply(document);
+    new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) apply(n.parentElement || n); })))
+      .observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
+<script>
 /* ---- App shell: top-level views ---- */
 const PROGRAM_NAV = {
   'program-authority': 'cognitive_authority',
@@ -1691,6 +1830,7 @@ function showAppView(view) {
   window._appView = view || v;
   if (v === 'run') updateRunSelectedHint();
   if (v === 'backlog') loadBacklog();
+  if (v === 'content') loadContentReports();
   if (v === 'admin') loadAdminStatus();
   if (v === 'home') loadHome();
   if (v === 'laws') loadLaws();
@@ -3436,6 +3576,112 @@ function renderBacklogItemDetail(it) {
 
   return html;
 }
+// ── Content evaluation (reports written by a host's content-eval runner) ──
+// Stage names are neutral; colour is for pass / fail only (violet is reserved for AI).
+const CE_STAGE_COLOR = { retrieve: '#52525b', select: '#52525b', answer: '#52525b' };
+function cePct(x) { return (x === null || x === undefined) ? '—' : Math.round(x * 100) + '%'; }
+function ceScoreColor(s) { return s >= 0.7 ? '#059669' : (s >= 0.5 ? '#d97706' : '#dc2626'); }
+async function loadContentReports() {
+  const box = document.getElementById('contentRuns');
+  const meta = document.getElementById('contentMeta');
+  try {
+    const d = await (await fetch('/api/content-reports')).json();
+    if (meta) meta.textContent = 'dir=' + (d.dir || '') + ' · reports=' + (d.count || 0);
+    const items = d.items || [];
+    if (!items.length) {
+      box.innerHTML = '<div class="card"><p class="muted">No content reports yet. Run a content evaluation '
+        + 'and point <span class="mono">CONJECTURE_CONTENT_REPORTS_DIR</span> at its output.</p></div>';
+      document.getElementById('contentReport').innerHTML = '';
+      return;
+    }
+    let html = '';
+    items.forEach((it, i) => {
+      const ok = it.passed === it.cases;
+      const forb = (it.rates || {}).forbidden_selection;
+      html += '<div class="ce-run" data-file="' + escapeHtml(it.file) + '">'
+        + '<div class="row" style="justify-content:space-between">'
+        + '<strong>' + escapeHtml(it.suite || 'report') + '</strong>'
+        + '<span class="badge ' + (ok ? 'pass' : 'fail') + '">' + (it.passed ?? '?') + '/' + (it.cases ?? '?') + '</span></div>'
+        + '<div class="muted mono" style="font-size:.72rem">' + escapeHtml((it.ran_at || '').replace('T', ' ').slice(0, 19)) + '</div>'
+        + '<div style="font-size:.75rem;margin-top:.25rem">'
+        + (it.stages || []).map(st => '<span class="ce-stage" style="background:' + CE_STAGE_COLOR[st] + '22;color:' + CE_STAGE_COLOR[st] + '">' + escapeHtml(st) + '</span>').join('')
+        + '</div><div class="muted" style="font-size:.72rem;margin-top:.2rem">'
+        + 'model calls ' + (it.model_calls ?? '—') + (forb ? ' · <span style="color:#b91c1c">forbidden ' + cePct(forb) + '</span>' : '')
+        + '</div></div>';
+    });
+    box.innerHTML = '<div class="ce-runs">' + html + '</div>';
+    box.querySelectorAll('.ce-run').forEach(el => { el.onclick = () => openContentReport(el.getAttribute('data-file')); });
+    const want = window._ceFile && items.some(x => x.file === window._ceFile) ? window._ceFile : items[0].file;
+    openContentReport(want);
+  } catch (e) {
+    box.innerHTML = '<div class="card"><p class="muted">Could not load reports: ' + escapeHtml(String(e)) + '</p></div>';
+  }
+}
+async function openContentReport(file) {
+  window._ceFile = file;
+  document.querySelectorAll('#contentRuns .ce-run').forEach(el => el.classList.toggle('active', el.getAttribute('data-file') === file));
+  const out = document.getElementById('contentReport');
+  const r = await fetch('/api/content-reports/' + encodeURIComponent(file));
+  if (!r.ok) { out.innerHTML = '<div class="card"><p class="muted">Report not found.</p></div>'; return; }
+  const d = await r.json();
+  const rates = d.rates || {};
+  const card = (n, l, bad) => '<div class="ce-rate' + (bad ? ' bad' : '') + '"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>';
+  let html = '<div class="card"><div class="ce-rates">'
+    + card((d.passed ?? '?') + '/' + (d.cases ?? '?'), 'cases passed', d.passed !== d.cases)
+    + card(cePct(rates.top1), 'Top-1 (expected source)')
+    + card(cePct(rates.acceptable_hit), 'acceptable hit')
+    + card(cePct(rates.forbidden_selection), 'forbidden selection', (rates.forbidden_selection || 0) > 0)
+    + card(cePct(rates.abstention_correct), 'abstained when told');
+  Object.entries(d.judged_means || {}).forEach(([m, v]) => { html += card(v === null ? '—' : v.toFixed(2), escapeHtml(m.replace('_', ' ')) + ' (mean)', v !== null && v < 0.7); });
+  html += card(d.model_calls ?? '—', 'model calls · ' + (d.seconds ?? '—') + 's') + '</div>';
+  const bs = d.by_stage || {};
+  html += '<div style="margin-top:.75rem;font-size:.82rem">';
+  Object.entries(bs).forEach(([st, v]) => {
+    const tot = (v.held || 0) + (v.failed || []).length;
+    html += '<div style="margin:.2rem 0"><span class="ce-stage" style="background:' + CE_STAGE_COLOR[st] + '22;color:' + CE_STAGE_COLOR[st] + '">' + escapeHtml(st) + '</span>'
+      + ' held ' + (v.held || 0) + '/' + tot
+      + ((v.failed || []).length ? ' · <span class="muted">failed ' + v.failed.map(escapeHtml).join(', ') + '</span>' : '') + '</div>';
+  });
+  html += '</div>';
+  const pins = d.pins || {};
+  html += '<p class="muted mono" style="font-size:.72rem;margin:.6rem 0 0">'
+    + Object.entries(pins).filter(([, v]) => v !== null && v !== undefined).map(([k, v]) => escapeHtml(k) + '=' + escapeHtml(String(v))).join(' · ')
+    + (d.budget && d.budget.stopped ? ' · <span style="color:#b91c1c">STOPPED: ' + escapeHtml(d.budget.stopped) + '</span>' : '')
+    + '</p></div>';
+  (d.results || []).forEach(c => {
+    const failed = new Set();
+    (c.failures || []).forEach(f => {
+      if (/retrieved_/.test(f)) failed.add('retrieve');
+      else if (/selected_|abstained/.test(f)) failed.add('select');
+      else if (/judged_at_least/.test(f)) failed.add('answer');
+    });
+    html += '<details class="scenario-result ' + (c.passed ? 'ok' : 'bad') + '"><summary>'
+      + '<span class="badge ' + (c.passed ? 'pass' : 'fail') + '">' + (c.passed ? 'PASS' : 'FAIL') + '</span> '
+      + '<strong>' + escapeHtml(c.case) + '</strong> '
+      + (d.stages || []).map(st => '<span class="ce-stage" style="background:' + (failed.has(st) ? '#fef2f2' : '#ecfdf5') + ';color:' + (failed.has(st) ? '#b91c1c' : '#047857') + '">' + (failed.has(st) ? '✗ ' : '✓ ') + escapeHtml(st) + '</span>').join('')
+      + ' <span class="muted mono" style="font-size:.75rem">→ ' + escapeHtml(c.selected || 'abstained') + (c.via ? ' · via ' + escapeHtml(c.via) : '') + '</span>'
+      + '</summary><div style="padding:.5rem .25rem">';
+    if ((c.failures || []).length) {
+      html += '<ul style="margin:.25rem 0 .6rem;font-size:.8rem;color:#b91c1c">' + c.failures.map(f => '<li>' + escapeHtml(f.replace(/^turn\[0\] /, '')) + '</li>').join('') + '</ul>';
+    }
+    const judged = c.judged || {};
+    Object.entries(judged).forEach(([m, j]) => {
+      const s = Number(j.score || 0);
+      html += '<div style="margin:.4rem 0"><div class="row" style="justify-content:space-between;font-size:.8rem"><strong>' + escapeHtml(m.replace('_', ' ')) + '</strong><span class="mono">' + s.toFixed(2) + '</span></div>'
+        + '<div class="ce-bar"><span style="width:' + Math.round(s * 100) + '%;background:' + ceScoreColor(s) + '"></span></div>'
+        + (j.reason ? '<div class="muted" style="font-size:.76rem;margin-top:.2rem">' + escapeHtml(j.reason) + '</div>' : '') + '</div>';
+    });
+    if ((c.retrieved || []).length) {
+      html += '<div style="font-size:.78rem;margin:.4rem 0"><span class="muted">candidates:</span> <span class="mono">' + c.retrieved.map(escapeHtml).join(' · ') + '</span></div>';
+    }
+    if (c.answer) {
+      html += '<div style="font-size:.8rem;margin-top:.4rem;white-space:pre-wrap;border-left:3px solid #e4e4e7;padding-left:.6rem">' + escapeHtml(c.answer) + '</div>';
+    }
+    html += '</div></details>';
+  });
+  out.innerHTML = html;
+}
+
 async function loadBacklog() {
   const list = document.getElementById('backlogList');
   const meta = document.getElementById('backlogMeta');
@@ -3469,8 +3715,9 @@ async function loadBacklog() {
       html += '<details class="scenario-result ' + closedCls + '">';
       html += '<summary>'
         + '<span class="badge ' + badgeCls + '">' + escapeHtml(cl || st) + '</span>'
-        + '<span class="badge ' + (st === 'closed' ? 'pass' : (st === 'backlog_fix' ? 'fail' : 'partial')) + '">'
-        + escapeHtml(st) + '</span>'
+        // One badge when status and classification say the same thing ("needs_review" twice).
+        + ((cl && cl !== st) ? '<span class="badge ' + (st === 'closed' ? 'pass' : (st === 'backlog_fix' ? 'fail' : 'partial')) + '">'
+          + escapeHtml(st) + '</span>' : '')
         + '<span class="mono">' + escapeHtml(it.scenario_id || '') + '</span>'
         + (it.failure_mode
           ? '<span class="badge open">' + escapeHtml(it.failure_mode) + '</span>' : '')
@@ -3526,6 +3773,7 @@ document.querySelectorAll('#appNav button[data-view]').forEach(btn => {
     else if (v === 'candidates') location.hash = '#/candidates';
     else if (v === 'run') location.hash = '#/run';
     else if (v === 'backlog') location.hash = '#/verdict';
+    else if (v === 'content') location.hash = '#/content';
     else if (v === 'admin' || v === 'cleanup') location.hash = '#/admin';
     else if (v === 'demo') location.hash = '#/demo';
     else if (v === 'help') location.hash = '#/help';
@@ -3946,7 +4194,7 @@ function parseHash() {
     'home', 'architecture-audit', 'audit',
     'laws', 'seek', 'candidates', 'run', 'runner',
     'techniques', 'how-we-run', 'proof',
-    'backlog', 'verdict', 'admin', 'cleanup', 'demo', 'help',
+    'backlog', 'verdict', 'content', 'admin', 'cleanup', 'demo', 'help',
     'program-laundry', 'program-antipattern', 'program-voice',
     'program-purity', 'program-memory', 'program-surface', 'program-authority',
     'map', 'approach',
@@ -4978,6 +5226,7 @@ function routeFromHash() {
   }
   if (view === 'run') updateRunSelectedHint();
   if (view === 'backlog') loadBacklog();
+  if (view === 'content') loadContentReports();
   if (view === 'admin') loadAdminStatus();
   if (view === 'demo') loadStory();
   if (view === 'laws') {
@@ -4997,6 +5246,7 @@ document.getElementById('btnAdminRefresh').onclick = () => loadAdminStatus();
 const btnLog = document.getElementById('btnRunnerLogRefresh');
 if (btnLog) btnLog.onclick = () => loadRunnerLog();
 document.getElementById('btnBacklogRefresh').onclick = () => loadBacklog();
+document.getElementById('btnContentRefresh').onclick = () => loadContentReports();
 document.getElementById('btnGoRunFromList').onclick = () => {
   location.hash = '#/run';
 };
@@ -5444,6 +5694,20 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                     _json_response(self, 200, console_admin_status())
                 except Exception as exc:  # noqa: BLE001
                     _json_response(self, 500, {"ok": False, "error": str(exc)})
+                return
+            if path == "/api/content-reports":
+                from conjecture_behaviour_runner.content_reports import list_reports
+
+                _json_response(self, 200, list_reports())
+                return
+            if path.startswith("/api/content-reports/"):
+                from conjecture_behaviour_runner.content_reports import get_report
+
+                rep = get_report(unquote(path.rsplit("/", 1)[-1]))
+                if rep is None:
+                    _json_response(self, 404, {"error": "report not found"})
+                else:
+                    _json_response(self, 200, rep)
                 return
             if path == "/api/backlog":
                 from conjecture_behaviour_runner.review_backlog import list_backlog

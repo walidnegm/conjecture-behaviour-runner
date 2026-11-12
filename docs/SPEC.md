@@ -6,14 +6,14 @@
 | **Document ID** | `CBR-SPEC` |
 | **Canonical path** | [`docs/SPEC.md`](./SPEC.md) |
 | **Title** | Conjecture Behaviour Runner Specification |
-| **Version** | **0.1.6** (alpha) — candidate discovery (expand + invent); optional env LLM propose |
+| **Version** | **0.1.7** (alpha) — content evaluation: stage-by-stage content invariants + optional DeepEval judge |
 | **Status** | **Active** — authoritative for claim, Script/verifier contracts, scope |
 | **Audience** | Integrators, contributors, agent authors of goldens |
 | **Companion face** | [README](../README.md) — **lead with planted-bug demo**; use cases; trap line |
 | **Agent coder guide** | [AGENTS.md](../AGENTS.md) — integrate host + author goldens |
 | **Prompt seed** | [prompts/conjecture_script_author.seed.md](../prompts/conjecture_script_author.seed.md) — trajectory + ODD → Script |
 | **Candidate discovery** | [templates/candidate_author/README.md](../templates/candidate_author/README.md) — expand · invent · propose (§2.2) |
-| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.6** (see `_version.py`) |
+| **Implementation package** | `src/conjecture_behaviour_runner/` · version **0.1.7** (see `_version.py`) |
 | **Claim hierarchy (locked)** | **Face (plain):** catch agent bugs that still look fine in chat · **Principle:** LLM proposes · code enforces (ledger/handoff rule-set) · **Precise:** freeze-safe state-law gates · **Technical:** envelopes / pin-freeze · **Gloss:** CCP-shaped conformance; ledger store agnostic — see §0 |
 | **Package** | `conjecture-behaviour-runner` · import `conjecture_behaviour_runner` · **MIT** |
 | **Inspiration / primary pattern** | [Conversation Control Plane](https://github.com/walidnegm/conversation-control-plane) — hosts isomorphic to that format are the apt application |
@@ -399,8 +399,9 @@ Same stack as §0 (abbreviated execution view):
        → OBSERVED TRAJECTORY → Verifier → Report
 ```
 
-| Layer today (0.1.6) | Status |
+| Layer today (0.1.7) | Status |
 |---|---|
+| Content invariants + golden cases + optional DeepEval judge | **Shipped** — §2.3 |
 | `ConjectureScript` / `run_script` / `RunResult` | **Stable** |
 | CognitionProvider + FreezeStore (stub / freeze / record) | **Shipped** — local/cloud still host-supplied |
 | Verifier: standard + temporal + outcome-specific | **Shipped** — richer temporal / domain kinds open |
@@ -592,6 +593,7 @@ artifact today: pin + source + freeze_key + optional evidence.
 | **1 next** | Playwright / LangGraph / Temporal / Crew adapters; agent synthesizer **with required expected**; fail closed if golden has no expected | open |
 | **0.1.5** | HttpJsonAdapter + loopback HTTP host e2e + planted bugs over HTTP; face frozen-cognition honesty | ✅ |
 | **0.1.6** | Candidate discovery: **inventor** (geometry) + **expander** (cross-product); optional env LLM propose; caps default 4 | ✅ |
+| **0.1.7** | Content evaluation: **stage-by-stage content invariants** (retrieve · select · answer), golden cases, Top-1 / acceptable-hit / **forbidden-selection** rates; optional **DeepEval** judge (§2.3) | ✅ |
 | **2** | Richer temporal ops; observation/domain ground truth; generation + shrink; production runner (shards, retries) | open |
 | **3** | ODD corpus / explorer / N-run **contract hold-rate** distributions | open |
 
@@ -756,6 +758,40 @@ Face docs: [README — Candidate author](../README.md#candidate-author-expand--i
 Patterns inventory: [incidents/CATALOG.md](../incidents/CATALOG.md).
 
 ---
+
+## 2.3 Content evaluation (normative, 0.1.7)
+
+Behaviour invariants prove *who* acted and *what state* the system holds. They pass a
+turn that lands in the right place and says something wrong. Content invariants grade
+*what was said* for retrieval-backed answers, **one stage at a time**, so a failure names
+the stage that broke:
+
+| Stage | Question | Checked by | Kinds |
+|---|---|---|---|
+| retrieve | Was the expected source among the candidates? | code | `retrieved_includes`, `retrieved_excludes` |
+| select | Did the selector pick an acceptable source, never a forbidden one — or abstain when told? | code | `selected_in`, `selected_not_in`, `abstained` |
+| answer | Is the answer faithful to its sources and relevant to the question? | `ContentJudge` (an LLM) | `judged_at_least` |
+
+**Observation convention.** The host fills `TurnObservation.extras` with `question`,
+`answer`, `contexts`, `retrieved_ids` (best first) and `selected_id` (`None` = abstained).
+A missing key fails the invariant — missing is not "none".
+
+**Golden case** = utterance → expected `primary` · `acceptable` · `forbidden` · or
+`expect_abstain`, plus the judged metrics and thresholds. Expected answers are **sources,
+not text**: answer wording changes; where it must come from does not. `case_script`
+turns a case into a one-turn script; `summarize` reports **Top-1**, **acceptable-hit**,
+**abstention-correct** and **forbidden-selection** — reported on its own, because a
+confident wrong pick is the dangerous failure.
+
+**Judge laws.**
+
+1. Deterministic kinds never call a model. A run of retrieve + select is free.
+2. `judged_at_least` with no judge bound **fails closed**.
+3. The judge's model is passed in (`contrib.deepeval_judge.DeepEvalJudge(model=...)`), so
+   a host routes judge calls through its own gateway and the **run budget counts them**.
+   DeepEval's default hosted model is refused unless `allow_default_model=True`.
+4. A judge should not be the model being judged (self-preference bias) — choose another
+   family where possible.
 
 ## 2.1 Pipeline and ecosystem
 

@@ -167,7 +167,7 @@ The ledger can live anywhere (session DB, LangGraph, Temporal, Vercel AI session
 If you can project **your** owner/kind/pins after Act, you can import a Driver and get
 a **verdict**.
 
-MIT · **0.1.6** · [Bot0.ai](https://bot0.ai)
+MIT · **0.1.7** · [Bot0.ai](https://bot0.ai)
 
 ---
 
@@ -524,6 +524,47 @@ Defaults: **4** LLM proposals and **4** inventive scenarios per author turn
 fields: [`templates/candidate_author/README.md`](templates/candidate_author/README.md).
 
 ---
+
+## Content evaluation — grade what was said, stage by stage (0.1.7)
+
+Behaviour invariants pass a turn that lands in the right place and says something wrong.
+**Content invariants** grade retrieval-backed answers one stage at a time, so a failure
+names the stage that broke:
+
+| Stage | Question | Checked by |
+|---|---|---|
+| retrieve | Was the expected source among the candidates? | code |
+| select | Did it pick an acceptable source — never a forbidden one — or abstain when told? | code |
+| answer | Is the answer faithful to its sources and relevant to the question? | an LLM judge (DeepEval) |
+
+A **golden case** is an utterance and where its answer must come from — sources, not text:
+
+```python
+from conjecture_behaviour_runner import GoldenCase, case_script, run_script, summarize
+
+case = GoldenCase(
+    "throughput_method", "explain how you do throughput analysis",
+    primary="bottleneck-analysis-equations",
+    forbidden=("financial-model-vs-ai-analysis",),   # a confident wrong pick is the dangerous failure
+    judged={"faithfulness": 0.7, "answer_relevancy": 0.7},
+)
+result = run_script(case_script(case), adapter=my_adapter)   # adapter fills extras
+```
+
+Your adapter fills `extras`: `question`, `answer`, `contexts`, `retrieved_ids`, `selected_id`
+(`None` = abstained). `summarize(cases, selected)` reports **Top-1**, **acceptable-hit**,
+**abstention-correct** and **forbidden-selection**. Retrieve and select never call a model.
+
+The answer stage takes a judge — `pip install "conjecture-behaviour-runner[deepeval]"`:
+
+```python
+from conjecture_behaviour_runner.contrib.deepeval_judge import DeepEvalJudge
+my_adapter.content_judge = DeepEvalJudge(model=my_gateway_model)  # a DeepEvalBaseLLM
+```
+
+Pass your own model so judge calls go through your gateway and the run budget counts them;
+DeepEval's default hosted model is refused unless you opt in. No judge bound → judged
+invariants fail closed. Normative detail: [SPEC §2.3](docs/SPEC.md).
 
 ## Planted-bug table (machinery)
 

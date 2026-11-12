@@ -90,6 +90,71 @@ def check_trajectory_invariant(
                 )
         return None
 
+    if kind == "act_stable":
+        # The act the host DISPATCHED, turn by turn — `extras["act"]`.
+        #
+        # Cognition commits one canonical act; every later stage may refine
+        # refs, ASK, REJECT, DEFER, DENY or FAIL, but may not answer a
+        # DIFFERENT act. This is the cross-turn form of that law, and the
+        # reason it needs a trajectory check rather than a per-turn one: no
+        # single turn looks wrong. The failure is that turn 2 answered
+        # something turn 1 did not ask.
+        #
+        # `expected` is optional. Omit it to mean "whatever was committed
+        # first"; give an act id to pin it.
+        want = exp if isinstance(exp, str) and exp else None
+        acts = [
+            (t.get("extras") or {}).get("act")
+            if isinstance(t.get("extras"), Mapping) else None
+            for t in turn_observations
+        ]
+        seen = want
+        for i, act in enumerate(acts):
+            if act is None or act == "":
+                # A turn that dispatched no act cannot contradict one.
+                continue
+            if seen is None:
+                seen = act
+                continue
+            if act != seen:
+                return (
+                    f"act_stable: act changed {seen!r} → {act!r} at turn[{i}] "
+                    f"(acts={acts!r}) — downstream reinterpreted the act"
+                )
+        if want is not None and seen != want:
+            return f"act_stable: never saw act {want!r} (acts={acts!r})"
+        return None
+
+    if kind == "never_invented":
+        # Unresolved means ASK / REJECT / DEFER — never a fabricated answer.
+        #
+        # Reads `extras["grounded"]`: the host says, per turn, whether the act
+        # had everything it needed. Where it did NOT, the outcome must be one
+        # the product is allowed to give while it still does not know. Prose
+        # in that slot is the invention this forbids.
+        #
+        # `expected` is the allowed set; it defaults to ask/reject/defer so a
+        # script that simply names the kind gets the law.
+        allowed = exp if isinstance(exp, (list, tuple, set)) else None
+        if allowed is None:
+            allowed = ("ask", "reject", "defer")
+        allowed_norm = {str(a).strip().lower() for a in allowed}
+        for i, t in enumerate(turn_observations):
+            extras = t.get("extras") if isinstance(t.get("extras"), Mapping) else {}
+            if "grounded" not in extras:
+                # Silent when the host does not report it — an invariant that
+                # guesses is worse than one that abstains.
+                continue
+            if extras.get("grounded"):
+                continue
+            outcome = str(t.get("observed_outcome") or "").strip().lower()
+            if outcome not in allowed_norm:
+                return (
+                    f"never_invented: turn[{i}] was not grounded but answered "
+                    f"{outcome!r}; allowed {sorted(allowed_norm)!r}"
+                )
+        return None
+
     if kind == "owner_changes_at_most":
         # expected = int max number of changes (0 = never changes once set)
         try:
@@ -128,8 +193,8 @@ def check_trajectory_invariant(
         f"unknown trajectory invariant kind={kind!r} "
         f"(known: eventually_exclusive_owner, never_exclusive_owner, "
         f"always_exclusive_owner, eventually_outcome, never_outcome, "
-        f"always_pin_present, pin_stable, owner_changes_at_most, "
-        f"active_kind_sequence_prefix, always_true)"
+        f"always_pin_present, pin_stable, act_stable, never_invented, "
+        f"owner_changes_at_most, active_kind_sequence_prefix, always_true)"
     )
 
 
@@ -142,6 +207,8 @@ TRAJECTORY_INVARIANT_KINDS: tuple[str, ...] = (
     "never_outcome",
     "always_pin_present",
     "pin_stable",
+    "act_stable",
+    "never_invented",
     "owner_changes_at_most",
     "active_kind_sequence_prefix",
 )

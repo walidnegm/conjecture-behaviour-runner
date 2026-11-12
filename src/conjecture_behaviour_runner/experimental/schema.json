@@ -1,6 +1,7 @@
 {
   "$defs": {
     "Actor": {
+      "description": "Who initiates the step in a multi-turn scenario.\n\nScripts are not user-only: agent-initiated turns, agent-to-agent handoffs,\nand system/completion events are first-class. Roadmap phasing starts\nuser-centric (Slice 0 ``DialogueTurn``), then agent/system, then multi-agent.",
       "enum": [
         "user",
         "agent",
@@ -35,6 +36,23 @@
         "confidence": {
           "$ref": "#/$defs/EvidenceConfidence",
           "default": "medium"
+        },
+        "element": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Element"
+        },
+        "full_page": {
+          "default": false,
+          "title": "Full Page",
+          "type": "boolean"
         }
       },
       "required": [

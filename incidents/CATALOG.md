@@ -55,10 +55,10 @@ audit lens (same template as the Control Plane SDK — not a second doctrine).
 
 | What the user hits | id | portable_seed | Status |
 |--------------------|-----|---------------|--------|
+| One click, several different answers, none of them the act | `act_reinterpreted` | `act_reinterpreted_downstream` | **runnable** |
 | Wrong agent/task keeps talking after continue | `owner_steal` | `owner_steal_mid_continue` | **runnable** |
 | Locked record silently changes mid-flight | `pin_drop` | `drop_pin_mid_continue` | **runnable** |
 | Mid-flight work wiped / restarted | `illegal_restart` | `illegal_restart_mid_continue` | **runnable** |
-| Mid cost-out + “any recommendations?” re-loops sizing / free-form tips | `owner_steal` (neighbor) | `cost_out_recommend_no_leave` | **runnable** (host) / seed |
 | Stale recommendation route after project/workflow change | `wrong_delivery_leaf` | — | seed_pending (`rec_route_*` host slugs) |
 | Duplicate objective chip double-launches setup | `wrong_delivery_leaf` | — | seed_pending (`rec_route_duplicate_chip_idempotent`) |
 | “What am I waiting on?” → wrong leaf | `lost_activity_recall` | — | seed_pending |
@@ -123,6 +123,7 @@ Observation-shaped portable proof.
 
 | id | portable_seed | Prove |
 |----|---------------|--------|
+| `act_reinterpreted` | `act_reinterpreted_downstream` | healthy PASS / planted reinterpretation FAIL |
 | `owner_steal` | `owner_steal_mid_continue` | healthy PASS / planted steal FAIL |
 | `pin_drop` | `drop_pin_mid_continue` | |
 | `illegal_restart` | `illegal_restart_mid_continue` | |

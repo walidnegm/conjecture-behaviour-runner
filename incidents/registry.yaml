@@ -12,6 +12,21 @@ title: Conjecture portable failure-mode registry
 doctrine: LLM proposes · code enforces
 dimension: D1 — cognition ↔ deterministic execution (conversational authority)
 entries:
+- id: act_reinterpreted
+  failure_mode: Act reinterpreted downstream
+  portable_seed: act_reinterpreted_downstream
+  law: After cognition commits the canonical act, downstream may refine refs, ASK,
+    REJECT, DEFER, DENY or FAIL — it may not answer a different act. Unresolved is
+    never a licence to invent prose.
+  plane: cognition
+  family: cognition
+  parent_id: null
+  portability: portable
+  seed_status: runnable
+  law_shape:
+  - act
+  - grounded
+  - observed_outcome
 - id: owner_steal
   failure_mode: Owner steal
   portable_seed: owner_steal_mid_continue

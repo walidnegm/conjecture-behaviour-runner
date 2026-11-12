@@ -131,6 +131,12 @@ class Evidence(BaseModel):
     path: str
     assertion: Optional[str] = None
     confidence: EvidenceConfidence = EvidenceConfidence.MEDIUM
+    #: ui_component only: a locator photographed on its own (scrolled into
+    #: view), for a surface inside a scrolling panel.
+    element: Optional[str] = None
+    #: ui_component only: also photograph the whole scrolled page — a layout
+    #: check at phone width needs what is below the fold (B-389).
+    full_page: bool = False
 
 
 class FailureState(BaseModel):

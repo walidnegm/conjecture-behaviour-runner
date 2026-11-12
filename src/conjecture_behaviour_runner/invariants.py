@@ -188,6 +188,10 @@ class BaseControlPlaneAdapter:
     custom kinds and ``return super().check_invariant(...)`` for the standard set.
     """
 
+    #: Optional judge for ``judged_at_least`` content invariants (see ``content.py``).
+    #: Left None, judged kinds fail closed; deterministic content kinds still run.
+    content_judge: Any = None
+
     def apply_effect(
         self, context: dict[str, Any], effect: LedgerEffect
     ) -> dict[str, Any]:  # pragma: no cover - abstract
@@ -209,4 +213,11 @@ class BaseControlPlaneAdapter:
         context: Mapping[str, Any],
         spec: InvariantSpec,
     ) -> Optional[str]:
+        from conjecture_behaviour_runner.content import (
+            CONTENT_INVARIANT_KINDS,
+            check_content_invariant,
+        )
+
+        if spec.kind in CONTENT_INVARIANT_KINDS:
+            return check_content_invariant(observation, spec, judge=self.content_judge)
         return check_standard_invariant(observation, spec)

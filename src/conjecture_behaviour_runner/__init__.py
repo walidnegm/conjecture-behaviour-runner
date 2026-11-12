@@ -16,6 +16,16 @@ from conjecture_behaviour_runner.cognition import (
     StubCognitionProvider,
     provider_for_mode,
 )
+from conjecture_behaviour_runner.content import (
+    CONTENT_INVARIANT_KINDS,
+    ContentJudge,
+    GoldenCase,
+    JudgeScore,
+    case_script,
+    check_content_invariant,
+    load_golden_cases,
+    summarize,
+)
 from conjecture_behaviour_runner.harness import run_script
 from conjecture_behaviour_runner.invariants import (
     STANDARD_INVARIANT_KINDS,
@@ -58,7 +68,15 @@ from conjecture_behaviour_runner._version import __version__, get_version
 __all__ = [
     "STANDARD_INVARIANT_KINDS",
     "TRAJECTORY_INVARIANT_KINDS",
+    "CONTENT_INVARIANT_KINDS",
     "BaseControlPlaneAdapter",
+    "ContentJudge",
+    "GoldenCase",
+    "JudgeScore",
+    "case_script",
+    "check_content_invariant",
+    "load_golden_cases",
+    "summarize",
     "CognitionDecision",
     "CognitionPin",
     "CognitionProvider",

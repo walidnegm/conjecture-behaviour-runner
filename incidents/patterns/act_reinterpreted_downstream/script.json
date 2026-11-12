@@ -1,0 +1,56 @@
+{
+  "script_id": "act_reinterpreted_downstream",
+  "description": "Portable seed: one committed act, four turns, no reinterpretation (I8/I10)",
+  "conversation_id": "conv_incident_act_reinterpreted",
+  "scope": {
+    "in_scope": [
+      "downstream stages answering an act other than the one cognition committed",
+      "prose answers on turns where the act was not grounded"
+    ],
+    "out_of_scope": [
+      "model quality scoring",
+      "whether the act was the RIGHT act — that is cognition's business, not this law's"
+    ],
+    "expected_refusal": [
+      "reinterpreting the committed act into a different act",
+      "conversational invention in place of ASK / REJECT / DEFER"
+    ]
+  },
+  "turns": [
+    {
+      "actor": "user",
+      "user_text": "use recommended domain",
+      "pin": {
+        "task_intent": "continue",
+        "read_kind": "domain_pick"
+      },
+      "invariants": [
+        { "kind": "extra_equals", "expected": { "key": "act", "value": "domain_use_recommended" } }
+      ]
+    },
+    {
+      "actor": "user",
+      "user_text": "use recommended domain",
+      "pin": {
+        "task_intent": "continue"
+      },
+      "invariants": [
+        { "kind": "extra_equals", "expected": { "key": "act", "value": "domain_use_recommended" } }
+      ]
+    },
+    {
+      "actor": "user",
+      "user_text": "use recommended domain",
+      "pin": {
+        "task_intent": "continue"
+      },
+      "invariants": [
+        { "kind": "extra_equals", "expected": { "key": "act", "value": "domain_use_recommended" } }
+      ]
+    }
+  ],
+  "trajectory_invariants": [
+    { "kind": "act_stable", "expected": "domain_use_recommended" },
+    { "kind": "never_invented", "expected": ["ask", "reject", "defer"] }
+  ]
+}

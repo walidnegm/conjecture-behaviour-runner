@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "conjecture-behaviour-runner"
-version = "0.1.6"
+version = "0.1.7"
 description = "LLM proposes · code enforces — multi-turn state-law regression (owner · pin · handoff) under pinned cognition; Script/Turn/Driver/Observation/Invariant"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -38,6 +38,8 @@ dev = ["pytest>=7.0"]
 control-plane = ["conversation-control-plane>=0.1.0"]
 # Optional: experimental YAML scenario loader (``experimental.scenario_models``).
 scenarios = ["PyYAML>=6.0"]
+# Optional: DeepEval-backed ContentJudge (``contrib.deepeval_judge``).
+deepeval = ["deepeval>=4.0"]
 
 [project.urls]
 Homepage = "https://github.com/walidnegm/conjecture-behaviour-runner"
